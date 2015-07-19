@@ -1,0 +1,7 @@
+node_modules
+.tmp
+.sass-cache
+assets/bower_components
+assets/styles/*.map
+assets/scripts/game_out.js
+views/out/*

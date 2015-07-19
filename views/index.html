@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>survive-js</title>
+	<!-- <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+	<link href="styles/bootstrap-slate.min.css" rel="stylesheet">
+	<style>
+		html {
+			/*background-color: #000000;*/
+		}
+		body {
+			margin: 0;
+			padding: 0;
+			/*background-color: #000000;*/
+		}
+		.game-output {
+			color: #FFFFFF;
+		}
+		.tracelog {
+			width: 1280px;
+			color: #FFFFFF;
+			background-color: #000000;
+		}
+	</style>
+	<script src="//ajax.googleapis.com/ajax/libs/webfont/1.5.10/webfont.js"></script>
+	<script>
+	WebFont.load({
+		google: {
+			families: ['Michroma']
+		}
+	});
+	</script>
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script src="scripts/game_out.js"></script>
+	<script>
+	$(document).ready(function () {
+		survive.router = {
+			loadView: function (view) {
+				$.get(view).success(function (data) {
+					$('#view-inject').html(data);
+				});
+			}
+		};
+
+		survive.router.loadView('login');
+	});
+	</script>
+</head>
+<body>
+	<div id='view-inject'></div>
+</body>
+</html>

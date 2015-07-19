@@ -1,0 +1,49 @@
+{
+  "name": "survive-js",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "bluebird": "^2.9.8",
+    "browserify": "^9.0.3",
+    "browserify-shim": "^3.8.3",
+    "ejs": "^2.2.3",
+    "express": "~3.4.0",
+    "jquery-browserify": "^1.8.1",
+    "moving-average": "0.0.5",
+    "performance-now": "^0.2.0",
+    "pixi-multistyle-text": "git://github.com/griever989/pixi-multistyle-text.git#master",
+    "pixi.js": "^3.0.6",
+    "shuffle-array": "^0.1.0",
+    "socket.io": "^1.3.2",
+    "socket.io-client": "^1.3.2",
+    "socket.io-rpc": "^0.8.10",
+    "socket.io-rpc-client": "^0.8.10",
+    "throttle-debounce": "^0.1.0",
+    "weakmap": "0.0.6"
+  },
+  "devDependencies": {
+    "bower": "^1.3.12",
+    "grunt": "~0.4.1",
+    "grunt-bower-install": "^1.6.0",
+    "grunt-browserify": "^3.3.0",
+    "grunt-concurrent": "~0.3.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-connect": "~0.5.0",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-jshint": "^0.11.0",
+    "grunt-contrib-watch": "~0.5.2",
+    "grunt-env": "^0.4.2",
+    "grunt-express": "^1.4.1",
+    "grunt-express-server": "~0.4.2",
+    "grunt-npm-install": "^0.1.0",
+    "grunt-open": "~0.2.2",
+    "grunt-preprocess": "^4.1.0",
+    "load-grunt-tasks": "~0.1.0",
+    "time-grunt": "~0.1.1"
+  },
+  "engines": {
+    "node": ">=0.12.6",
+    "npm": "1.2.x"
+  }
+}
