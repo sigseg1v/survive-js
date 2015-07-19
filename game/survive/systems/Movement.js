@@ -3,11 +3,11 @@ var isServer = typeof window === 'undefined';
 var limit = require('../../etc/ratelimiter.js');
 var movingAverage = require('moving-average');
 
-function Movement(container, Hex, Entity, Movable, Placement, Follow, world, physics) {
+function Movement(container, Block, Entity, Movable, Placement, Follow, world, physics) {
     var MAX_REPLAY_STATE_QUEUE_LEN = 5; // TODO -- consolidate shared constants
     var TARGET_AMOUNT_REPLAY_STATES = 1;
 
-    var hexScratch = new Hex(0, 0, 1);
+    var blockScratch = new Block(0, 0, 1);
     var vectorScratch = new physics.vector();
 
     var limit_updateReplayDelay = limit(3000, updateReplayDelay);
@@ -36,9 +36,9 @@ function Movement(container, Hex, Entity, Movable, Placement, Follow, world, phy
                 vectorScratch.clone(entity.components.follow.offset).negate();
                 vectorScratch.rotate(target.components.placement.orientation);
                 entity.components.placement.position.clone(target.components.placement.position).vsub(vectorScratch);
-                if (snap === 'hex') {
-                    hexScratch.setValuesByCartesian(entity.components.placement.position.x, entity.components.placement.position.y, 1);
-                    entity.components.placement.position.set(hexScratch.getX(), hexScratch.getY());
+                if (snap === 'block') {
+                    blockScratch.set(entity.components.placement.position.x, entity.components.placement.position.y);
+                    entity.components.placement.position.set(blockScratch.x, blockScratch.y);
                 }
             }
         });
@@ -91,4 +91,4 @@ function Movement(container, Hex, Entity, Movable, Placement, Follow, world, phy
 }
 
 module.exports = Movement;
-module.exports.$inject = ['$container', 'Hex', 'Entity', 'component/Movable', 'component/Placement', 'component/Follow', 'World', 'lib/physicsjs'];
+module.exports.$inject = ['$container', 'Block', 'Entity', 'component/Movable', 'component/Placement', 'component/Follow', 'World', 'lib/physicsjs'];

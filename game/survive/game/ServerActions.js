@@ -32,7 +32,7 @@ function dataFor(player) {
     return playerDataMap.get(player);
 }
 
-function ServerActions(container, game, world, Server, socket, physics, Hex, pathfinder, tuning) {
+function ServerActions(container, game, world, Server, socket, physics, pathfinder, tuning) {
     var self = this;
 
     var collisionDetector = physics.behavior('body-collision-detection');
@@ -70,4 +70,4 @@ function ServerActions(container, game, world, Server, socket, physics, Hex, pat
 }
 
 module.exports = ServerActions;
-module.exports.$inject = ['$container', 'Game', 'World', 'Server', 'socket', 'lib/physicsjs', 'Hex', 'Pathfinder', 'Tuning'];
+module.exports.$inject = ['$container', 'Game', 'World', 'Server', 'socket', 'lib/physicsjs', 'Pathfinder', 'Tuning'];

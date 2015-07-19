@@ -10,7 +10,7 @@ function Pathfinder(physics, world, game) {
         registeredExtensions = true;
     }
 
-    // cache paths where key is destination q,r pair, and value is an directed graph keyed by q,r
+    // cache paths where key is destination x,y pair, and value is an directed graph keyed by x,y
     var cachedPaths = {};
     function cachePath(path) {
         if (path.length < 2) {
@@ -19,7 +19,7 @@ function Pathfinder(physics, world, game) {
         var index = 0;
         var len = path.length - 1;
         var destNode = path[0];
-        var hash = hashPair(destNode.q, destNode.r);
+        var hash = hashPair(destNode.x, destNode.y);
         if (cachedPaths[hash] === undefined) {
             cachedPaths[hash] = {};
         }
@@ -29,14 +29,14 @@ function Pathfinder(physics, world, game) {
         lastNode = destNode;
         while (++index < len) {
             currentNode = path[index];
-            directedGraph[hashPair(currentNode.q, currentNode.r)] = lastNode;
+            directedGraph[hashPair(currentNode.x, currentNode.y)] = lastNode;
             lastNode = currentNode;
         }
     }
     function cachedPathExistsFrom(start, end) {
-        var endHash = hashPair(end.q, end.r);
+        var endHash = hashPair(end.x, end.y);
         if (cachedPaths[endHash] !== undefined) {
-            var startLoc = cachedPaths[endHash][hashPair(start.q, start.r)];
+            var startLoc = cachedPaths[endHash][hashPair(start.x, start.y)];
             if (startLoc !== undefined) {
                 return startLoc;
             }
@@ -45,18 +45,18 @@ function Pathfinder(physics, world, game) {
     }
     function getCachedPath(start, end) {
         var path = [];
-        var directedGraph = cachedPaths[hashPair(end.q, end.r)];
-        var currentNode = directedGraph !== undefined ? directedGraph[hashPair(start.q, start.r)] : undefined;
+        var directedGraph = cachedPaths[hashPair(end.x, end.y)];
+        var currentNode = directedGraph !== undefined ? directedGraph[hashPair(start.x, start.y)] : undefined;
         while (true) {
             if (currentNode === undefined) {
                 console.log('Cached path lookup failed.');
                 return path;
             }
             path.push(currentNode);
-            if (currentNode.q === end.q && currentNode.r === end.r) {
+            if (currentNode.x === end.x && currentNode.y === end.y) {
                 break;
             }
-            currentNode = directedGraph[hashPair(currentNode.q, currentNode.r)];
+            currentNode = directedGraph[hashPair(currentNode.x, currentNode.y)];
         }
         return path;
     }
@@ -82,33 +82,33 @@ function Pathfinder(physics, world, game) {
     //      end <required> : position to find path to
     //      cache: cache the resulting path for faster lookup from subsequent searches
     //      colliderTypes: filters which entities you can collide with based on physicsjs-style rules; does not work nicely with cache (yet)
-    //      alwaysCollideWithHexAt: given an {x, y} object, will always consider it as colliding. this is useful for determining if a new path _will_ block something after it is placed
+    //      alwaysCollideWithBlockAt: given an {x, y} object, will always consider it as colliding. this is useful for determining if a new path _will_ block something after it is placed
     //      skipCache: will always find the absolute shortest path, at the cost of a longer running algorithm
     self.findPath = function findPath(options) {
         var scratch = physics.scratchpad();
         var start = options.start;
         var end = options.end;
         var colliderTypes = options.colliderTypes || { "$in": ['wall', 'building'], "$nin": ['base'] };
-        var alwaysCollideWithHexAt = options.alwaysCollideWithHexAt ? scratch.hex().setValuesByCartesian(options.alwaysCollideWithHexAt.x, options.alwaysCollideWithHexAt.y, 1) : null;
+        var alwaysCollideWithBlockAt = options.alwaysCollideWithBlockAt ? scratch.block().set(options.alwaysCollideWithBlockAt.x, options.alwaysCollideWithBlockAt.y) : null;
         var storeToCache = options.cache;
         var useCache = !options.skipCache;
 
         // using A* pathfinding algorithm
-        var startHex = scratch.hex().setValuesByCartesian(start.x, start.y, 1);
-        var endHex = scratch.hex().setValuesByCartesian(end.x, end.y, 1);
+        var startBlock = scratch.block().set(start.x, start.y);
+        var endBlock = scratch.block().set(end.x, end.y);
         var startHeuristic = getDistanceHeuristic(start, end);
-        var startHexData = scratch.pathfindingData().set(startHeuristic, 0, startHeuristic, startHex, null);
+        var startBlockData = scratch.pathfindingData().set(startHeuristic, 0, startHeuristic, startBlock, null);
         var pointBody = new physics.body('point');
 
         // dictionaries for open and closed sets so we can do fast contains check and fast data lookup
         var open = [];
         var openHash = {};
         var closed = {};
-        open.push(startHexData);
-        openHash[startHexData.hex.getHashCode()] = true;
+        open.push(startBlockData);
+        openHash[startBlockData.block.getHashCode()] = true;
 
-        var current = null; // current Hex
-        var currentData = null; // pathfinding data for current Hex
+        var current = null; // current Block
+        var currentData = null; // pathfinding data for current Block
         var pathWalker;
         var bsMinIndex, bsMaxIndex, bsCurrentIndex, bsCurrentElement;
         while (open.length > 0)
@@ -117,35 +117,35 @@ function Pathfinder(physics, world, game) {
             //     return b.f - a.f;
             // });
             currentData = open.pop();
-            current = currentData.hex;
+            current = currentData.block;
             openHash[current.getHashCode()] = false;
 
-            if (useCache && cachedPathExistsFrom(current, endHex)) {
+            if (useCache && cachedPathExistsFrom(current, endBlock)) {
                 // if a cached path exists, then just burn through it filling the current path along the way
-                var cachedHexPath = getCachedPath(current, endHex);
-                // console.log('cached path exists with length', cachedHexPath.length);
+                var cachedBlockPath = getCachedPath(current, endBlock);
+                // console.log('cached path exists with length', cachedBlockPath.length);
                 var cachedPathCurrent;
-                for (var cachedPathIndex = 0, cachedPathLength = cachedHexPath.length; cachedPathIndex < cachedPathLength; cachedPathIndex++) {
-                    cachedPathCurrent = cachedHexPath[cachedPathIndex];
-                    currentData = scratch.pathfindingData().set(0, 0, 0, scratch.hex().set(cachedPathCurrent.q, cachedPathCurrent.r), currentData);
-                    current = currentData.hex;
+                for (var cachedPathIndex = 0, cachedPathLength = cachedBlockPath.length; cachedPathIndex < cachedPathLength; cachedPathIndex++) {
+                    cachedPathCurrent = cachedBlockPath[cachedPathIndex];
+                    currentData = scratch.pathfindingData().set(0, 0, 0, scratch.block().set(cachedPathCurrent.x, cachedPathCurrent.y), currentData);
+                    current = currentData.block;
                 }
             }
-            if (current.equals(endHex)) {
+            if (current.equals(endBlock)) {
                 // check if we are about to add the end position to the closed list, if so, we have found a path
                 var finalPath = [];
-                var finalHexPath = [];
+                var finalBlockPath = [];
                 pathWalker = currentData;
                 while (pathWalker)
                 {
-                    finalPath.push(pathWalker.hex.getCenter());
-                    finalHexPath.push({ q: pathWalker.hex.q, r: pathWalker.hex.r });
+                    finalPath.push(pathWalker.block.getCenter());
+                    finalBlockPath.push({ x: pathWalker.block.x, y: pathWalker.block.y });
                     pathWalker = pathWalker.parent;
                 }
                 finalPath.reverse();
                 scratch.done();
                 if (storeToCache) {
-                    cachePath(finalHexPath);
+                    cachePath(finalBlockPath);
                 }
                 return finalPath;
             }
@@ -158,10 +158,10 @@ function Pathfinder(physics, world, game) {
             var neighbourPositions = current.getNeighbourPositions();
             var pos_i, pos_len;
             for (pos_i = 0, pos_len = neighbourPositions.length; pos_i < pos_len; pos_i++) {
-                var neighbour = scratch.hex().set(neighbourPositions[pos_i][0], neighbourPositions[pos_i][1], 1);
-                var neighbourPosition = scratch.vector().set(neighbour.getX(), neighbour.getY());
+                var neighbour = scratch.block().set(neighbourPositions[pos_i][0], neighbourPositions[pos_i][1]);
+                var neighbourPosition = scratch.vector().set(neighbour.x, neighbour.y);
                 pointBody.state.pos.clone(neighbourPosition);
-                var collide =  collidesWith(pointBody, alwaysCollideWithHexAt, colliderTypes);
+                var collide = collidesWith(pointBody, alwaysCollideWithBlockAt, colliderTypes);
 
                 // if this node is already on the closed list, or if we can't move there, then ignore it
                 if (!closed[neighbour.getHashCode()] && !collide)
@@ -169,8 +169,7 @@ function Pathfinder(physics, world, game) {
                     if (openHash[neighbour.getHashCode()])
                     {
                         // already on open list
-                        // normally, here, we check if the G value to get there along this path is less,
-                        // but that's impossible since all our directions on a hex grid have equal weights
+                        // TODO check if the G value to get there along this path is less
                     }
                     else
                     {
@@ -217,15 +216,15 @@ function Pathfinder(physics, world, game) {
         return null;
     };
 
-    function collidesWith(body, alwaysCollideWithHexAt, colliderTypes) {
+    function collidesWith(body, alwaysCollideWithBlockAt, colliderTypes) {
         var i, j, k, len, lenj, lenk, ignored;
         var scratch = physics.scratchpad();
-        var hex = scratch.hex().setValuesByCartesian(body.state.pos.x, body.state.pos.y, 1);
-        if (alwaysCollideWithHexAt && alwaysCollideWithHexAt.q === hex.q && alwaysCollideWithHexAt.r === hex.r) {
+        var block = scratch.block().set(body.state.pos.x, body.state.pos.y);
+        if (alwaysCollideWithBlockAt && alwaysCollideWithBlockAt.x === block.x && alwaysCollideWithBlockAt.y === block.y) {
             scratch.done();
             return true;
         }
-        var candidates = world.queryStaticItemsAtHex(hex);
+        var candidates = world.queryStaticItemsAtPoint(block);
         for (i = 0, len = candidates.length; i < len; ++i) {
             for (j = 0, lenj = colliderTypes.$in.length; j < lenj; j++) {
                 if (candidates[i].labels.indexOf(colliderTypes.$in[j]) !== -1) {
@@ -247,38 +246,25 @@ function Pathfinder(physics, world, game) {
         return false;
     }
 
-
-    // "Calculating Distance" http://www.richardssoftware.net/Home/Post?id=1
-    // Manhattan distance for hexagonal grid
+    // Manhattan distance for square grid
     function getDistanceHeuristic(start, end) {
-        var scratch = physics.scratchpad();
-        var startHex = scratch.hex().setValuesByCartesian(start.x, start.y, 1);
-        var endHex = scratch.hex().setValuesByCartesian(end.x, end.y, 1);
-        var ax = startHex.r - ((startHex.q >= 0) ? (startHex.q >> 1) : (startHex.q - 1) / 2);
-        var ay = startHex.r + ((startHex.q >= 0) ? ((startHex.q + 1) >> 1) : startHex.q / 2);
-        var bx = endHex.r - ((endHex.q >= 0) ? (endHex.q >> 1) : (endHex.q - 1) / 2);
-        var by = endHex.r + ((endHex.q >= 0) ? ((endHex.q + 1) >> 1) : endHex.q / 2);
-        var dx = bx - ax;
-        var dy = by - ay;
-        if (getSign(dx) === getSign(dy))
-        {
-            return scratch.done(Math.max(Math.abs(dx), Math.abs(dy)) * 10);
-        }
-        return scratch.done((Math.abs(dx) + Math.abs(dy)) * 10);
+        var dx = Math.abs(start.x - end.x);
+        var dy = Math.abs(start.y - end.y);
+        return dx + dy;
     }
 
     function getSign(n) {
         return (n > 0) ? 1 : ((n < 0) ? -1 : n);
     }
 
-    function PathfindingData(f, g, h, hex, parent) {
-        this.set(f, g, h, hex, parent);
+    function PathfindingData(f, g, h, block, parent) {
+        this.set(f, g, h, block, parent);
     }
-    PathfindingData.prototype.set = function set(f, g, h, hex, parent) {
+    PathfindingData.prototype.set = function set(f, g, h, block, parent) {
         this.f = f;
         this.g = g;
         this.h = h;
-        this.hex = hex;
+        this.block = block;
         this.parent = parent || null;
         return this;
     };

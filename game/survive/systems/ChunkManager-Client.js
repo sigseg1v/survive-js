@@ -1,6 +1,6 @@
 "use strict";
 
-var Hex = require('../../engine/world/Hex.js');
+var Block = require('../../engine/world/Block.js');
 
 function ChunkManagerClient(socket, world, game, Model) {
     var self = this;
@@ -35,14 +35,14 @@ function ChunkManagerClient(socket, world, game, Model) {
             game.events.emit('removeGraphics', tile.sprite);
         });
         floorTiles = data.map(function (item) {
-            var hex = new Hex(item.q, item.r);
+            var block = new Block(item.x, item.y);
             var sprite = Model.createSprites('floor')[0];
             sprite.staticPosition = {
-                x: hex.getX(),
-                y: hex.getY()
+                x: block.x,
+                y: block.y
             };
             return {
-                hex: hex,
+                block: block,
                 sprite: sprite
             };
         });
@@ -59,8 +59,8 @@ function ChunkManagerClient(socket, world, game, Model) {
         // TODO -- if this array gets too big, we can do this differently
         for (var i = floorTiles.length - 1; i > 0; i--) {
             tile = floorTiles[i];
-            x = tile.hex.getX();
-            y = tile.hex.getY();
+            x = tile.block.x;
+            y = tile.block.y;
             if (tile.sprite.visible && !coordsAreInLoadedChunk(x, y, x, y)) {
                 tile.sprite.visible = false;
             } else if (!tile.sprite.visible && coordsAreInLoadedChunk(x, y, x, y)) {

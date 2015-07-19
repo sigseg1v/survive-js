@@ -53,7 +53,7 @@ function World(socket, game, renderer, container, physics, clientStateManager) {
     // var staticItemsTree = physics.behavior('broadphase-quadtree');
     // self.staticItemsTree = staticItemsTree;
 
-    self.staticItemStore = new HexGridStore();
+    self.staticItemStore = new BlockGridStore();
 
     if(!isServer) {
         socket.on('World.addEntity', function (entity) {
@@ -91,43 +91,33 @@ function World(socket, game, renderer, container, physics, clientStateManager) {
 }
 
 World.prototype.queryStaticItemsAtPoint = function queryStaticItemsAtPoint(x, y) {
-    x = x || 0;
-    y = y || 0;
-    var scratch = this.__physics.scratchpad();
-    var hex = scratch.hex().setValuesByCartesian(x, y, 1);
-    var results = this.queryStaticItemsAtHex(hex);
-    scratch.done();
-    return results;
+    return this.staticItemStore.queryAt(Math.floor(x), Math.floor(y));
 };
 
-World.prototype.queryStaticItemsAtHex = function queryStaticItemsAtHex(hex) {
-    return this.staticItemStore.queryAt(hex.q, hex.r);
-};
-
-function HexGridStore() {
+function BlockGridStore() {
     this.items = [];
     this.__nothing = [];
 }
-HexGridStore.prototype.insertAt = function insertAt(q, r, item) {
-    if (this.items[q] === undefined) {
-        this.items[q] = [];
+BlockGridStore.prototype.insertAt = function insertAt(x, y, item) {
+    if (this.items[x] === undefined) {
+        this.items[x] = [];
     }
-    if (this.items[q][r] === undefined) {
-        this.items[q][r] = [];
+    if (this.items[x][y] === undefined) {
+        this.items[x][y] = [];
     }
-    this.items[q][r].push(item);
+    this.items[x][y].push(item);
 };
-HexGridStore.prototype.removeAt = function removeAt(q, r, item) {
-    var index = this.items[q][r].indexOf(item);
+BlockGridStore.prototype.removeAt = function removeAt(x, y, item) {
+    var index = this.items[x][y].indexOf(item);
     if (index !== -1) {
-        this.items[q][r].splice(this.items[q][r].indexOf(item), 1);
+        this.items[x][y].splice(this.items[x][y].indexOf(item), 1);
     } else {
-        console.log('Attempt to remove item from HexGridStore that does not exist.');
+        console.log('Attempt to remove item from BlockGridStore that does not exist.');
     }
 };
-HexGridStore.prototype.queryAt = function queryAt(q, r) {
-    if (this.items[q] !== undefined && this.items[q][r] !== undefined) {
-        return this.items[q][r];
+BlockGridStore.prototype.queryAt = function queryAt(x, y) {
+    if (this.items[x] !== undefined && this.items[x][y] !== undefined) {
+        return this.items[x][y];
     } else {
         return this.__nothing;
     }
@@ -353,8 +343,8 @@ World.prototype.addEntity = function addEntity(entity, skipNotify) {
 
         if (movable.treatment === 'static') {
             var scratch = this.__physics.scratchpad();
-            var hex = scratch.hex().setValuesByCartesian(movable.state.pos.x, movable.state.pos.y, 1);
-            this.staticItemStore.insertAt(hex.q, hex.r, movable);
+            var block = scratch.block().set(movable.state.pos.x, movable.state.pos.y);
+            this.staticItemStore.insertAt(block.x, block.y, movable);
             scratch.done();
             // this.staticItemsTree.trackBody({ body: movable });
         } else {
@@ -429,8 +419,8 @@ World.prototype.removeEntity = function removeEntity(entity) {
     if (movable) {
         if (movable.treatment === 'static') {
             var scratch = this.__physics.scratchpad();
-            var hex = scratch.hex().setValuesByCartesian(movable.state.pos.x, movable.state.pos.y, 1);
-            this.staticItemStore.removeAt(hex.q, hex.r, movable);
+            var block = scratch.block().set(movable.state.pos.x, movable.state.pos.y);
+            this.staticItemStore.removeAt(block.x, block.y, movable);
             scratch.done();
             // this.staticItemsTree.untrackBody({ body: movable });
         } else {

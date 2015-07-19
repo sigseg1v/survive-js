@@ -8,12 +8,10 @@ module.exports = function loadBody(physics, name) {
             x: 0,
             y: 0,
             vertices: [
-                { x:  0,         y:  1      },
-                { x:  0.8660254, y:  0.5    },
-                { x:  0.8660254, y: -0.5    },
-                { x:  0,         y: -1      },
-                { x: -0.8660254, y: -0.5    },
-                { x: -0.8660254, y:  0.5    }
+                { x:  -0.5, y: -0.5 },
+                { x:   0.5, y: -0.5 },
+                { x:   0.5, y:  0.5 },
+                { x:  -0.5, y:  0.5 }
             ],
             treatment: 'static',
             labels: ['wall', 'destroyable']
@@ -22,7 +20,7 @@ module.exports = function loadBody(physics, name) {
         body = physics.body('ghost-circle', {
             x: 0,
             y: 0,
-            radius: 0.35,
+            radius: 0.7,
             treatment: 'dynamic',
             options: {
                 integrationMode: 'future'
@@ -33,7 +31,7 @@ module.exports = function loadBody(physics, name) {
         body = physics.body('collision-circle', {
             x: 0,
             y: 0,
-            radius: 0.35,
+            radius: 0.7,
             treatment: 'dynamic',
             options: {
                 integrationMode: isServer ? 'normal' : 'future' // server controls enemy physics, client loads

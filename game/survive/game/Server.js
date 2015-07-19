@@ -3,7 +3,7 @@
 function loadGame() {
     var container = require('../../../wires.js');
     var loader = require('../../../assets/scripts/testWorld.js');
-    var Hex = require('../../engine/world/Hex.js');
+    var Block = require('../../engine/world/Block.js');
     var game = container.resolve('Game');
     var world = container.resolve('World');
     game.mode = game.runModes.automaticAsync;
@@ -25,7 +25,7 @@ function loadGame() {
     var levelData = loader.parse(loader.data);
     var floorTiles = levelData.floors.map(function (floor) {
         var position = floor.getCenter();
-        return Hex.fromCartesian(position.x, position.y, 1);
+        return Block.fromPoint(position.x, position.y);
     });
     var wallEntities = levelData.walls.map(function (wall) {
         var entity = container.resolve('entity/WallEntity/wall');

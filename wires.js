@@ -31,6 +31,7 @@ if (!isServer) {
 }
 
 container.registerAlias('Hex', require('./game/engine/world/Hex.js'));
+container.registerAlias('Block', require('./game/engine/world/Block.js'));
 container.registerType('Graphics', require('./game/engine/presentation/Graphics.js'));
 container.registerInstance('Pathfinder', require('./game/engine/world/Pathfinder.js'));
 

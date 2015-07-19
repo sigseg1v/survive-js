@@ -2,10 +2,12 @@
 var replayIntegrator = require('./replay-integrator.js');
 var broadphaseQuadtree = require('./broadphase-quadtree.js');
 var Hex = require('./Hex.js');
+var Block = require('./Block.js');
 
 function extend(physics) {
 
     physics.scratchpad.register('hex', Hex);
+    physics.scratchpad.register('block', Block);
     physics.scratchpad.maxIndex = Infinity;
 
     physics.body.mixin({
