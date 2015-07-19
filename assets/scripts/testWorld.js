@@ -27,17 +27,17 @@ function parseLevelString(value) {
     var y = yStart;
 
     data.split('').forEach(function (node) {
+        // everything that isn't empty gets floorspace within the world
+        if (node !== glyphs.VOID && node !== glyphs.ENDROW) {
+            floors.push(new Block(x, y));
+        }
+
         if (node === glyphs.GEN_WALL) {
             walls.push(new Block(x, y));
         } else if (node === glyphs.ENDROW) {
             y++;
             x = xStart;
             return;
-        }
-
-        // everything that isn't empty gets floorspace within the world
-        if (node !== glyphs.VOID && node !== glyphs.ENDROW) {
-            floors.push(new Block(x, y));
         }
 
         x++;
