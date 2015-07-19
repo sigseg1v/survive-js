@@ -28,6 +28,13 @@ function ClientActions(container, game, world, socket, rpcClientPromise, pixi) {
         rpc.spawnEnemy();
     };
 
+    self.attack = function attack(targetPoint, weapon) {
+        if (!rpc) {
+            return;
+        }
+        rpc.attack(targetPoint, weapon);
+    };
+
     self.sendChatMessage = function sendChatMessage(message) {
         if (!rpc) {
             return;

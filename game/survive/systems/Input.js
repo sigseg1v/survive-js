@@ -6,6 +6,7 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
 
     var playerKeys = {};
     var releasedKeys = {};
+    var mouseClicks = [];
 
     var player = null;
     game.events.on('playerLoaded', function (ent) { player = ent; });
@@ -13,6 +14,7 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
     document.addEventListener('keydown', playerKeysDown, false);
     document.addEventListener('keyup', playerKeysUp, false);
     document.addEventListener('keypress', playerKeyPress, false);
+    document.addEventListener('click', mouseClick, false);
 
     var chatOpen = false;
     game.events.on('close-chat-entry', function () {
@@ -24,6 +26,17 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
 
     function interruptAction() {
         //using = false;
+    }
+
+    var pointScratch = new pixi.Point();
+    function mouseClick(e) {
+        renderer.mouse.getLocalPosition(renderer.world, pointScratch);
+        renderer.applyInverseCoordinateTransform(pointScratch, pointScratch.x / renderer.GFX_SCALE, pointScratch.y * -1 / renderer.GFX_SCALE);
+        mouseClicks.push({
+            button: e.button,
+            x: pointScratch.x,
+            y: pointScratch.y
+        });
     }
 
     function playerKeysDown(e) {
@@ -93,6 +106,13 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
             releasedKeys[78] = false;
         }
 
+        while (mouseClicks.length !== 0) {
+            var clickData = mouseClicks.pop();
+            if (clickData.button === 0) {
+                attack(clickData);
+            }
+        }
+
         newTarget.rotate(Math.PI / 2);
 
         setPlayerVelocity(newTarget);
@@ -100,6 +120,12 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
 
         scratch.done();
     };
+
+    function attack(clickData) {
+        if (player) {
+            ClientActions.attack({ x: clickData.x, y: clickData.y }, 0);
+        }
+    }
 
     function setPlayerVelocity(target) {
         var scratch = physics.scratchpad();

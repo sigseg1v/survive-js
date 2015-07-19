@@ -8,6 +8,9 @@ function ClientStateManager() {
 ClientStateManager.prototype.getClientState = function getClientState(socket) {
     return this.idStateMap[socket.id.toString()];
 };
+ClientStateManager.prototype.getClientStateBySocketId = function getClientStateBySocketId(id) {
+    return this.idStateMap[id];
+};
 ClientStateManager.prototype.addClient = function addClient(socket) {
     if (this.idStateMap[socket.id.toString()]) {
         console.log('Attempt to add client that is already tracked.');

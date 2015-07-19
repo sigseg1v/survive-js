@@ -32,10 +32,13 @@ function dataFor(player) {
     return playerDataMap.get(player);
 }
 
-function ServerActions(container, game, world, Server, socket, physics, pathfinder, tuning) {
+function ServerActions(container, game, world, Server, socket, physics, pathfinder, tuning, clientStateManager) {
     var self = this;
 
     var collisionDetector = physics.behavior('body-collision-detection');
+    var pool = {
+        attackArc1: bodies(physics, 'AttackArc1')
+    };
 
     self.getPlayerChildEntities = function getPlayerChildEntities(player) {
         return playerEntityList.has(player) ? playerEntityList.get(player) : [];
@@ -54,6 +57,44 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             world.addEntity(enemy);
         },
 
+        attack: function attack(targetPoint, weapon) {
+            var player = Server.getPlayerBySocketId(this.commonId);
+            if (!player) return;
+            var client = clientStateManager.getClientStateBySocketId(this.commonId);
+            var scratch = physics.scratchpad();
+            var attackArc = pool.attackArc1;
+            attackArc.state.pos.clone(player.components.movable.body.state.pos);
+            var angle = scratch.vector().clone(targetPoint).vsub(player.components.movable.body.state.pos).angle();
+            attackArc.state.angular.pos = angle;
+            var attackArcAabb = attackArc.aabb();
+
+            var candidates = [];
+            var loadedChunks = client.getLoadedChunks();
+            loadedChunks.forEach(function (chunk) {
+                var i, ilen, ent;
+                var entIds = chunk.getEntityIds();
+                for (i = 0, ilen = entIds.length; i < ilen; i++) {
+                    ent = world.entityById([entIds[i]]);
+                    if (ent && ent.components.movable.body) {
+                        candidates.push(ent.components.movable.body);
+                    }
+                }
+            });
+
+            var hit = world.physics.find({
+                labels: { $in: ['enemy'] },
+                $in: candidates
+            }).filter(function (body) {
+                return physics.aabb.overlap(attackArcAabb, body.aabb()) && !!collisionDetector.checkGJK(body, attackArc);
+            }).map(function (body) {
+                return body.entity();
+            });
+            hit.forEach(function (ent) {
+                console.log('hit:', ent.id);
+            });
+            scratch.done();
+        },
+
         sendChatMessage: function sendChatMessage(message) {
             message = (message === undefined || message === null) ? '' : message;
             var player = Server.getPlayerBySocketId(this.commonId);
@@ -70,4 +111,4 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
 }
 
 module.exports = ServerActions;
-module.exports.$inject = ['$container', 'Game', 'World', 'Server', 'socket', 'lib/physicsjs', 'Pathfinder', 'Tuning'];
+module.exports.$inject = ['$container', 'Game', 'World', 'Server', 'socket', 'lib/physicsjs', 'Pathfinder', 'Tuning', 'ClientStateManager'];
