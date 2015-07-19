@@ -70,6 +70,8 @@ container.registerInstance('component/Lightsource', require('./game/survive/comp
 container.registerInstance('component/Path', require('./game/survive/components/Path.js'));
 container.registerInstance('component/Name', require('./game/survive/components/Name.js'));
 container.registerInstance('component/Use', require('./game/survive/components/Use.js'));
+container.registerInstance('component/Health', require('./game/survive/components/Health.js'));
+container.registerInstance('component/Melee', require('./game/survive/components/Melee.js'));
 
 container.registerType('entity/PlayerEntity', require('./game/survive/entities/PlayerEntity.js'));
 

@@ -34,8 +34,8 @@ function genericEnemy(container) {
         model: { name: 'genericEnemy' },
         movable: { body: 'GenericEnemy' }
     });
-    ent.components.healable.currentHealth = 10;
-    ent.components.healable.maximumHealth = 10;
+    ent.components.health.currentHealth = 10;
+    ent.components.health.maximumHealth = 10;
     ent.components.melee.damage = 1;
     return ent;
 }

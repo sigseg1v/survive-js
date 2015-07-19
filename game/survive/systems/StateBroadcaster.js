@@ -1,14 +1,15 @@
 "use strict";
 var limit = require('../../etc/ratelimiter.js');
 
-function StateBroadcaster(socket, clientStateManager, Movable, Placement, Name, world) {
+function StateBroadcaster(socket, clientStateManager, Movable, Placement, Name, Health, world) {
     var self = this;
 
     // components to broadcast state for
     self.components = [
         Movable,
         Placement,
-        Name
+        Name,
+        Health
     ];
 
     var sendChangeDelta_limit = limit(1000/20, sendChangeDelta);
@@ -104,4 +105,4 @@ function StateBroadcaster(socket, clientStateManager, Movable, Placement, Name, 
 }
 
 module.exports = StateBroadcaster;
-module.exports.$inject = ['socket', 'ClientStateManager', 'component/Movable', 'component/Placement', 'component/Name', 'World'];
+module.exports.$inject = ['socket', 'ClientStateManager', 'component/Movable', 'component/Placement', 'component/Name', 'component/Health', 'World'];

@@ -20,7 +20,7 @@ module.exports = function loadBody(physics, name) {
         body = physics.body('ghost-circle', {
             x: 0,
             y: 0,
-            radius: 0.7,
+            radius: 0.3,
             treatment: 'dynamic',
             options: {
                 integrationMode: 'future'
@@ -31,7 +31,7 @@ module.exports = function loadBody(physics, name) {
         body = physics.body('collision-circle', {
             x: 0,
             y: 0,
-            radius: 0.7,
+            radius: 0.3,
             treatment: 'dynamic',
             options: {
                 integrationMode: isServer ? 'normal' : 'future' // server controls enemy physics, client loads

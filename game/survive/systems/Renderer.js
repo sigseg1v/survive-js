@@ -177,7 +177,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
             }
         }
 
-        return bsFound ? bsCurrentIndex : bsMinIndex;
+        return Math.max(Math.min(bsFound ? bsCurrentIndex : bsMinIndex, bsArray.length - 1), 0);
     }
 
     function addInPosition(graphics) {
