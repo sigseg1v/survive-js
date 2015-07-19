@@ -147,7 +147,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     }
 
     function computeZFromWorldPosition(worldPosition, graphics, skipReposition) {
-        var newZ = worldPosition.x + worldPosition.y;
+        var newZ = worldPosition.y - worldPosition.x;
         if (graphics.z !== newZ) {
             graphics.z = newZ;
             if (!skipReposition) {
@@ -159,7 +159,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     function findPosition(graphics) {
         // binary search to find insertion point
         var bsFound, bsArray, bsCurrentIndex, bsMinIndex, bsMaxIndex, bsCurrentElement;//, bsRow, gfxRow;
-        bsArray = self.world.children[graphics.layer];
+        bsArray = self.world.children[graphics.layer].children;
         bsCurrentIndex = 0;
         bsMinIndex = 0;
         bsMaxIndex = bsArray.length - 1;
@@ -167,9 +167,9 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         while (bsMinIndex <= bsMaxIndex) {
             bsCurrentIndex = (bsMinIndex + bsMaxIndex) / 2 | 0;
             bsCurrentElement = bsArray[bsCurrentIndex];
-            if (bsCurrentElement.z < graphics.z) {
+            if (bsCurrentElement.z > graphics.z) {
                 bsMinIndex = bsCurrentIndex + 1;
-            } else if (bsCurrentElement.z > graphics.z) {
+            } else if (bsCurrentElement.z < graphics.z) {
                 bsMaxIndex = bsCurrentIndex - 1;
             } else {
                 bsFound = true;
@@ -185,7 +185,12 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     }
 
     function reposition(graphics) {
-        self.world.children[graphics.layer].setChildIndex(graphics, findPosition(graphics));
+        var layer = self.world.children[graphics.layer];
+        var index = layer.getChildIndex(graphics);
+        var newIndex = findPosition(graphics);
+        if (index !== newIndex) {
+            layer.setChildIndex(graphics, newIndex);
+        }
     }
 
     self.step = function step() {
