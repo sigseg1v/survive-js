@@ -10,11 +10,37 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     self.width = 1280;
     self.height = 720;
 
+    function applyCoordinateTransform(target, x, y) {
+        if (x === undefined) {
+            x = target.x;
+        }
+        if (y === undefined) {
+            y = target.y;
+        }
+        target.x = x - y;
+        target.y = (x + y) / 2;
+    }
+
+    function applyInverseCoordinateTransform(target, x, y) {
+        if (x === undefined) {
+            x = target.x;
+        }
+        if (y === undefined) {
+            y = target.y;
+        }
+        target.x = x + y;
+        target.y = y * 2 - x;
+    }
+
+    self.applyCoordinateTransform = applyCoordinateTransform;
+    self.applyInverseCoordinateTransform = applyInverseCoordinateTransform;
+
     var renderer = pixi.autoDetectRenderer(self.width, self.height);
     //var addOrder = 0;
 
     self.renderer = renderer;
     self.stage = new pixi.Container(0x272b30);
+    //self.stage.rotation = - Math.PI / 3;
     self.world = new pixi.Container();
     self.zoom = 1;
     self.focus = null;
@@ -91,8 +117,9 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
             //graphics.addOrder = addOrder++;
         }
         if (graphics.hasOwnProperty('staticPosition')) {
-            graphics.position.x = graphics.staticPosition.x * GFX_SCALE;
-            graphics.position.y = graphics.staticPosition.y * -1 * GFX_SCALE;
+            applyCoordinateTransform(graphics.position, graphics.staticPosition.x * GFX_SCALE, graphics.staticPosition.y * -1 * GFX_SCALE);
+            // graphics.position.x = graphics.staticPosition.x * GFX_SCALE;
+            // graphics.position.y = graphics.staticPosition.y * -1 * GFX_SCALE;
         }
 
         // binary search to find insertion point
@@ -210,10 +237,12 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         lightmapWorld.scale.x = self.zoom / GFX_SCALE;
         lightmapWorld.scale.y = self.zoom / GFX_SCALE;
         if (self.focus) {
-            self.world.position.x = self.focus.x * self.zoom * -1 + (self.width / 2);
-            self.world.position.y = self.focus.y * self.zoom * 1 + (self.height / 2);
-            lightmapWorld.position.x = self.focus.x * self.zoom * -1 + (self.width / 2);
-            lightmapWorld.position.y = self.focus.y * self.zoom * 1 + (self.height / 2);
+            applyCoordinateTransform(self.world.position, self.focus.x * self.zoom * -1 + (self.width / 2), self.focus.y * self.zoom * 1 + (self.height / 2));
+            applyCoordinateTransform(lightmapWorld.position, self.focus.x * self.zoom * -1 + (self.width / 2), self.focus.y * self.zoom * 1 + (self.height / 2));
+            // self.world.position.x = self.focus.x * self.zoom * -1 + (self.width / 2);
+            // self.world.position.y = self.focus.y * self.zoom * 1 + (self.height / 2);
+            // lightmapWorld.position.x = self.focus.x * self.zoom * -1 + (self.width / 2);
+            // lightmapWorld.position.y = self.focus.y * self.zoom * 1 + (self.height / 2);
         }
 
         for (i = 0, l = Model.entities.length; i < l; ++i) {
@@ -223,8 +252,9 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
                 sprites = entity.components.model.sprites;
                 for (j = 0, jl = sprites.length; j < jl; j++) {
                     sprite = sprites[j];
-                    sprite.position.x = placement.position.x * GFX_SCALE;
-                    sprite.position.y = placement.position.y * -1 * GFX_SCALE;
+                    applyCoordinateTransform(sprite.position, placement.position.x * GFX_SCALE, placement.position.y * -1 * GFX_SCALE);
+                    // sprite.position.x = placement.position.x * GFX_SCALE;
+                    // sprite.position.y = placement.position.y * -1 * GFX_SCALE;
                     sprite.rotation = placement.orientation * -1;
                 }
             }
@@ -242,8 +272,9 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
                 if (sprite.scale.y !== scale) {
                     sprite.scale.y = scale;
                 }
-                sprite.position.x = placement.position.x * GFX_SCALE;
-                sprite.position.y = placement.position.y * -1 * GFX_SCALE;
+                applyCoordinateTransform(sprite.position, placement.position.x * GFX_SCALE,  placement.position.y * -1 * GFX_SCALE);
+                // sprite.position.x = placement.position.x * GFX_SCALE;
+                // sprite.position.y = placement.position.y * -1 * GFX_SCALE;
             }
         }
         lightmapRenderer.clear();

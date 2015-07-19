@@ -58,27 +58,32 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
         }
     }
 
+    var UP = { x: 0, y: 1 };
+    var DOWN = { x: 0, y: -1 };
+    var LEFT = { x: -1, y: 0 };
+    var RIGHT = { x: 1, y: 0 };
+
     self.step = function step() {
         var scratch = physics.scratchpad();
-        var newPosition = scratch.vector().zero();
+        var newTarget = scratch.vector().zero();
 
         if (playerKeys[65]) {
             // a
             interruptAction();
-            newPosition.add(-1, 0);
+            newTarget.add(LEFT.x, LEFT.y);
         } else if (playerKeys[68]) {
             // d
             interruptAction();
-            newPosition.add(1, 0);
+            newTarget.add(RIGHT.x, RIGHT.y);
         }
         if (playerKeys[87]) {
             // w
             interruptAction();
-            newPosition.add(0, 1);
+            newTarget.add(UP.x, UP.y);
         } else if (playerKeys[83]) {
             // s
             interruptAction();
-            newPosition.add(0, -1);
+            newTarget.add(DOWN.x, DOWN.y);
         }
 
         if (releasedKeys[78]) {
@@ -88,7 +93,9 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
             releasedKeys[78] = false;
         }
 
-        setPlayerVelocity(newPosition);
+        newTarget.rotate(Math.PI / 2);
+
+        setPlayerVelocity(newTarget);
         setPlayerOrientation(renderer.mouse);
 
         scratch.done();
