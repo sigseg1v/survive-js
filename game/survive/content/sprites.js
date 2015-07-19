@@ -48,8 +48,8 @@ function register(container) {
         sprite.anchor.y = 0.5;
         sprite.position.x = 0;
         sprite.position.y = 0;
-        sprite.scale.x = GFX_SCALE / 30;
-        sprite.scale.y = GFX_SCALE / 30;
+        sprite.scale.x = 1 / 2;
+        sprite.scale.y = 1 / 2;
         return sprite;
     }
 }
