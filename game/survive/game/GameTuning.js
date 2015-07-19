@@ -3,7 +3,7 @@
 function GameTuning(game) {
     var self = this;
 
-    defineEmittableProperty('buildingCostMultiplier', 1, Number);
+    // defineEmittableProperty('buildingCostMultiplier', 1, Number);
 
     function defineEmittableProperty(name, defaultValue, setter) {
         var backingProperty = defaultValue;

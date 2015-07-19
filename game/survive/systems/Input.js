@@ -22,19 +22,8 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
         chatOpen = true;
     });
 
-    var buildMenuOpen = false;
-    game.events.on('buildmenu-open', function () {
-        buildMenuOpen = true;
-    });
-    game.events.on('buildmenu-close', function () {
-        buildMenuOpen = false;
-    });
-
-    var using = false;
-    var gather_limit = limit(100, ClientActions.consumeNearby);
-
     function interruptAction() {
-        using = false;
+        //using = false;
     }
 
     function playerKeysDown(e) {
@@ -92,58 +81,6 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
             newPosition.add(0, -1);
         }
 
-        if (releasedKeys[66]) {
-            // b
-            interruptAction();
-            ClientActions.toggleBuildMenu();
-            releasedKeys[66] = false;
-        }
-
-        if (releasedKeys[49]) {
-            // # 1
-            interruptAction();
-            if (buildMenuOpen) {
-                ClientActions.createBuilding('Base');
-            }
-            releasedKeys[49] = false;
-        }
-
-        if (releasedKeys[50]) {
-            // # 2
-            interruptAction();
-            if (buildMenuOpen) {
-                ClientActions.createBuilding('Generator');
-            }
-            releasedKeys[50] = false;
-        }
-
-        if (releasedKeys[51]) {
-            // # 3
-            interruptAction();
-            if (buildMenuOpen) {
-                ClientActions.createBuilding('Healer');
-            }
-            releasedKeys[51] = false;
-        }
-
-        if (releasedKeys[52]) {
-            // # 4
-            interruptAction();
-            if (buildMenuOpen) {
-                ClientActions.createBuilding('Cannon');
-            }
-            releasedKeys[52] = false;
-        }
-
-        if (releasedKeys[53]) {
-            // # 5
-            interruptAction();
-            if (buildMenuOpen) {
-                ClientActions.createBuilding('Wall');
-            }
-            releasedKeys[53] = false;
-        }
-
         if (releasedKeys[78]) {
             // n
             interruptAction();
@@ -151,35 +88,8 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
             releasedKeys[78] = false;
         }
 
-        if (releasedKeys[80]) {
-            // p
-            interruptAction();
-            testDrawPathToCenter();
-            releasedKeys[80] = false;
-        }
-
-        // if (releasedKeys[219]) {
-        //     // '['
-        //     interruptAction();
-        //     ClientActions.pathEnemiesToPlayer();
-        //     releasedKeys[219] = false;
-        // }
-
-        if (releasedKeys[32]) {
-            // space
-            if (!using) {
-                interruptAction();
-                using = true;
-            }
-            releasedKeys[32] = false;
-        }
-
         setPlayerVelocity(newPosition);
         setPlayerOrientation(renderer.mouse);
-
-        if (using) {
-            gather_limit();
-        }
 
         scratch.done();
     };
@@ -200,32 +110,6 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
             player.components.movable.body.state.angular.vel = 0;
         }
         scratch.done();
-    }
-
-    function testDrawPathToCenter() {
-        if (!player) return;
-
-        var pathNodes = path.findPath({
-            start: player.components.placement.position,
-            end: { x: 0, y: 0 },
-            wallsOnly: false
-        });
-
-        var sprites = pathNodes.map(function (node) {
-            var graphics = new pixi.Graphics();
-            graphics.beginFill(0x000000FF);
-            graphics.drawCircle(node.x * renderer.GFX_SCALE, node.y * -1 * renderer.GFX_SCALE, 0.25 * renderer.GFX_SCALE);
-            graphics.endFill();
-            return graphics;
-        });
-        sprites.forEach(function (sprite) {
-            game.events.emit('addGraphics', sprite);
-        });
-        setTimeout(function () {
-            sprites.forEach(function (sprite) {
-                game.events.emit('removeGraphics', sprite);
-            });
-        }, 3000);
     }
 }
 

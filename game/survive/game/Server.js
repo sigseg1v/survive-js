@@ -10,34 +10,17 @@ function loadGame() {
     var followPath = container.resolve('system/FollowPath');
     var movement = container.resolve('system/Movement');
     var chunkManager = container.resolve('system/ChunkManager');
-    var generator = container.resolve('system/GeneratorCycle');
-    var healer = container.resolve('system/HealerCycle');
-    var autoGather = container.resolve('system/ResourceAutoGatherCycle');
-    var cannonAttack = container.resolve('system/CannonCycle');
-    var meleeAttack = container.resolve('system/MeleeCycle');
     var stateBroadcaster = container.resolve('system/StateBroadcaster');
     var playerSync = container.resolve('system/PlayerSync');
     var physicsSync = container.resolve('system/PhysicsSync');
-    //var networkPing = container.resolve('system/NetworkPing');
-    var dayNight = container.resolve('system/DayNightCycle');
     var cheats = container.resolve('system/Cheats');
     game.registerSystem(followPath);
-    game.registerSystem(dayNight);
     game.registerSystem(movement);
-    game.registerSystem(generator);
-    game.registerSystem(healer);
-    game.registerSystem(autoGather);
-    game.registerSystem(cannonAttack);
-    game.registerSystem(meleeAttack);
     game.registerSystem(playerSync);
     game.registerSystem(physicsSync);
     game.registerSystem(chunkManager);
     game.registerSystem(stateBroadcaster);
-    //game.registerSystem(networkPing);
     game.registerSystem(cheats);
-    if (process.env.TRACE) {
-        game.registerSystem(container.resolve('system/TracelogWrite'));
-    }
 
     var levelData = loader.parse(loader.data);
     var floorTiles = levelData.floors.map(function (floor) {
@@ -50,17 +33,8 @@ function loadGame() {
         entity.components.placement.position = position;
         return entity;
     });
-    var mineralEntities = levelData.minerals.map(function (data) {
-        var hex = data.hex;
-        var type = data.type;
-        var entity = container.resolve('entity/MineralEntity/' + type);
-        var position = hex.getCenter();
-        entity.components.placement.position = position;
-        return entity;
-    });
     world.setFloor(floorTiles);
     world.addEntities(wallEntities);
-    world.addEntities(mineralEntities);
 
     return game;
 }

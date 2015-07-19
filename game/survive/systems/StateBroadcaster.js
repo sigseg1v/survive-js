@@ -1,18 +1,13 @@
 "use strict";
 var limit = require('../../etc/ratelimiter.js');
 
-function StateBroadcaster(socket, clientStateManager, Movable, Placement, Healable, Chargeable, Resource, Miner, Melee, Name, world) {
+function StateBroadcaster(socket, clientStateManager, Movable, Placement, Name, world) {
     var self = this;
 
     // components to broadcast state for
     self.components = [
         Movable,
         Placement,
-        Healable,
-        Chargeable,
-        Resource,
-        Miner,
-        Melee,
         Name
     ];
 
@@ -109,4 +104,4 @@ function StateBroadcaster(socket, clientStateManager, Movable, Placement, Healab
 }
 
 module.exports = StateBroadcaster;
-module.exports.$inject = ['socket', 'ClientStateManager', 'component/Movable', 'component/Placement', 'component/Healable', 'component/Chargeable', 'component/Resource', 'component/Miner', 'component/Melee', 'component/Name', 'World'];
+module.exports.$inject = ['socket', 'ClientStateManager', 'component/Movable', 'component/Placement', 'component/Name', 'World'];

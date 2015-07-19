@@ -22,9 +22,6 @@
         });
 
         socket.once('worldLoaded', function() {
-            actions.getDayNightStatus().then(function (result) {
-                container.resolve('system/DayNightCycle').update(result);
-            });
             game.events.emit('worldLoaded');
         });
 
@@ -58,39 +55,23 @@
         var renderer = container.resolve('system/Renderer');
         var playerSync = container.resolve('system/PlayerSync');
         var physicsSync = container.resolve('system/PhysicsSync');
-        //var networkPing = container.resolve('system/NetworkPing');
-        var resourceBars = container.resolve('system/ControlResourceBars');
         var nameplates = container.resolve('system/UpdateNameplates');
-        var dayNight = container.resolve('system/DayNightCycle');
         var chat = container.resolve('system/Chat');
-        var drawBuildMenu = container.resolve('system/DrawBuildMenu');
-        var drawMineralCount = container.resolve('system/DrawMineralCount');
         var calculateLighting = container.resolve('system/CalculateLighting');
         var cheats = container.resolve('system/Cheats');
-        // @ifdef TRACE
-        var tracelogWrite = container.resolve('system/TracelogWrite');
-        // @endif
 
         game.registerSystem(input);
         game.registerSystem(playerSync);
         game.registerSystem(physicsSync);
         game.registerSystem(stateSyncer);
-        game.registerSystem(dayNight);
         game.registerSystem(movement);
         game.registerSystem(chunkManager);
-        game.registerSystem(resourceBars, true);
         game.registerSystem(nameplates, true);
         game.registerSystem(effects, true);
-        //game.registerSystem(networkPing);
         game.registerSystem(renderer, true);
         game.registerSystem(chat);
-        game.registerSystem(drawBuildMenu, true);
-        game.registerSystem(drawMineralCount, true);
         game.registerSystem(calculateLighting, true);
         game.registerSystem(cheats);
-        // @ifdef TRACE
-        game.registerSystem(tracelogWrite);
-        // @endif
 
         return game;
     }

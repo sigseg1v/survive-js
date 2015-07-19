@@ -14,20 +14,6 @@ function Movement(container, Hex, Entity, Movable, Placement, Follow, world, phy
     var avg_replayStateCount = movingAverage(5 * 60 * 1000);
 
     this.step = function step(time) {
-
-        // @ifdef TRACE
-        Movable.forWith([Placement.name], function (entity) {
-            if (entity.components.movable.body.treatment === 'static') {
-                return;
-            }
-            var tracelogger = entity.components.tracelog;
-            if (tracelogger) {
-                tracelogger.persistent[Movable.name] = 'position ' + entity.components.placement.position.toFixedString(5) + ', velocity ' + entity.components.movable.body.state.vel.toFixedString(5) + ', accel ' + entity.components.movable.body.state.acc.toFixedString(5);
-                tracelogger.persistent[Movable.name + '_1'] = 'replay states : ' + entity.components.movable.body.replayStateCount();
-            }
-        });
-        // @endif
-
         if (!isServer) {
             limit_updateReplayDelay();
         }

@@ -21,55 +21,11 @@ function ClientActions(container, game, world, socket, rpcClientPromise, pixi) {
         });
     });
 
-    var requestingBuildMenu = false;
-    self.toggleBuildMenu = function toggleBuildMenu() {
-        if (!rpc || requestingBuildMenu) {
-            return;
-        }
-        requestingBuildMenu = true;
-        rpc.toggleBuildMenu().then(function (menu) {
-            requestingBuildMenu = false;
-            if (menu) {
-                // opened
-                game.events.emit('buildmenu-open', menu);
-            } else {
-                // closed
-                game.events.emit('buildmenu-close');
-            }
-        });
-    };
-
-    self.createBuilding = function createBuilding(name) {
-        if (!rpc) {
-            return;
-        }
-
-        rpc.createBuilding(name);
-    };
-
-    self.consumeNearby = function consumeNearby() {
-        if (!rpc) {
-            return;
-        }
-        rpc.consumeNearby();
-    };
-
     self.spawnEnemy = function spawnEnemy() {
         if (!rpc) {
             return;
         }
         rpc.spawnEnemy();
-    };
-
-    // self.pathEnemiesToPlayer = function pathEnemiesToPlayer() {
-    //     if (!rpc) {
-    //         return;
-    //     }
-    //     rpc.pathEnemiesToPlayer();
-    // };
-
-    self.getDayNightStatus = function getDayNightStatus() {
-        return load.then(function (rpc) { return rpc.getDayNightStatus(); });
     };
 
     self.sendChatMessage = function sendChatMessage(message) {
