@@ -54,12 +54,14 @@ function roundAwayFromZero(num) {
 }
 
 var data = function(){/*!
-##########$
-#XXXXXXXX#$
-#XXXXXXXX#$
-#XXXXXXXX#$
-#XXXXXXXX#$
-##########$
+# # # # # # # #$
+# X X X X X X #$
+# X X X X X X #$
+# X X X X X X #$
+# X X X X X X #$
+# X X X X X X #$
+# X X X X X X #$
+# # # # # # # #$
 */};
 
 module.exports = {

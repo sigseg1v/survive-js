@@ -42,6 +42,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     self.stage = new pixi.Container(0x272b30);
     //self.stage.rotation = - Math.PI / 3;
     self.world = new pixi.Container();
+    self.worldOffset = { x: -3 , y: -6 };
     self.zoom = 1;
     self.focus = null;
 
@@ -237,8 +238,8 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         lightmapWorld.scale.x = self.zoom / GFX_SCALE;
         lightmapWorld.scale.y = self.zoom / GFX_SCALE;
         if (self.focus) {
-            applyCoordinateTransform(self.world.position, self.focus.x * self.zoom * -1 + (self.width / 2), self.focus.y * self.zoom * 1 + (self.height / 2));
-            applyCoordinateTransform(lightmapWorld.position, self.focus.x * self.zoom * -1 + (self.width / 2), self.focus.y * self.zoom * 1 + (self.height / 2));
+            applyCoordinateTransform(self.world.position, (self.focus.x + self.worldOffset.x) * self.zoom * -1 + (self.width / 2), (self.focus.y + self.worldOffset.y) * self.zoom * 1 + (self.height / 2));
+            applyCoordinateTransform(lightmapWorld.position, (self.focus.x + self.worldOffset.x) * self.zoom * -1 + (self.width / 2), (self.focus.y + self.worldOffset.y) * self.zoom * 1 + (self.height / 2));
             // self.world.position.x = self.focus.x * self.zoom * -1 + (self.width / 2);
             // self.world.position.y = self.focus.y * self.zoom * 1 + (self.height / 2);
             // lightmapWorld.position.x = self.focus.x * self.zoom * -1 + (self.width / 2);
