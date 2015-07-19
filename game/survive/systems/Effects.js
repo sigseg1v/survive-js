@@ -57,7 +57,7 @@ function Effects(pixi, physics, game) {
         sprite.scale.x = GFX_SCALE / 170 /*px*/ * vec.norm();
         sprite.scale.y = GFX_SCALE / 40 / 2;
         sprite.blendMode = pixi.BLEND_MODES.ADD;
-        sprite.zIndex = 100;
+        sprite.layer = 9;
         game.events.emit('addGraphics', sprite);
         setTimeout(function () {
             game.events.emit('removeGraphics', sprite);
@@ -78,7 +78,7 @@ function Effects(pixi, physics, game) {
         sprite.scale.x = GFX_SCALE / 170 /*px*/ * vec.norm();
         sprite.scale.y = GFX_SCALE / 40 / 2;
         sprite.blendMode = pixi.BLEND_MODES.ADD;
-        sprite.zIndex = 100;
+        sprite.layer = 9;
         game.events.emit('addGraphics', sprite);
         setTimeout(function () {
             game.events.emit('removeGraphics', sprite);
@@ -93,7 +93,7 @@ function Effects(pixi, physics, game) {
         sprite.position.y = sourceEntity.components.placement.position.y * -1 * GFX_SCALE;
         sprite.scale.x = GFX_SCALE / 30;
         sprite.scale.y = GFX_SCALE / 30;
-        sprite.zIndex = 100;
+        sprite.layer = 9;
         spritesUnderEffect.push({
             sprite: sprite,
             start: sourceEntity.components.placement.position,
@@ -111,7 +111,7 @@ function Effects(pixi, physics, game) {
         sprite.position.y = entity.components.placement.position.y * -1 * GFX_SCALE;
         sprite.scale.x = GFX_SCALE / 40;
         sprite.scale.y = GFX_SCALE / 40;
-        sprite.zIndex = 120;
+        sprite.layer = 10;
         var pos = { x: entity.components.placement.position.x, y: entity.components.placement.position.y + 1 };
         var endPos = { x: pos.x, y: pos.y + 1 };
         spritesUnderEffect.push({

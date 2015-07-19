@@ -12,22 +12,21 @@ function register(container) {
         sprite.position.y = 0;
         sprite.scale.x = 1.7320507999999961 * GFX_SCALE / 60 /*px*/;
         sprite.scale.y = 2 * GFX_SCALE / 60 /*px*/;
-        sprite.zIndex = 1;
+        sprite.layer = 2;
         return [sprite];
     });
     modelComponent.registerSpriteLoader('floor', function () {
-        var sprite = spriteFromGenericHex("images/tileStone_full_top.png");
-        sprite.anchor.x = 0.5;
-        sprite.anchor.y = 0.3595;
-        sprite.zIndex = 0;
+        var sprite = spriteFromGenericHex("images/iso_dirt_z1.png");
+        sprite.layer = 0;
+
         return [sprite];
     });
     modelComponent.registerSpriteLoader('wall', function () {
-        var sprite = spriteFromGenericHex("images/tileRock_full.png");
-        sprite.zIndex = 0.5;
+        var sprite = spriteFromGenericHex("images/iso_wall_z0_5.png");
+        sprite.layer = 1;
 
-        var spriteTop = spriteFromGenericHex("images/tileRock_full_top.png");
-        spriteTop.zIndex = 1.5;
+        var spriteTop = spriteFromGenericHex("images/iso_wall_z1_5.png");
+        spriteTop.layer = 3;
 
         return [sprite, spriteTop];
     });
@@ -39,7 +38,7 @@ function register(container) {
         sprite.position.y = 0;
         sprite.scale.x = 1.7320507999999961 * GFX_SCALE / 60 /*px*/;
         sprite.scale.y = 2 * GFX_SCALE / 60 /*px*/;
-        sprite.zIndex = 1;
+        sprite.layer = 2;
         return [sprite];
     });
 
@@ -49,8 +48,8 @@ function register(container) {
         sprite.anchor.y = 0.5;
         sprite.position.x = 0;
         sprite.position.y = 0;
-        sprite.scale.x = GFX_SCALE / 36;
-        sprite.scale.y = GFX_SCALE / 33;
+        sprite.scale.x = GFX_SCALE / 30;
+        sprite.scale.y = GFX_SCALE / 30;
         return sprite;
     }
 }

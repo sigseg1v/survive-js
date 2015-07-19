@@ -43,6 +43,14 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     //self.stage.rotation = - Math.PI / 3;
     self.world = new pixi.Container();
     self.worldOffset = { x: -3 , y: -6 };
+
+    // make 10 layers for the world
+    (function generateWorldLayers() {
+        for (var i = 0; i < 10; i++) {
+            self.world.addChild(new pixi.Container());
+        }
+    })();
+
     self.zoom = 1;
     self.focus = null;
 
@@ -76,10 +84,23 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     game.events.on('addLightsource', onAddLightsource);
     game.events.on('removeLightsource', onRemoveLightsource);
 
+    function isValidLayer(layer) {
+        return !(layer < 0 || layer > 10);
+    }
+
     function onAddEntity(entity) {
+        var graphics;
         if (entity.components.model.sprites) {
             for (var i = 0, len = entity.components.model.sprites.length; i < len; i++) {
-                onAddGraphics(entity.components.model.sprites[i]);
+                graphics = entity.components.model.sprites[i];
+                if (!graphics.hasOwnProperty('layer')) {
+                    graphics.layer = 2;
+                }
+                if (!isValidLayer(graphics.layer)) {
+                    throw "The layer " + graphics.layer + " is invalid.";
+                }
+                computeZFromWorldPosition(entity.components.placement.position, graphics, true);
+                addInPosition(graphics);
             }
         }
     }
@@ -104,131 +125,68 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         }
     }
 
-    function onAddGraphics(item) {
-        addInPosition(item);
+    function onAddGraphics(graphics) {
+        if (!graphics.hasOwnProperty('layer')) {
+            graphics.layer = 2;
+        }
+        if (!isValidLayer(graphics.layer)) {
+            throw "The layer " + graphics.layer + " is invalid.";
+        }
+        if (graphics.hasOwnProperty('staticPosition')) {
+            computeZFromWorldPosition(graphics.staticPosition, graphics, true);
+            applyCoordinateTransform(graphics.position, graphics.staticPosition.x * GFX_SCALE, graphics.staticPosition.y * -1 * GFX_SCALE);
+        }
+        addInPosition(graphics);
     }
 
     function onRemoveGraphics(item) {
-        self.world.removeChild(item);
+        var layerContainer = self.world.children[item.layer];
+        if (layerContainer) {
+            layerContainer.removeChild(item);
+        }
     }
 
-    function addInPosition(graphics) {
-        if (!graphics.hasOwnProperty('zIndex')) {
-            graphics.zIndex = 1;
-            //graphics.addOrder = addOrder++;
+    function computeZFromWorldPosition(worldPosition, graphics, skipReposition) {
+        var newZ = worldPosition.x + worldPosition.y;
+        if (graphics.z !== newZ) {
+            graphics.z = newZ;
+            if (!skipReposition) {
+                reposition(graphics);
+            }
         }
-        if (graphics.hasOwnProperty('staticPosition')) {
-            applyCoordinateTransform(graphics.position, graphics.staticPosition.x * GFX_SCALE, graphics.staticPosition.y * -1 * GFX_SCALE);
-            // graphics.position.x = graphics.staticPosition.x * GFX_SCALE;
-            // graphics.position.y = graphics.staticPosition.y * -1 * GFX_SCALE;
-        }
+    }
 
+    function findPosition(graphics) {
         // binary search to find insertion point
         var bsFound, bsArray, bsCurrentIndex, bsMinIndex, bsMaxIndex, bsCurrentElement;//, bsRow, gfxRow;
-        bsArray = self.world.children;
+        bsArray = self.world.children[graphics.layer];
         bsCurrentIndex = 0;
         bsMinIndex = 0;
         bsMaxIndex = bsArray.length - 1;
         bsFound = false;
-        //gfxRow = getRow(graphics.position);
         while (bsMinIndex <= bsMaxIndex) {
             bsCurrentIndex = (bsMinIndex + bsMaxIndex) / 2 | 0;
             bsCurrentElement = bsArray[bsCurrentIndex];
-            if (bsCurrentElement.zIndex < graphics.zIndex) {
+            if (bsCurrentElement.z < graphics.z) {
                 bsMinIndex = bsCurrentIndex + 1;
-            } else if (bsCurrentElement.zIndex > graphics.zIndex) {
+            } else if (bsCurrentElement.z > graphics.z) {
                 bsMaxIndex = bsCurrentIndex - 1;
             } else {
-                // bsRow = getRow(bsCurrentElement.position);
-                // if (bsRow < gfxRow) {
-                //     bsMinIndex = bsCurrentIndex + 1;
-                // } else if (gfxRow > bsRow) {
-                //     bsMaxIndex = bsCurrentIndex - 1;
-                // } else {
-                //     // item found, stop search
-                //    break;
-                // }
                 bsFound = true;
                 break;
             }
         }
 
-        self.world.addChildAt(graphics, bsFound ? bsCurrentIndex : bsMinIndex);
-        //throttledSort();
+        return bsFound ? bsCurrentIndex : bsMinIndex;
     }
 
-    // function getRow(pos) {
-    //     var x = pos.x / GFX_SCALE;
-    //     var y = pos.y / GFX_SCALE;
-    //     var _q = 1 / 3.0 * 1.7320508075 * x - 1 / 3.0 * y;
-    //     var _r = 2 / 3.0 * y;
-    //     var _y = -_q - _r;
-    //
-    //     var rx = Math.round(_q);
-    //     var ry = Math.round(_y);
-    //     var rz = Math.round(_r);
-    //
-    //     var x_err = Math.abs(rx - _q);
-    //     var y_err = Math.abs(ry - _y);
-    //     var z_err = Math.abs(rz - _r);
-    //
-    //     return (x_err <= y_err || x_err <= z_err || y_err <= z_err) ? -rx - ry : rz;
-    // }
+    function addInPosition(graphics) {
+        self.world.children[graphics.layer].addChildAt(graphics, findPosition(graphics));
+    }
 
-    // function drawOrderCompare(a, b) {
-    //     var ra, rb;
-    //     if (a.zIndex > b.zIndex) {
-    //         return -1;
-    //     } else if (a.zIndex < b.zIndex) {
-    //         return 1;
-    //     } else {
-    //         ra = getRow(a.position);
-    //         rb = getRow(b.position);
-    //         if (ra < rb) {
-    //             return -1;
-    //         } else if (ra > rb) {
-    //             return 1;
-    //         } else {
-    //             return 0;
-    //         }
-    //     }
-    // }
-
-    // function getCubeCoordinates(x, y, scale) {
-    //     scale = scale || 1;
-    //     var _q = 1 / 3.0 * 1.7320508075 * x / scale - 1 / 3.0 * y / scale;
-    //     var _r = 2 / 3.0 * y / scale;
-    //     var _y = -_q - _r;
-    //
-    //     var rx = Math.round(_q);
-    //     var ry = Math.round(_y);
-    //     var rz = Math.round(_r);
-    //
-    //     var x_err = Math.abs(rx - _q);
-    //     var y_err = Math.abs(ry - _y);
-    //     var z_err = Math.abs(rz - _r);
-    //
-    //     if (x_err < y_err || x_err < z_err || y_err < z_err)
-    //
-    //     if (x_err > y_err && x_err > z_err) {
-    //     } else if (y_err > z_err) {
-    //     } else {
-    //         rz = -rx - ry;
-    //     }
-    //
-    //     return rz;
-    // }
-
-    // function zSort() {
-    //     console.log('zsorting');
-    //     self.world.children.sort(function (a, b) {
-    //         if (a.zIndex == b.zIndex) {
-    //             return 0;
-    //         }
-    //         if (a.zIndex > b.zIndex) return 1;
-    //         return -1;
-    //     });
-    // }
+    function reposition(graphics) {
+        self.world.children[graphics.layer].setChildIndex(graphics, findPosition(graphics));
+    }
 
     self.step = function step() {
         var i, l, j, jl, entity, sprites, sprite, placement, scale;
@@ -253,6 +211,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
                 sprites = entity.components.model.sprites;
                 for (j = 0, jl = sprites.length; j < jl; j++) {
                     sprite = sprites[j];
+                    computeZFromWorldPosition(placement.position, sprite);
                     applyCoordinateTransform(sprite.position, placement.position.x * GFX_SCALE, placement.position.y * -1 * GFX_SCALE);
                     // sprite.position.x = placement.position.x * GFX_SCALE;
                     // sprite.position.y = placement.position.y * -1 * GFX_SCALE;
