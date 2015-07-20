@@ -17,6 +17,8 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         if (y === undefined) {
             y = target.y;
         }
+        x *= GFX_SCALE;
+        y *= GFX_SCALE * -1;
         target.x = x - y;
         target.y = (x + y) / 2;
     }
@@ -28,8 +30,11 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         if (y === undefined) {
             y = target.y;
         }
-        target.x = x + y;
-        target.y = y * 2 - x;
+
+        target.x = x / 2 + y;
+        target.y = y - (x / 2);
+        target.x /= GFX_SCALE;
+        target.y /= GFX_SCALE * -1;
     }
 
     self.applyCoordinateTransform = applyCoordinateTransform;
@@ -134,7 +139,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         }
         if (graphics.hasOwnProperty('staticPosition')) {
             computeZFromWorldPosition(graphics.staticPosition, graphics, true);
-            applyCoordinateTransform(graphics.position, graphics.staticPosition.x * GFX_SCALE, graphics.staticPosition.y * -1 * GFX_SCALE);
+            applyCoordinateTransform(graphics.position, graphics.staticPosition.x, graphics.staticPosition.y);
         }
         addInPosition(graphics);
     }
@@ -186,6 +191,9 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
 
     function reposition(graphics) {
         var layer = self.world.children[graphics.layer];
+        if (graphics.parent !== layer) {
+            return;
+        }
         var index = layer.getChildIndex(graphics);
         var newIndex = findPosition(graphics);
         if (index !== newIndex) {
@@ -201,8 +209,8 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         lightmapWorld.scale.x = self.zoom / GFX_SCALE;
         lightmapWorld.scale.y = self.zoom / GFX_SCALE;
         if (self.focus) {
-            applyCoordinateTransform(self.world.position, (self.focus.x + self.worldOffset.x) * self.zoom * -1 + (self.width / 2), (self.focus.y + self.worldOffset.y) * self.zoom * 1 + (self.height / 2));
-            applyCoordinateTransform(lightmapWorld.position, (self.focus.x + self.worldOffset.x) * self.zoom * -1 + (self.width / 2), (self.focus.y + self.worldOffset.y) * self.zoom * 1 + (self.height / 2));
+            applyCoordinateTransform(self.world.position, ((self.focus.x + self.worldOffset.x) * self.zoom * -1 + (self.width / 2)) / GFX_SCALE, ((self.focus.y + self.worldOffset.y) * self.zoom * 1 + (self.height / 2)) / GFX_SCALE * -1);
+            applyCoordinateTransform(lightmapWorld.position, ((self.focus.x + self.worldOffset.x) * self.zoom * -1 + (self.width / 2)) / GFX_SCALE, ((self.focus.y + self.worldOffset.y) * self.zoom * 1 + (self.height / 2)) / GFX_SCALE * -1);
             // self.world.position.x = self.focus.x * self.zoom * -1 + (self.width / 2);
             // self.world.position.y = self.focus.y * self.zoom * 1 + (self.height / 2);
             // lightmapWorld.position.x = self.focus.x * self.zoom * -1 + (self.width / 2);
@@ -217,7 +225,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
                 for (j = 0, jl = sprites.length; j < jl; j++) {
                     sprite = sprites[j];
                     computeZFromWorldPosition(placement.position, sprite);
-                    applyCoordinateTransform(sprite.position, placement.position.x * GFX_SCALE, placement.position.y * -1 * GFX_SCALE);
+                    applyCoordinateTransform(sprite.position, placement.position.x, placement.position.y);
                     // sprite.position.x = placement.position.x * GFX_SCALE;
                     // sprite.position.y = placement.position.y * -1 * GFX_SCALE;
                     sprite.rotation = placement.orientation * -1;
@@ -237,7 +245,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
                 if (sprite.scale.y !== scale) {
                     sprite.scale.y = scale;
                 }
-                applyCoordinateTransform(sprite.position, placement.position.x * GFX_SCALE,  placement.position.y * -1 * GFX_SCALE);
+                applyCoordinateTransform(sprite.position, placement.position.x,  placement.position.y);
                 // sprite.position.x = placement.position.x * GFX_SCALE;
                 // sprite.position.y = placement.position.y * -1 * GFX_SCALE;
             }

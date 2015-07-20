@@ -44,7 +44,7 @@ Graphics.prototype.setText = function setText(text, options) {
     }
 };
 Graphics.prototype.setTextPosition = function setTextPosition(pos) {
-    this.renderer.applyCoordinateTransform(this.textData, pos.x * this.renderer.GFX_SCALE, pos.y * this.renderer.GFX_SCALE * -1);
+    this.renderer.applyCoordinateTransform(this.textData, pos.x, pos.y);
     this.textData.x += (this.offset.x) * this.renderer.GFX_SCALE;
     this.textData.y += (this.offset.y * -1) * this.renderer.GFX_SCALE * -1;
 };

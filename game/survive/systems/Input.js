@@ -1,7 +1,7 @@
 "use strict";
 var limit = require('../../etc/ratelimiter.js');
 
-function Input(container, physics, ClientActions, path, pixi, world, game, renderer) {
+function Input(container, physics, ClientActions, path, pixi, world, game, renderer, Effects) {
     var self = this;
 
     var playerKeys = {};
@@ -31,7 +31,7 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
     var pointScratch = new pixi.Point();
     function mouseClick(e) {
         renderer.mouse.getLocalPosition(renderer.world, pointScratch);
-        renderer.applyInverseCoordinateTransform(pointScratch, pointScratch.x / renderer.GFX_SCALE, pointScratch.y * -1 / renderer.GFX_SCALE);
+        renderer.applyInverseCoordinateTransform(pointScratch);
         mouseClicks.push({
             button: e.button,
             x: pointScratch.x,
@@ -147,4 +147,4 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
 }
 
 module.exports = Input;
-module.exports.$inject = ['$container', 'lib/physicsjs', 'ClientActions', 'Pathfinder', 'lib/pixi.js', 'World', 'Game', 'system/Renderer'];
+module.exports.$inject = ['$container', 'lib/physicsjs', 'ClientActions', 'Pathfinder', 'lib/pixi.js', 'World', 'Game', 'system/Renderer', 'system/Effects'];

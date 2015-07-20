@@ -40,6 +40,12 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
         attackArc1: bodies(physics, 'AttackArc1')
     };
 
+    function spawnEnemyAtLocation(location) {
+        var enemy = container.resolve('entity/EnemyEntity/slime');
+        enemy.components.placement.position = location;
+        world.addEntity(enemy);
+    }
+
     self.getPlayerChildEntities = function getPlayerChildEntities(player) {
         return playerEntityList.has(player) ? playerEntityList.get(player) : [];
     };
@@ -52,9 +58,7 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
         spawnEnemy: function spawnEnemy() {
             var player = Server.getPlayerBySocketId(this.commonId);
             if (!player) return;
-            var enemy = container.resolve('entity/EnemyEntity/slime');
-            enemy.components.placement.position = player.components.placement.position;
-            world.addEntity(enemy);
+            spawnEnemyAtLocation(player.components.placement.position);
         },
 
         attack: function attack(targetPoint, weapon) {
@@ -65,6 +69,7 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             var attackArc = pool.attackArc1;
             attackArc.state.pos.clone(player.components.movable.body.state.pos);
             var angle = scratch.vector().clone(targetPoint).vsub(player.components.movable.body.state.pos).angle();
+            //spawnEnemyAtLocation(scratch.vector().clone(targetPoint).vsub(player.components.movable.body.state.pos).normalize().mult(1).vadd(player.components.movable.body.state.pos));
             attackArc.state.angular.pos = angle;
             var attackArcAabb = attackArc.aabb();
 

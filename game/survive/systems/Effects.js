@@ -104,6 +104,26 @@ function Effects(pixi, physics, game) {
         game.events.emit('addGraphics', sprite);
     };
 
+    self.drawLocationDebugSprite = function drawAttackProjectile(position) {
+        var sprite = new pixi.Sprite.fromImage('images/simple_projectile.png');
+        sprite.anchor.set(0.5, 0.5);
+        sprite.staticPosition = {
+            x: position.x,
+            y: position.y
+        };
+        sprite.scale.x = GFX_SCALE / 30;
+        sprite.scale.y = GFX_SCALE / 30;
+        sprite.layer = 9;
+        spritesUnderEffect.push({
+            sprite: sprite,
+            start: position,
+            end: position,
+            startTime: now(),
+            duration: 100
+        });
+        game.events.emit('addGraphics', sprite);
+    };
+
     self.drawCombatText = function drawCombatText(entity, text, format) {
         var sprite = new pixi.MultiStyleText(text, format);
         sprite.anchor.set(0.5, 0.5);
