@@ -44,16 +44,17 @@ module.exports = function loadBody(physics, name) {
             y: 0,
             vertices: [
                 { x:  0.0, y:  0.0 },
-                { x: -0.5, y:  1.0 },
-                { x: -0.2, y:  1.2 },
-                { x:  0.2, y:  1.2 },
-                { x:  0.5, y:  1.0 }
+                { x:  1.0, y: -0.5 },
+                { x:  1.2, y: -0.2 },
+                { x:  1.2, y:  0.2 },
+                { x:  1.0, y:  0.5 }
             ],
             treatment: 'dynamic',
             options: {
                 integrationMode: 'disabled'
             }
         });
+        body.offset.set(0.8, 0);
     }
     return body;
 };
