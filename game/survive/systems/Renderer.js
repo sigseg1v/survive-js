@@ -37,8 +37,35 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         target.y /= GFX_SCALE * -1;
     }
 
+    function applyCoordinateTransformUnscaled(target, x, y) {
+        if (x === undefined) {
+            x = target.x;
+        }
+        if (y === undefined) {
+            y = target.y;
+        }
+        y *= -1;
+        target.x = x - y;
+        target.y = (x + y) / 2;
+    }
+
+    function applyInverseCoordinateTransformUnscaled(target, x, y) {
+        if (x === undefined) {
+            x = target.x;
+        }
+        if (y === undefined) {
+            y = target.y;
+        }
+
+        target.x = x / 2 + y;
+        target.y = y - (x / 2);
+        target.y *= -1;
+    }
+
     self.applyCoordinateTransform = applyCoordinateTransform;
     self.applyInverseCoordinateTransform = applyInverseCoordinateTransform;
+    self.applyCoordinateTransformUnscaled = applyCoordinateTransformUnscaled;
+    self.applyInverseCoordinateTransformUnscaled = applyInverseCoordinateTransformUnscaled;
 
     var renderer = pixi.autoDetectRenderer(self.width, self.height);
     //var addOrder = 0;

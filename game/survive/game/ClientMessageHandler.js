@@ -8,10 +8,30 @@ function ClientMessageHandler(socket, effects, world, game) {
 
     self.registerHandlers = function registerHandlers() {
         socket.on('chat-message', handleChatMessage);
+        socket.on('entity-damaged', handleEntityDamaged);
+        socket.on('entity-attack', handleEntityAttack);
     };
 
     function handleChatMessage(data) {
         game.events.emit('chat-receive', data);
+    }
+
+    function handleEntityDamaged(data) {
+        var ent = world.entityById(data.entityId);
+        if (!ent) return;
+        game.events.emit('entity-damaged', data);
+        effects.drawCombatText(ent, "-<num>" + data.amount + "</num>",
+            {
+                def: { font: '12px Michroma', fill: 'white' },
+                num: { font: '12px Michroma', fill: '#FD4554' }
+            });
+    }
+
+    function handleEntityAttack(data) {
+        var ent = world.entityById(data.entityId);
+        if (!ent) return;
+        game.events.emit('entity-attack', data);
+        var targetPoint = data.targetPoint;
     }
 }
 

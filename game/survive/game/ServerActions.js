@@ -80,8 +80,19 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
         });
 
         var damage = player.components.melee.damage;
+        socket.emit('entity-attack', {
+            entityId: player.id,
+            targetPoint: targetPoint
+        });
         hit.forEach(function (ent) {
             var amount = Math.min(ent.components.health.currentHealth, damage);
+            if (amount < 0) {
+                return;
+            }
+            socket.emit('entity-damaged', {
+                entityId: ent.id,
+                amount: amount
+            });
             ent.components.health.currentHealth -= amount;
             if (ent.components.health.currentHealth <= 0) {
                 world.removeEntity(ent);
