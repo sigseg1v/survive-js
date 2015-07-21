@@ -18,8 +18,9 @@ function HealthData(comp, entity, options) {
     this._currentHealth = this.options.currentHealth || 1;
     Object.defineProperty(this, 'currentHealth', {
         get: function () { return this._currentHealth; },
-        set: function (val) {
-            if (val && (this._currentHealth != val)) {
+        set: function (raw) {
+            var val = Number(raw);
+            if (this._currentHealth != val) {
                 this._currentHealth = val;
                 comp.entityDataChanged(entity);
             }
@@ -29,8 +30,9 @@ function HealthData(comp, entity, options) {
     this._maximumHealth = this.options.maximumHealth || 100;
     Object.defineProperty(this, 'maximumHealth', {
         get: function () { return this._maximumHealth; },
-        set: function (val) {
-            if (val && (this._maximumHealth != val)) {
+        set: function (raw) {
+            var val = Number(raw);
+            if (this._maximumHealth != val) {
                 this._maximumHealth = val;
                 comp.entityDataChanged(entity);
             }

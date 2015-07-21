@@ -36,8 +36,6 @@ function MeleeData(comp, entity, options) {
             }
         }
     });
-
-    this.currentTarget = null;
 }
 MeleeData.prototype.toJSON = function toJSON() {
     return {

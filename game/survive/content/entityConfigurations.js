@@ -9,6 +9,7 @@ function newPlayer(container) {
 
     // TODO -- figure out why this doesn't sync to local player
     ent.components.lightsource.scale = 0.5;
+    ent.components.melee.damage = 5;
     return ent;
 }
 

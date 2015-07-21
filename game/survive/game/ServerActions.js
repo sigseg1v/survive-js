@@ -46,6 +46,50 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
         world.addEntity(enemy);
     }
 
+    function performAttack(player, client, targetPoint, weapon) {
+        var scratch = physics.scratchpad();
+        var attackArc = pool.attackArc1;
+        attackArc.state.pos.clone(player.components.movable.body.state.pos);
+        var angle = scratch.vector().clone(targetPoint).vsub(player.components.movable.body.state.pos).angle();
+        //spawnEnemyAtLocation(scratch.vector().clone(targetPoint).vsub(player.components.movable.body.state.pos).normalize().mult(1).vadd(player.components.movable.body.state.pos));
+        attackArc.state.angular.pos = angle;
+        var attackArcAabb = attackArc.aabb();
+
+        var candidates = [];
+        var loadedChunks = client.getLoadedChunks();
+        loadedChunks.forEach(function (chunk) {
+            var i, ilen, ent;
+            var entIds = chunk.getEntityIds();
+            for (i = 0, ilen = entIds.length; i < ilen; i++) {
+                ent = world.entityById([entIds[i]]);
+                if (ent && ent.components.movable.body) {
+                    candidates.push(ent.components.movable.body);
+                }
+            }
+        });
+
+        var hit = world.physics.find({
+            labels: { $in: ['enemy'] },
+            $in: candidates
+        }).filter(function (body) {
+            return physics.aabb.overlap(attackArcAabb, body.aabb()) && !!collisionDetector.checkGJK(body, attackArc);
+        }).map(function (body) {
+            return body.entity();
+        }).filter(function (ent) {
+            return ent && ent.components.health;
+        });
+
+        var damage = player.components.melee.damage;
+        hit.forEach(function (ent) {
+            var amount = Math.min(ent.components.health.currentHealth, damage);
+            ent.components.health.currentHealth -= amount;
+            if (ent.components.health.currentHealth <= 0) {
+                world.removeEntity(ent);
+            }
+        });
+        scratch.done();
+    }
+
     self.getPlayerChildEntities = function getPlayerChildEntities(player) {
         return playerEntityList.has(player) ? playerEntityList.get(player) : [];
     };
@@ -65,39 +109,7 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             var player = Server.getPlayerBySocketId(this.commonId);
             if (!player) return;
             var client = clientStateManager.getClientStateBySocketId(this.commonId);
-            var scratch = physics.scratchpad();
-            var attackArc = pool.attackArc1;
-            attackArc.state.pos.clone(player.components.movable.body.state.pos);
-            var angle = scratch.vector().clone(targetPoint).vsub(player.components.movable.body.state.pos).angle();
-            //spawnEnemyAtLocation(scratch.vector().clone(targetPoint).vsub(player.components.movable.body.state.pos).normalize().mult(1).vadd(player.components.movable.body.state.pos));
-            attackArc.state.angular.pos = angle;
-            var attackArcAabb = attackArc.aabb();
-
-            var candidates = [];
-            var loadedChunks = client.getLoadedChunks();
-            loadedChunks.forEach(function (chunk) {
-                var i, ilen, ent;
-                var entIds = chunk.getEntityIds();
-                for (i = 0, ilen = entIds.length; i < ilen; i++) {
-                    ent = world.entityById([entIds[i]]);
-                    if (ent && ent.components.movable.body) {
-                        candidates.push(ent.components.movable.body);
-                    }
-                }
-            });
-
-            var hit = world.physics.find({
-                labels: { $in: ['enemy'] },
-                $in: candidates
-            }).filter(function (body) {
-                return physics.aabb.overlap(attackArcAabb, body.aabb()) && !!collisionDetector.checkGJK(body, attackArc);
-            }).map(function (body) {
-                return body.entity();
-            });
-            hit.forEach(function (ent) {
-                console.log('hit:', ent.id);
-            });
-            scratch.done();
+            limit.byCooldown(player.components.melee, performAttack, [player, client, targetPoint, weapon]);
         },
 
         sendChatMessage: function sendChatMessage(message) {

@@ -1,7 +1,7 @@
 "use strict";
 var Entity = require('../../engine/Entity.js');
 
-function PlayerEntity(container, Placement, Model, Movable, Lightsource, Name, Use, options) {
+function PlayerEntity(container, Placement, Model, Movable, Lightsource, Name, Use, Melee, options) {
     Entity.call(this);
     options = options || {};
     this.addComponent(Placement, options[Placement.name]);
@@ -10,9 +10,10 @@ function PlayerEntity(container, Placement, Model, Movable, Lightsource, Name, U
     this.addComponent(Lightsource, options[Lightsource.name]);
     this.addComponent(Name, options[Name.name]);
     this.addComponent(Use, options[Use.name]);
+    this.addComponent(Melee, options[Melee.name]);
 }
 PlayerEntity.prototype = Object.create(Entity.prototype);
 PlayerEntity.prototype.constructor = PlayerEntity;
 
 module.exports = PlayerEntity;
-module.exports.$inject = ['$container', 'component/Placement', 'component/Model', 'component/Movable', 'component/Lightsource', 'component/Name', 'component/Use'];
+module.exports.$inject = ['$container', 'component/Placement', 'component/Model', 'component/Movable', 'component/Lightsource', 'component/Name', 'component/Use', 'component/Melee'];

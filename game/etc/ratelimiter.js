@@ -29,13 +29,13 @@ function rateLimit(limitInterval, fn, thisArg) {
         return null;
     }
 }
-rateLimit.byCooldown = function byCooldown(component, fn, thisArg) {
+rateLimit.byCooldown = function byCooldown(component, fn, args, thisArg) {
     var timer = timerFor(component);
     var now = pnow();
 
     if (now - timer.last > component.cooldown) {
         timer.last = now;
-        return fn.call(thisArg);
+        return fn.apply(thisArg, args);
     }
     return null;
 };
