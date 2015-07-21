@@ -7,6 +7,32 @@ function Effects(pixi, physics, game, renderer) {
 
     var spritesUnderEffect = [];
 
+    // data:
+    //      sourceEntity
+    //      targetEntity
+    //      targetPoint
+    var spellEffects = {
+        0: function meleeAttack(data) {
+            var sprite = new pixi.Sprite.fromImage('images/simple_projectile.png');
+            sprite.anchor.set(0.5, 0.5);
+            sprite.staticPosition = {
+                x: data.targetPoint.x,
+                y: data.targetPoint.y
+            };
+            sprite.scale.x = GFX_SCALE / 30;
+            sprite.scale.y = GFX_SCALE / 30;
+            sprite.layer = 9;
+            spritesUnderEffect.push({
+                sprite: sprite,
+                start: sprite.staticPosition,
+                end: sprite.staticPosition,
+                startTime: now(),
+                duration: 100
+            });
+            game.events.emit('addGraphics', sprite);
+        }
+    };
+
     self.step = function step() {
         if (spritesUnderEffect.length === 0) {
             return;
@@ -61,6 +87,25 @@ function Effects(pixi, physics, game, renderer) {
             duration: 100
         });
         game.events.emit('addGraphics', sprite);
+    };
+
+    self.drawSpellEffect = function drawSpellEffect(sourceEntity, target, spellId) {
+        var targetPoint;
+        var targetEntity;
+        if (target.hasOwnProperty('x') && target.hasOwnProperty('y')) {
+            targetEntity = null;
+            targetPoint = target;
+        } else if (target.hasOwnProperty('id')) {
+            targetEntity = target;
+            targetPoint = targetEntity.components.placement.position;
+        } else {
+            return;
+        }
+        return spellEffects[spellId].call(null, {
+            sourceEntity: sourceEntity,
+            targetEntity: targetEntity,
+            targetPoint: targetPoint
+        });
     };
 
     self.drawCombatText = function drawCombatText(entity, text, format) {
