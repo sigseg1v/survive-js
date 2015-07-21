@@ -117,7 +117,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     game.events.on('removeLightsource', onRemoveLightsource);
 
     function isValidLayer(layer) {
-        return !(layer < 0 || layer > 10);
+        return !(layer < 0 || layer >= 10);
     }
 
     function onAddEntity(entity) {
