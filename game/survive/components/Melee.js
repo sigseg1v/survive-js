@@ -37,6 +37,7 @@ function MeleeData(comp, entity, options) {
         }
     });
 }
+MeleeData.prototype.globalCooldown = 200;
 MeleeData.prototype.toJSON = function toJSON() {
     return {
         injector: this.injector,

@@ -46,7 +46,16 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
         world.addEntity(enemy);
     }
 
-    function performAttack(player, client, targetPoint, weapon) {
+    var attackHandler = limit.responsive()
+        .on('ready', onAttackReady)
+        .on('gcd', onAttackGcd)
+        .on('cooldown', onAttackCooldown);
+
+    self.getPlayerChildEntities = function getPlayerChildEntities(player) {
+        return playerEntityList.has(player) ? playerEntityList.get(player) : [];
+    };
+
+    function onAttackReady(limiter, state, player, client, targetPoint, weapon) {
         var scratch = physics.scratchpad();
         var attackArc = pool.attackArc1;
         attackArc.state.pos.clone(player.components.movable.body.state.pos);
@@ -84,6 +93,11 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             entityId: player.id,
             targetPoint: targetPoint
         });
+
+        if (hit.length === 0) {
+            limiter.clearReadyCooldown(state);
+        }
+
         hit.forEach(function (ent) {
             var amount = Math.min(ent.components.health.currentHealth, damage);
             if (amount < 0) {
@@ -101,9 +115,9 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
         scratch.done();
     }
 
-    self.getPlayerChildEntities = function getPlayerChildEntities(player) {
-        return playerEntityList.has(player) ? playerEntityList.get(player) : [];
-    };
+    function onAttackGcd(limiter, state, player, client, targetPoint, weapon) { }
+
+    function onAttackCooldown(limiter, state, player, client, targetPoint, weapon) { }
 
     self.exposedActions = {
         notifyIdentifier: function notifyIdentifier(identifier) {
@@ -120,7 +134,7 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             var player = Server.getPlayerBySocketId(this.commonId);
             if (!player) return;
             var client = clientStateManager.getClientStateBySocketId(this.commonId);
-            limit.byCooldown(player.components.melee, performAttack, [player, client, targetPoint, weapon]);
+            attackHandler.trigger(player.components.melee, [player, client, targetPoint, weapon]);
         },
 
         sendChatMessage: function sendChatMessage(message) {
