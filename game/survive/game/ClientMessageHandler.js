@@ -31,7 +31,7 @@ function ClientMessageHandler(socket, effects, world, game) {
         var ent = world.entityById(data.entityId);
         if (!ent) return;
         game.events.emit('entity-attack', data);
-        var targetPoint = data.targetPoint;
+        effects.drawSpellEffect(ent, data.targetPoint, 0);
     }
 }
 

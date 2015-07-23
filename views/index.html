@@ -43,7 +43,11 @@
 			}
 		};
 
-		survive.router.loadView('login');
+		PIXI.loader
+			.add('images/attack_swing/attack_swing.json')
+			.load(function showLogin() {
+				survive.router.loadView('login');
+			});
 	});
 	</script>
 </head>

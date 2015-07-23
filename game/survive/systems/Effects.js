@@ -1,7 +1,7 @@
 "use strict";
 var now = require('performance-now');
 
-function Effects(pixi, physics, game, renderer) {
+function Effects(pixi, physics, game, renderer, Model) {
     var self = this;
     var GFX_SCALE = 20; // https://github.com/GoodBoyDigital/pixi.js/issues/1306
 
@@ -10,26 +10,35 @@ function Effects(pixi, physics, game, renderer) {
     // data:
     //      sourceEntity
     //      targetEntity
+    //      sourcePoint
     //      targetPoint
     var spellEffects = {
         0: function meleeAttack(data) {
-            var sprite = new pixi.Sprite.fromImage('images/simple_projectile.png');
-            sprite.anchor.set(0.5, 0.5);
+            var scratch = physics.scratchpad();
+            var sprite = Model.createSprites('attack_swing')[0];
+            var sourceScreenspace = renderer.applyCoordinateTransformUnscaled(new pixi.Point(data.sourcePoint.x, data.sourcePoint.y));
+            var targetScreenspace = renderer.applyCoordinateTransformUnscaled(new pixi.Point(data.targetPoint.x, data.targetPoint.y));
+            var angle = scratch.vector().clone(targetScreenspace).vsub(scratch.vector().clone(sourceScreenspace)).angle();
+            sprite.anchor.set(0, 0.5);
             sprite.staticPosition = {
-                x: data.targetPoint.x,
-                y: data.targetPoint.y
+                x: data.sourcePoint.x,
+                y: data.sourcePoint.y
             };
             sprite.scale.x = GFX_SCALE / 30;
             sprite.scale.y = GFX_SCALE / 30;
+            sprite.rotation = angle;
             sprite.layer = 9;
+            sprite.loop = false;
             spritesUnderEffect.push({
                 sprite: sprite,
                 start: sprite.staticPosition,
                 end: sprite.staticPosition,
                 startTime: now(),
-                duration: 100
+                duration: 'end'
             });
             game.events.emit('addGraphics', sprite);
+            sprite.play();
+            scratch.done();
         }
     };
 
@@ -47,10 +56,12 @@ function Effects(pixi, physics, game, renderer) {
         var dist;
         for (index = 0; index < spritesUnderEffect.length; /* nop */) {
             entry = spritesUnderEffect[index];
-            if (currentTime - entry.startTime > entry.duration) {
+            if ((entry.duration === 'end' && !entry.sprite.playing) || currentTime - entry.startTime > entry.duration) {
                 game.events.emit('removeGraphics', entry.sprite);
                 spritesUnderEffect.splice(index, 1);
                 // removed from array, so don't increment index
+            } else if (entry.duration === 'end' && entry.sprite.playing) {
+                index++;
             } else {
                 newPos.clone(entry.start);
                 pathVec.clone(entry.end).vsub(newPos);
@@ -92,6 +103,7 @@ function Effects(pixi, physics, game, renderer) {
     self.drawSpellEffect = function drawSpellEffect(sourceEntity, target, spellId) {
         var targetPoint;
         var targetEntity;
+        var sourcePoint = sourceEntity && sourceEntity.components.placement ? sourceEntity.components.placement.position : null;
         if (target.hasOwnProperty('x') && target.hasOwnProperty('y')) {
             targetEntity = null;
             targetPoint = target;
@@ -104,6 +116,7 @@ function Effects(pixi, physics, game, renderer) {
         return spellEffects[spellId].call(null, {
             sourceEntity: sourceEntity,
             targetEntity: targetEntity,
+            sourcePoint: sourcePoint,
             targetPoint: targetPoint
         });
     };
@@ -141,4 +154,4 @@ function Effects(pixi, physics, game, renderer) {
 }
 
 module.exports = Effects;
-module.exports.$inject = ['lib/pixi.js', 'lib/physicsjs', 'Game', 'system/Renderer'];
+module.exports.$inject = ['lib/pixi.js', 'lib/physicsjs', 'Game', 'system/Renderer', 'component/Model'];

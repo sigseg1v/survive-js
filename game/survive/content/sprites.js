@@ -41,6 +41,22 @@ function register(container) {
         sprite.layer = 2;
         return [sprite];
     });
+    modelComponent.registerSpriteLoader('attack_swing', function () {
+        var frames = [];
+        for (var i = 1, len = 12; i <= len; i++) {
+            frames.push(pixi.Texture.fromFrame("attack_swing" + (i < 10 ? "0" + i : i) + ".png"));
+        }
+        var sprite = new pixi.extras.MovieClip(frames);
+        sprite.anchor.x = 0.5;
+        sprite.anchor.y = 0.5;
+        sprite.position.x = 0;
+        sprite.position.y = 0;
+        sprite.scale.x = 1.7320507999999961 * GFX_SCALE / 60 /*px*/;
+        sprite.scale.y = 2 * GFX_SCALE / 60 /*px*/;
+        sprite.layer = 2;
+        sprite.animationSpeed = 0.5;
+        return [sprite];
+    });
 
     function spriteFromGenericHex(path) {
         var sprite = new pixi.Sprite(pixi.Texture.fromImage(path));

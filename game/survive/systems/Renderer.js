@@ -21,6 +21,8 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         y *= GFX_SCALE * -1;
         target.x = x - y;
         target.y = (x + y) / 2;
+
+        return target;
     }
 
     function applyInverseCoordinateTransform(target, x, y) {
@@ -35,6 +37,8 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         target.y = y - (x / 2);
         target.x /= GFX_SCALE;
         target.y /= GFX_SCALE * -1;
+
+        return target;
     }
 
     function applyCoordinateTransformUnscaled(target, x, y) {
@@ -47,6 +51,8 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         y *= -1;
         target.x = x - y;
         target.y = (x + y) / 2;
+
+        return target;
     }
 
     function applyInverseCoordinateTransformUnscaled(target, x, y) {
@@ -60,6 +66,8 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         target.x = x / 2 + y;
         target.y = y - (x / 2);
         target.y *= -1;
+
+        return target;
     }
 
     self.applyCoordinateTransform = applyCoordinateTransform;
