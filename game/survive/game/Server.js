@@ -14,6 +14,7 @@ function loadGame() {
     var playerSync = container.resolve('system/PlayerSync');
     var physicsSync = container.resolve('system/PhysicsSync');
     var cheats = container.resolve('system/Cheats');
+    var spawner = container.resolve('system/SpawnerCycle');
     game.registerSystem(followPath);
     game.registerSystem(movement);
     game.registerSystem(playerSync);
@@ -21,6 +22,7 @@ function loadGame() {
     game.registerSystem(chunkManager);
     game.registerSystem(stateBroadcaster);
     game.registerSystem(cheats);
+    game.registerSystem(spawner);
 
     var levelData = loader.parse(loader.data);
     var floorTiles = levelData.floors.map(function (floor) {
@@ -33,8 +35,12 @@ function loadGame() {
         entity.components.placement.position = position;
         return entity;
     });
+    var otherEntities = levelData.entities.map(function (spawner) {
+        return spawner();
+    });
     world.setFloor(floorTiles);
     world.addEntities(wallEntities);
+    world.addEntities(otherEntities);
 
     return game;
 }
@@ -72,7 +78,7 @@ function handlePlayerConfigData(socket, playerData) {
     var chunkManager = container.resolve('system/ChunkManager');
     var player = container.resolve('entity/PlayerEntity/newPlayer');
 
-    console.log('player name joined:' + playerData.name);
+    console.log('player name joined:', playerData.name);
 
     csm.addClient(socket);
 

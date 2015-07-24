@@ -41,11 +41,19 @@ function genericEnemy(container) {
     return ent;
 }
 
+function spawnerEntity(container) {
+    var ent = container.resolve('entity/SpawnerEntity');
+    ent.components.spawner.type = 'entity/EnemyEntity/slime';
+    ent.components.spawner.cooldown = 5000;
+    return ent;
+}
+
 function register(container) {
     container.registerType('entity/PlayerEntity/newPlayer', newPlayer.bind(null, container));
     container.registerType('entity/PlayerEntity/clientPlayer', clientPlayer.bind(null, container));
     container.registerType('entity/WallEntity/wall', wallEntity.bind(null, container));
     container.registerType('entity/EnemyEntity/slime', genericEnemy.bind(null, container));
+    container.registerType('entity/SpawnerEntity/slime', spawnerEntity.bind(null, container));
 }
 
 module.exports = {

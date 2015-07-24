@@ -29,6 +29,7 @@ function Effects(pixi, physics, game, renderer, Model) {
             sprite.rotation = angle;
             sprite.layer = 9;
             sprite.loop = false;
+            sprite.animationSpeed = 1.6;
             spritesUnderEffect.push({
                 sprite: sprite,
                 start: sprite.staticPosition,

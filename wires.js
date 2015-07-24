@@ -56,6 +56,7 @@ container.registerAlias('Component', require('./game/engine/Component.js'));
 container.registerType('entity/DisplayEntity', require('./game/survive/entities/DisplayEntity.js'));
 container.registerType('entity/WallEntity', require('./game/survive/entities/WallEntity.js'));
 container.registerType('entity/EnemyEntity', require('./game/survive/entities/EnemyEntity.js'));
+container.registerType('entity/SpawnerEntity', require('./game/survive/entities/SpawnerEntity.js'));
 
 container.registerInstance('Game', require('./game/engine/Game.js'));
 container.registerInstance('World', require('./game/engine/world/World.js'));
@@ -72,6 +73,7 @@ container.registerInstance('component/Name', require('./game/survive/components/
 container.registerInstance('component/Use', require('./game/survive/components/Use.js'));
 container.registerInstance('component/Health', require('./game/survive/components/Health.js'));
 container.registerInstance('component/Melee', require('./game/survive/components/Melee.js'));
+container.registerInstance('component/Spawner', require('./game/survive/components/Spawner.js'));
 
 container.registerType('entity/PlayerEntity', require('./game/survive/entities/PlayerEntity.js'));
 
@@ -91,6 +93,7 @@ container.registerInstance('system/Cheats', require('./game/survive/systems/Chea
 if (!isServer) container.registerInstance('system/UpdateNameplates', require('./game/survive/systems/UpdateNameplates.js'));
 if (!isServer) container.registerInstance('system/Chat', require('./game/survive/systems/Chat-Client.js'));
 if (!isServer) container.registerInstance('system/CalculateLighting', require('./game/survive/systems/CalculateLighting.js'));
+if (isServer) container.registerInstance('system/SpawnerCycle', require('./game/survive/systems/SpawnerCycle.js'));
 
 container.registerInstance('system/Effects', require('./game/survive/systems/Effects.js'));
 

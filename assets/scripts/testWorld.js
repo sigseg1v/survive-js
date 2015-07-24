@@ -6,13 +6,14 @@ var glyphs = {
     VOID: '.',
     ENDROW: '$',
     FLOOR: 'X',
-    GEN_WALL: '#'
+    GEN_WALL: '#',
+    SPAWNER: '+'
 };
 
 function parseLevelString(value) {
     var walls = [];
     var floors = [];
-    var minerals = [];
+    var other = [];
     var recognizedGlyphs = Object.keys(glyphs).reduce(function (out, glyph) {
         return out += glyphs[glyph];
     }, '');
@@ -26,14 +27,27 @@ function parseLevelString(value) {
     var x = xStart;
     var y = yStart;
 
+    function setPlacement(entity) {
+        entity.components.placement.position.x = x;
+        entity.components.placement.position.y = y;
+    }
+
     data.split('').forEach(function (node) {
         // everything that isn't empty gets floorspace within the world
         if (node !== glyphs.VOID && node !== glyphs.ENDROW) {
             floors.push(new Block(x, y));
         }
 
+        var placement = new Block(x, y);
+
         if (node === glyphs.GEN_WALL) {
-            walls.push(new Block(x, y));
+            walls.push(placement);
+        } else if (node === glyphs.SPAWNER) {
+            other.push(function() {
+                var ent = container.resolve('entity/SpawnerEntity/slime');
+                ent.components.placement.position = placement.getCenter();
+                return ent;
+            });
         } else if (node === glyphs.ENDROW) {
             y++;
             x = xStart;
@@ -45,7 +59,8 @@ function parseLevelString(value) {
 
     return {
         walls: walls,
-        floors: floors
+        floors: floors,
+        entities: other
     };
 }
 
@@ -56,10 +71,10 @@ function roundAwayFromZero(num) {
 var data = function(){/*!
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #$
 # X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X #$
-# X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X #$
+# X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X + X #$
 # X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X #$
 # X X X X X X # # # # # # # # # # # # # X X X X X X X X X X X X X X X X X X X X # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #$
-# X X X X X X # . . . . . . . . . . . # X X X X X X X X X X X X X X X X X X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+# X + X X X X # . . . . . . . . . . . # X X X X X X X X X X X X X X X X X X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
 # X X X X X X # . . . . . . . . . . . # X X X X X X X X X X X X X X X X X X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
 # # # # # # # # . . . . . . . . . . . # # # # # # # # # # # # # # # # # # # # # # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
 */};
