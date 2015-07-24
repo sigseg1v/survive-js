@@ -5,7 +5,7 @@ var limit = require('../../etc/ratelimiter.js');
 function EnemyTargetting(container, Movable, Placement, Path, world, physics, pathfinder) {
     var WP_TAG_RANGE = 1;
 
-    var calculatePaths_limit = limit(500, calculatePaths);
+    var calculatePaths_limit = limit(2000, calculatePaths);
 
     this.step = function step(time) {
         calculatePaths_limit();

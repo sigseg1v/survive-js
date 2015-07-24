@@ -177,31 +177,33 @@ function Pathfinder(physics, world, game) {
                         var h = getDistanceHeuristic(neighbourPosition, end);
                         var f = g + h;
 
+                        var neighbourData;
                         if (neighbourInOpenSet) {
                             neighbourInOpenSet.set(f, g, neighbour, currentData);
+                            neighbourData = neighbourInOpenSet;
+                            open.splice(open.indexOf(neighbourData), 0); // remove so we can add again in correct position
                         } else {
-                            var neighbourData = scratch.pathfindingData().set(f, g, neighbour, currentData);
-
-                            // binary search to find correct spot to insert to keep sorted by f-values
-                            bsCurrentIndex = 0;
-                            bsMinIndex = 0;
-                            bsMaxIndex = open.length - 1;
-                            while (bsMinIndex <= bsMaxIndex) {
-                                bsCurrentIndex = (bsMinIndex + bsMaxIndex) / 2 | 0;
-                                bsCurrentElement = open[bsCurrentIndex].f;
-                                if (bsCurrentElement > f) {
-                                    bsMinIndex = bsCurrentIndex + 1;
-                                } else if (bsCurrentElement < f) {
-                                    bsMaxIndex = bsCurrentIndex - 1;
-                                } else {
-                                    // item matching f found, stop search
-                                    break;
-                                }
-                            }
-                            open.splice(bsCurrentIndex, 0, neighbourData);
-
+                            neighbourData = scratch.pathfindingData().set(f, g, neighbour, currentData);
                             openHash[neighbour.getHashCode()] = true;
                         }
+
+                        // binary search to find correct spot to insert to keep sorted by f-values
+                        bsCurrentIndex = 0;
+                        bsMinIndex = 0;
+                        bsMaxIndex = open.length - 1;
+                        while (bsMinIndex <= bsMaxIndex) {
+                            bsCurrentIndex = (bsMinIndex + bsMaxIndex) / 2 | 0;
+                            bsCurrentElement = open[bsCurrentIndex].f;
+                            if (bsCurrentElement > f) {
+                                bsMinIndex = bsCurrentIndex + 1;
+                            } else if (bsCurrentElement < f) {
+                                bsMaxIndex = bsCurrentIndex - 1;
+                            } else {
+                                // item matching f found, stop search
+                                break;
+                            }
+                        }
+                        open.splice(bsCurrentIndex, 0, neighbourData);
                     }
                 }
             }
