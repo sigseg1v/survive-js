@@ -130,7 +130,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
 
     function onAddEntity(entity) {
         var graphics;
-        if (entity.components.model.sprites) {
+        if (entity.components.model && entity.components.model.sprites) {
             for (var i = 0, len = entity.components.model.sprites.length; i < len; i++) {
                 graphics = entity.components.model.sprites[i];
                 if (!graphics.hasOwnProperty('layer')) {
@@ -146,7 +146,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     }
 
     function onRemoveEntity(entity) {
-        if (entity.components.model.sprites) {
+        if (entity.components.model && entity.components.model.sprites) {
             for (var i = 0, len = entity.components.model.sprites.length; i < len; i++) {
                 onRemoveGraphics(entity.components.model.sprites[i]);
             }

@@ -94,6 +94,7 @@ if (!isServer) container.registerInstance('system/UpdateNameplates', require('./
 if (!isServer) container.registerInstance('system/Chat', require('./game/survive/systems/Chat-Client.js'));
 if (!isServer) container.registerInstance('system/CalculateLighting', require('./game/survive/systems/CalculateLighting.js'));
 if (isServer) container.registerInstance('system/SpawnerCycle', require('./game/survive/systems/SpawnerCycle.js'));
+if (isServer) container.registerInstance('system/EnemyTargetting', require('./game/survive/systems/EnemyTargetting.js'));
 
 container.registerInstance('system/Effects', require('./game/survive/systems/Effects.js'));
 

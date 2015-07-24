@@ -77,6 +77,10 @@ function Pathfinder(physics, world, game) {
         }
     });
 
+    self.clearCache = function () {
+        cachedPaths = {};
+    };
+
     // options:
     //      start <required> : position to start path from
     //      end <required> : position to find path to
@@ -166,46 +170,37 @@ function Pathfinder(physics, world, game) {
                 // if this node is already on the closed list, or if we can't move there, then ignore it
                 if (!closed[neighbour.getHashCode()] && !collide)
                 {
-                    if (openHash[neighbour.getHashCode()])
-                    {
-                        // already on open list
-                        // TODO check if the G value to get there along this path is less
-                    }
-                    else
-                    {
-                        // not on open list
-                        var g = 0;
-                        pathWalker = currentData;
-                        while (pathWalker)
-                        {
-                            g += 10;
-                            pathWalker = pathWalker.parent;
-                        }
+                    var g = currentData.g + 10; // need to account for distance to neighbour here
+                    var neighbourInOpenSet = openHash[neighbour.getHashCode()];
+                    if (!neighbourInOpenSet || g < neighbourInOpenSet.g) {
                         var h = getDistanceHeuristic(neighbourPosition, end);
                         var f = g + h;
-                        var neighbourData = scratch.pathfindingData().set(f, g, h, neighbour, currentData);
 
-                        // binary search to find correct spot to insert to keep sorted by f-values
-                        bsCurrentIndex = 0;
-                        bsMinIndex = 0;
-                        bsMaxIndex = open.length - 1;
-                        while (bsMinIndex <= bsMaxIndex) {
-                            bsCurrentIndex = (bsMinIndex + bsMaxIndex) / 2 | 0;
-                            bsCurrentElement = open[bsCurrentIndex].f;
-                            if (bsCurrentElement > f) {
-                                bsMinIndex = bsCurrentIndex + 1;
-                            } else if (bsCurrentElement < f) {
-                                bsMaxIndex = bsCurrentIndex - 1;
-                            } else {
-                                // item matching f found, stop search
-                                break;
+                        if (neighbourInOpenSet) {
+                            neighbourInOpenSet.set(f, g, h, neighbour, currentData);
+                        } else {
+                            var neighbourData = scratch.pathfindingData().set(f, g, h, neighbour, currentData);
+
+                            // binary search to find correct spot to insert to keep sorted by f-values
+                            bsCurrentIndex = 0;
+                            bsMinIndex = 0;
+                            bsMaxIndex = open.length - 1;
+                            while (bsMinIndex <= bsMaxIndex) {
+                                bsCurrentIndex = (bsMinIndex + bsMaxIndex) / 2 | 0;
+                                bsCurrentElement = open[bsCurrentIndex].f;
+                                if (bsCurrentElement > f) {
+                                    bsMinIndex = bsCurrentIndex + 1;
+                                } else if (bsCurrentElement < f) {
+                                    bsMaxIndex = bsCurrentIndex - 1;
+                                } else {
+                                    // item matching f found, stop search
+                                    break;
+                                }
                             }
+                            open.splice(bsCurrentIndex, 0, neighbourData);
+
+                            openHash[neighbour.getHashCode()] = true;
                         }
-                        open.splice(bsCurrentIndex, 0, neighbourData);
-
-                        //open.push(neighbourData);
-
-                        openHash[neighbour.getHashCode()] = true;
                     }
                 }
             }

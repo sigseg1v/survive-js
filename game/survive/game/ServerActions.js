@@ -71,7 +71,7 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             var entIds = chunk.getEntityIds();
             for (i = 0, ilen = entIds.length; i < ilen; i++) {
                 ent = world.entityById([entIds[i]]);
-                if (ent && ent.components.movable.body) {
+                if (ent && ent.components.movable && ent.components.movable.body) {
                     candidates.push(ent.components.movable.body);
                 }
             }

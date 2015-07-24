@@ -15,6 +15,7 @@ function loadGame() {
     var physicsSync = container.resolve('system/PhysicsSync');
     var cheats = container.resolve('system/Cheats');
     var spawner = container.resolve('system/SpawnerCycle');
+    var enemyTargetting = container.resolve('system/EnemyTargetting');
     game.registerSystem(followPath);
     game.registerSystem(movement);
     game.registerSystem(playerSync);
@@ -23,6 +24,7 @@ function loadGame() {
     game.registerSystem(stateBroadcaster);
     game.registerSystem(cheats);
     game.registerSystem(spawner);
+    game.registerSystem(enemyTargetting);
 
     var levelData = loader.parse(loader.data);
     var floorTiles = levelData.floors.map(function (floor) {
