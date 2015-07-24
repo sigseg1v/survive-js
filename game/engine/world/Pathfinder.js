@@ -92,7 +92,7 @@ function Pathfinder(physics, world, game) {
         var scratch = physics.scratchpad();
         var start = options.start;
         var end = options.end;
-        var colliderTypes = options.colliderTypes || { "$in": ['wall', 'building'], "$nin": ['base'] };
+        var colliderTypes = options.colliderTypes || { "$in": ['wall', 'building'], "$nin": [] };
         var alwaysCollideWithBlockAt = options.alwaysCollideWithBlockAt ? scratch.block().set(options.alwaysCollideWithBlockAt.x, options.alwaysCollideWithBlockAt.y) : null;
         var storeToCache = options.cache;
         var useCache = !options.skipCache;
@@ -101,7 +101,7 @@ function Pathfinder(physics, world, game) {
         var startBlock = scratch.block().set(start.x, start.y);
         var endBlock = scratch.block().set(end.x, end.y);
         var startHeuristic = getDistanceHeuristic(start, end);
-        var startBlockData = scratch.pathfindingData().set(startHeuristic, 0, startHeuristic, startBlock, null);
+        var startBlockData = scratch.pathfindingData().set(startHeuristic, 0, startBlock, null);
         var pointBody = new physics.body('point');
 
         // dictionaries for open and closed sets so we can do fast contains check and fast data lookup
@@ -131,7 +131,7 @@ function Pathfinder(physics, world, game) {
                 var cachedPathCurrent;
                 for (var cachedPathIndex = 0, cachedPathLength = cachedBlockPath.length; cachedPathIndex < cachedPathLength; cachedPathIndex++) {
                     cachedPathCurrent = cachedBlockPath[cachedPathIndex];
-                    currentData = scratch.pathfindingData().set(0, 0, 0, scratch.block().set(cachedPathCurrent.x, cachedPathCurrent.y), currentData);
+                    currentData = scratch.pathfindingData().set(0, 0, scratch.block().set(cachedPathCurrent.x, cachedPathCurrent.y), currentData);
                     current = currentData.block;
                 }
             }
@@ -164,22 +164,23 @@ function Pathfinder(physics, world, game) {
             for (pos_i = 0, pos_len = neighbourPositions.length; pos_i < pos_len; pos_i++) {
                 var neighbour = scratch.block().set(neighbourPositions[pos_i][0], neighbourPositions[pos_i][1]);
                 var neighbourPosition = scratch.vector().set(neighbour.x, neighbour.y);
+                var neighbourDistance = neighbourPositions[pos_i][2];
                 pointBody.state.pos.clone(neighbourPosition);
                 var collide = collidesWith(pointBody, alwaysCollideWithBlockAt, colliderTypes);
 
                 // if this node is already on the closed list, or if we can't move there, then ignore it
                 if (!closed[neighbour.getHashCode()] && !collide)
                 {
-                    var g = currentData.g + 10; // need to account for distance to neighbour here
+                    var g = currentData.g + neighbourDistance;
                     var neighbourInOpenSet = openHash[neighbour.getHashCode()];
                     if (!neighbourInOpenSet || g < neighbourInOpenSet.g) {
                         var h = getDistanceHeuristic(neighbourPosition, end);
                         var f = g + h;
 
                         if (neighbourInOpenSet) {
-                            neighbourInOpenSet.set(f, g, h, neighbour, currentData);
+                            neighbourInOpenSet.set(f, g, neighbour, currentData);
                         } else {
-                            var neighbourData = scratch.pathfindingData().set(f, g, h, neighbour, currentData);
+                            var neighbourData = scratch.pathfindingData().set(f, g, neighbour, currentData);
 
                             // binary search to find correct spot to insert to keep sorted by f-values
                             bsCurrentIndex = 0;
@@ -252,13 +253,12 @@ function Pathfinder(physics, world, game) {
         return (n > 0) ? 1 : ((n < 0) ? -1 : n);
     }
 
-    function PathfindingData(f, g, h, block, parent) {
-        this.set(f, g, h, block, parent);
+    function PathfindingData(f, g, block, parent) {
+        this.set(f, g, block, parent);
     }
-    PathfindingData.prototype.set = function set(f, g, h, block, parent) {
+    PathfindingData.prototype.set = function set(f, g, block, parent) {
         this.f = f;
         this.g = g;
-        this.h = h;
         this.block = block;
         this.parent = parent || null;
         return this;

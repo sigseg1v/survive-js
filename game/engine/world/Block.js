@@ -6,15 +6,16 @@ function Block(x, y) {
     this.y = y || 0;
 }
 
+// x, y, dist * 10
 var neighbourDeltas = [
-    [-1, -1],
-    [-1,  0],
-    [-1,  1],
-    [ 0, -1],
-    [ 0,  1],
-    [ 1, -1],
-    [ 1,  0],
-    [ 1,  1]
+    [-1, -1, 14],
+    [-1,  0, 10],
+    [-1,  1, 14],
+    [ 0, -1, 10],
+    [ 0,  1, 10],
+    [ 1, -1, 14],
+    [ 1,  0, 10],
+    [ 1,  1, 14]
 ];
 
 Block.prototype.equals = function equals(other) {
@@ -50,7 +51,7 @@ Block.prototype.getNeighbourPositions = function getNeighbourPositions() {
     var i, len, out;
     out = [];
     for (i = 0, len = neighbourDeltas.length; i < len; i++) {
-        out.push([this.x + neighbourDeltas[i][0], this.y + neighbourDeltas[i][1]]);
+        out.push([this.x + neighbourDeltas[i][0], this.y + neighbourDeltas[i][1], neighbourDeltas[i][2]]);
     }
     return out;
 };
