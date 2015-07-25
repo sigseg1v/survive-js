@@ -10,6 +10,11 @@ function ClientMessageHandler(socket, effects, world, game) {
         socket.on('chat-message', handleChatMessage);
         socket.on('entity-damaged', handleEntityDamaged);
         socket.on('entity-attack', handleEntityAttack);
+        socket.on('path-update', function (path) {
+            path.forEach(function (node, i) {
+                setTimeout(effects.drawLocationDebugSprite.bind(null, node), i * 20);
+            });
+        });
     };
 
     function handleChatMessage(data) {

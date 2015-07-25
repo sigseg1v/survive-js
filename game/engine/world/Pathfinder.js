@@ -88,6 +88,7 @@ function Pathfinder(physics, world, game) {
     //      colliderTypes: filters which entities you can collide with based on physicsjs-style rules; does not work nicely with cache (yet)
     //      alwaysCollideWithBlockAt: given an {x, y} object, will always consider it as colliding. this is useful for determining if a new path _will_ block something after it is placed
     //      skipCache: will always find the absolute shortest path, at the cost of a longer running algorithm
+    //      maxIterations: stop searching and return no path after this many iterations
     self.findPath = function findPath(options) {
         var scratch = physics.scratchpad();
         var start = options.start;
@@ -96,6 +97,7 @@ function Pathfinder(physics, world, game) {
         var alwaysCollideWithBlockAt = options.alwaysCollideWithBlockAt ? scratch.block().set(options.alwaysCollideWithBlockAt.x, options.alwaysCollideWithBlockAt.y) : null;
         var storeToCache = options.cache;
         var useCache = !options.skipCache;
+        var maxIterations = options.maxIterations || -1;
 
         // using A* pathfinding algorithm
         var startBlock = scratch.block().set(start.x, start.y);
@@ -115,8 +117,12 @@ function Pathfinder(physics, world, game) {
         var currentData = null; // pathfinding data for current Block
         var pathWalker;
         var bsMinIndex, bsMaxIndex, bsCurrentIndex, bsCurrentElement;
+        var iterations = 0;
         while (open.length > 0)
         {
+            if (maxIterations !== -1 && iterations >= maxIterations) {
+                break;
+            }
             // open.sort(function (a, b) {
             //     return b.f - a.f;
             // });
@@ -160,53 +166,82 @@ function Pathfinder(physics, world, game) {
             // go through all neighbouring nodes
             var pos;
             var neighbourPositions = current.getNeighbourPositions();
-            var pos_i, pos_len;
-            for (pos_i = 0, pos_len = neighbourPositions.length; pos_i < pos_len; pos_i++) {
-                var neighbour = scratch.block().set(neighbourPositions[pos_i][0], neighbourPositions[pos_i][1]);
-                var neighbourPosition = scratch.vector().set(neighbour.x, neighbour.y);
-                var neighbourDistance = neighbourPositions[pos_i][2];
-                pointBody.state.pos.clone(neighbourPosition);
-                var collide = collidesWith(pointBody, alwaysCollideWithBlockAt, colliderTypes);
+            var diagonalNeighbourPositions = current.getDiagonalNeighbourPositions();
+            var collidedWithIndex;
+            var pos_i, pos_len, positionsArray;
+            positionsArray = neighbourPositions;
+            collidedWithIndex = [];
+            while (positionsArray !== null) {
+                pos_i = 0;
+                pos_len = positionsArray.length;
+                for (; pos_i < pos_len; pos_i++) {
+                    if (neighbourPositions[pos_i].skip === true) {
+                        continue;
+                    }
+                    var neighbour = scratch.block().set(neighbourPositions[pos_i][0], neighbourPositions[pos_i][1]);
+                    var neighbourPosition = scratch.vector().set(neighbour.x, neighbour.y);
+                    var neighbourDistance = neighbourPositions[pos_i][2];
+                    pointBody.state.pos.clone(neighbourPosition);
+                    var collide = collidesWith(pointBody, alwaysCollideWithBlockAt, colliderTypes);
+                    if (collide) {
+                        collidedWithIndex.push(pos_i);
+                    }
 
-                // if this node is already on the closed list, or if we can't move there, then ignore it
-                if (!closed[neighbour.getHashCode()] && !collide)
-                {
-                    var g = currentData.g + neighbourDistance;
-                    var neighbourInOpenSet = openHash[neighbour.getHashCode()];
-                    if (!neighbourInOpenSet || g < neighbourInOpenSet.g) {
-                        var h = getDistanceHeuristic(neighbourPosition, end);
-                        var f = g + h;
+                    // if this node is already on the closed list, or if we can't move there, then ignore it
+                    if (!closed[neighbour.getHashCode()] && !collide)
+                    {
+                        var g = currentData.g + neighbourDistance;
+                        var neighbourInOpenSet = openHash[neighbour.getHashCode()];
+                        if (!neighbourInOpenSet || g < neighbourInOpenSet.g) {
+                            var h = getDistanceHeuristic(neighbourPosition, end);
+                            var f = g + h;
 
-                        var neighbourData;
-                        if (neighbourInOpenSet) {
-                            neighbourInOpenSet.set(f, g, neighbour, currentData);
-                            neighbourData = neighbourInOpenSet;
-                            open.splice(open.indexOf(neighbourData), 0); // remove so we can add again in correct position
-                        } else {
-                            neighbourData = scratch.pathfindingData().set(f, g, neighbour, currentData);
-                            openHash[neighbour.getHashCode()] = true;
-                        }
-
-                        // binary search to find correct spot to insert to keep sorted by f-values
-                        bsCurrentIndex = 0;
-                        bsMinIndex = 0;
-                        bsMaxIndex = open.length - 1;
-                        while (bsMinIndex <= bsMaxIndex) {
-                            bsCurrentIndex = (bsMinIndex + bsMaxIndex) / 2 | 0;
-                            bsCurrentElement = open[bsCurrentIndex].f;
-                            if (bsCurrentElement > f) {
-                                bsMinIndex = bsCurrentIndex + 1;
-                            } else if (bsCurrentElement < f) {
-                                bsMaxIndex = bsCurrentIndex - 1;
+                            var neighbourData;
+                            if (neighbourInOpenSet) {
+                                neighbourInOpenSet.set(f, g, neighbour, currentData);
+                                neighbourData = neighbourInOpenSet;
+                                open.splice(open.indexOf(neighbourData), 0); // remove so we can add again in correct position
                             } else {
-                                // item matching f found, stop search
-                                break;
+                                neighbourData = scratch.pathfindingData().set(f, g, neighbour, currentData);
+                                openHash[neighbour.getHashCode()] = true;
                             }
+
+                            // binary search to find correct spot to insert to keep sorted by f-values
+                            bsCurrentIndex = 0;
+                            bsMinIndex = 0;
+                            bsMaxIndex = open.length - 1;
+                            while (bsMinIndex <= bsMaxIndex) {
+                                bsCurrentIndex = (bsMinIndex + bsMaxIndex) / 2 | 0;
+                                bsCurrentElement = open[bsCurrentIndex].f;
+                                if (bsCurrentElement > f) {
+                                    bsMinIndex = bsCurrentIndex + 1;
+                                } else if (bsCurrentElement < f) {
+                                    bsMaxIndex = bsCurrentIndex - 1;
+                                } else {
+                                    // item matching f found, stop search
+                                    break;
+                                }
+                            }
+                            open.splice(bsCurrentIndex, 0, neighbourData);
                         }
-                        open.splice(bsCurrentIndex, 0, neighbourData);
                     }
                 }
+                // go through diagonals second
+                if (positionsArray === neighbourPositions)
+                {
+                    positionsArray = diagonalNeighbourPositions;
+                    while (collidedWithIndex.length > 0) {
+                        // a collision with index i means that we can ignore diagonal i and i+1
+                        var collisionIndex = collidedWithIndex.pop();
+                        positionsArray[collisionIndex].skip = true;
+                        positionsArray[(collisionIndex + 1) % positionsArray.length].skip = true;
+                    }
+
+                } else {
+                    positionsArray = null;
+                }
             }
+            iterations++;
         }
 
         // no path found

@@ -96,7 +96,7 @@ if (!isServer) container.registerInstance('system/CalculateLighting', require('.
 if (isServer) container.registerInstance('system/SpawnerCycle', require('./game/survive/systems/SpawnerCycle.js'));
 if (isServer) container.registerInstance('system/EnemyTargetting', require('./game/survive/systems/EnemyTargetting.js'));
 
-container.registerInstance('system/Effects', require('./game/survive/systems/Effects.js'));
+if (!isServer) container.registerInstance('system/Effects', require('./game/survive/systems/Effects.js'));
 
 require('./game/survive/content/entityConfigurations.js').register(container);
 

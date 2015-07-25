@@ -2,7 +2,7 @@
 var isServer = typeof window === 'undefined';
 var limit = require('../../etc/ratelimiter.js');
 
-function EnemyTargetting(container, Movable, Placement, Path, world, physics, pathfinder) {
+function EnemyTargetting(container, socket, Movable, Placement, Path, world, physics, pathfinder) {
     var WP_TAG_RANGE = 1;
 
     var calculatePaths_limit = limit(2000, calculatePaths);
@@ -39,12 +39,14 @@ function EnemyTargetting(container, Movable, Placement, Path, world, physics, pa
                 enemy.components.path.path = pathfinder.findPath({
                     start: startPos,
                     end: endPos,
-                    cache: true
+                    cache: true,
+                    maxIterations: 10000
                 });
+                socket.emit('path-update', enemy.components.path.path);
             }
         }
     }
 }
 
 module.exports = EnemyTargetting;
-module.exports.$inject = ['$container', 'component/Movable', 'component/Placement', 'component/Path', 'World', 'lib/physicsjs', 'Pathfinder'];
+module.exports.$inject = ['$container', 'socket', 'component/Movable', 'component/Placement', 'component/Path', 'World', 'lib/physicsjs', 'Pathfinder'];

@@ -7,14 +7,17 @@ function Block(x, y) {
 }
 
 // x, y, dist * 10
+// the order of these arrays matters for collision detection optimizations -- if the order is disturbed, Pathfinder must be updated
 var neighbourDeltas = [
-    [-1, -1, 14],
     [-1,  0, 10],
-    [-1,  1, 14],
     [ 0, -1, 10],
-    [ 0,  1, 10],
-    [ 1, -1, 14],
     [ 1,  0, 10],
+    [ 0,  1, 10]
+];
+var neighbourDiagonalDeltas = [
+    [-1,  1, 14],
+    [-1, -1, 14],
+    [ 1, -1, 14],
     [ 1,  1, 14]
 ];
 
@@ -48,6 +51,14 @@ Block.prototype.contains = function contains(point) {
 };
 
 Block.prototype.getNeighbourPositions = function getNeighbourPositions() {
+    var i, len, out;
+    out = [];
+    for (i = 0, len = neighbourDeltas.length; i < len; i++) {
+        out.push([this.x + neighbourDeltas[i][0], this.y + neighbourDeltas[i][1], neighbourDeltas[i][2]]);
+    }
+    return out;
+};
+Block.prototype.getDiagonalNeighbourPositions = function getDiagonalNeighbourPositions() {
     var i, len, out;
     out = [];
     for (i = 0, len = neighbourDeltas.length; i < len; i++) {

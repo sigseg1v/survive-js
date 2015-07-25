@@ -90,7 +90,10 @@ function World(socket, game, renderer, container, physics, clientStateManager) {
     }
 }
 
-World.prototype.queryStaticItemsAtPoint = function queryStaticItemsAtPoint(x, y) {
+World.prototype.queryStaticItemsAtPoint = function queryStaticItemsAtPoint(point) {
+    return this.queryStaticItemsAt(point.x, point.y);
+};
+World.prototype.queryStaticItemsAt = function queryStaticItemsAt(x, y) {
     return this.staticItemStore.queryAt(Math.floor(x), Math.floor(y));
 };
 
