@@ -1,23 +1,8 @@
 var fs = require('fs');
 var Promise = require('bluebird');
 var promise_lstat = Promise.promisify(fs.lstat, fs);
+var promise_symlink = Promise.promisify(fs.symlink, fs);
 
-// create the symlinks here in a script because msysgit on windows doesn't currently support committing directory symlinks
-module.exports = function initSymlinks() {
-    return Promise.all([
-        createDirectoryLink('./node_modules/game', '../game'),
-        createDirectoryLink('./node_modules/assets', '../assets'),
-        createDirectoryLink('./node_modules/views', '../views'),
-        createFileLink('./node_modules/wires.js', '../wires.js')
-    ]);
-};
-
-function createDirectoryLink(linkFileLocation, relativeLinkToStore, type) {
-    return createLink(linkFileLocation, relativeLinkToStore, 'dir');
-}
-function createFileLink(linkFileLocation, relativeLinkToStore, type) {
-    return createLink(linkFileLocation, relativeLinkToStore, 'file');
-}
 function createLink(linkFileLocation, relativeLinkToStore, type) {
     return promise_lstat(linkFileLocation)
         .then(function (stat) {
@@ -29,14 +14,25 @@ function createLink(linkFileLocation, relativeLinkToStore, type) {
         })
         .caught(function (err) {
             if (err && err.code == 'ENOENT') {
-                // symlink syntax:
-                //      symlinkSync(srcPath, dstPath)
-                //          srcPath: path of file or dir relative to dstPath (not relative to cwd)
-                //          dstPath: location relative to cwd where the symlink file will be created
-                fs.symlinkSync(relativeLinkToStore, linkFileLocation, type);
-                console.log('created symlink at', linkFileLocation, 'to', relativeLinkToStore);
+                // symlink(srcPath, dstPath, type) syntax -- don't lie, you totally forgot the format of the arguments:
+                //      srcPath: path of file or dir relative to dstPath (not relative to cwd)
+                //      dstPath: location relative to cwd where the symlink file will be create
+                //      type: 'file', 'dir', or 'junction' on Windows, otherwise ignored
+                return promise_symlink(relativeLinkToStore, linkFileLocation, type).
+                    then(function () {
+                        console.log('created symlink at', linkFileLocation, 'to', relativeLinkToStore);
+                    });
             } else {
                 throw err;
             }
         });
 }
+
+module.exports = function initSymlinks() {
+    return Promise.all([
+        createLink('./node_modules/game', '../game', 'dir'),
+        createLink('./node_modules/assets', '../assets', 'dir'),
+        createLink('./node_modules/views', '../views', 'dir'),
+        createLink('./node_modules/wires.js', '../wires.js', 'file')
+    ]);
+};
