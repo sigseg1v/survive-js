@@ -64,8 +64,8 @@ function register(container) {
         sprite.anchor.y = 0.5;
         sprite.position.x = 0;
         sprite.position.y = 0;
-        sprite.scale.x = 1 / 2;
-        sprite.scale.y = 1 / 2;
+        sprite.scale.x = 0.54;
+        sprite.scale.y = 0.54;
         return sprite;
     }
 }
