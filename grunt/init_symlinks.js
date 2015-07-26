@@ -18,8 +18,8 @@ function createLink(linkFileLocation, relativeLinkToStore, type) {
                 //      srcPath: path of file or dir relative to dstPath (not relative to cwd)
                 //      dstPath: location relative to cwd where the symlink file will be create
                 //      type: 'file', 'dir', or 'junction' on Windows, otherwise ignored
-                return promise_symlink(relativeLinkToStore, linkFileLocation, type).
-                    then(function () {
+                return promise_symlink(relativeLinkToStore, linkFileLocation, type)
+                    .then(function () {
                         console.log('created symlink at', linkFileLocation, 'to', relativeLinkToStore);
                     });
             } else {
