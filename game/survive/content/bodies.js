@@ -7,6 +7,7 @@ module.exports = function loadBody(physics, name) {
         body = physics.body('convex-polygon', {
             x: 0,
             y: 0,
+            restitution: 0,
             vertices: [
                 { x:  -0.5, y: -0.5 },
                 { x:   0.5, y: -0.5 },
@@ -21,6 +22,8 @@ module.exports = function loadBody(physics, name) {
             x: 0,
             y: 0,
             radius: 0.3,
+            restitution: 0,
+            cof: 0,
             treatment: 'dynamic',
             options: {
                 integrationMode: 'future'
@@ -32,6 +35,8 @@ module.exports = function loadBody(physics, name) {
             x: 0,
             y: 0,
             radius: 0.3,
+            restitution: 0,
+            cof: 0.5,
             treatment: 'dynamic',
             options: {
                 integrationMode: isServer ? 'normal' : 'future' // server controls enemy physics, client loads
@@ -42,6 +47,7 @@ module.exports = function loadBody(physics, name) {
         body = physics.body('convex-polygon', {
             x: 0,
             y: 0,
+            offset: new physics.vector(0.8, 0),
             vertices: [
                 { x:  0.0, y:  0.0 },
                 { x:  1.0, y: -0.5 },
@@ -54,7 +60,6 @@ module.exports = function loadBody(physics, name) {
                 integrationMode: 'disabled'
             }
         });
-        body.offset.set(0.8, 0);
     }
     return body;
 };
