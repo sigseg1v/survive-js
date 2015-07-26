@@ -71,32 +71,52 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
         }
     }
 
-    var UP = { x: 0, y: 1 };
-    var DOWN = { x: 0, y: -1 };
-    var LEFT = { x: -1, y: 0 };
-    var RIGHT = { x: 1, y: 0 };
+    var UP = renderer.applyInverseCoordinateTransformUnscaled({ x: 1, y: 0 });
+    var DOWN = renderer.applyInverseCoordinateTransformUnscaled({ x: -1, y: 0 });
+    var LEFT = renderer.applyInverseCoordinateTransformUnscaled({ x: 0, y: -1 });
+    var RIGHT = renderer.applyInverseCoordinateTransformUnscaled({ x: 0, y: 1 });
+    // the diagonals are different than just adding two vectors together, because we are using a transformed screenspace
+    var UP_LEFT = { x: 0, y: 1 };
+    var DOWN_RIGHT = { x: 0, y: -1 };
+    var DOWN_LEFT = { x: -1, y: 0 };
+    var UP_RIGHT = { x: 1, y: 0 };
 
     self.step = function step() {
         var scratch = physics.scratchpad();
         var newTarget = scratch.vector().zero();
 
-        if (playerKeys[65]) {
+        if (playerKeys[87] && playerKeys[65] && !playerKeys[83] && !playerKeys[68]) {
+            // w + a
+            interruptAction();
+            newTarget.clone(UP_LEFT);
+        } else if (playerKeys[87] && playerKeys[68] && !playerKeys[65] && !playerKeys[83]) {
+            // w + d
+            interruptAction();
+            newTarget.clone(UP_RIGHT);
+        } else if (playerKeys[83] && playerKeys[68] && !playerKeys[87] &&!playerKeys[65]) {
+            // s + d
+            interruptAction();
+            newTarget.clone(DOWN_RIGHT);
+        } else if (playerKeys[83] && playerKeys[65] && !playerKeys[87] && !playerKeys[68]) {
+            // s + a
+            interruptAction();
+            newTarget.clone(DOWN_LEFT);
+        } else if (playerKeys[65]) {
             // a
             interruptAction();
-            newTarget.add(LEFT.x, LEFT.y);
+            newTarget.clone(LEFT);
         } else if (playerKeys[68]) {
             // d
             interruptAction();
-            newTarget.add(RIGHT.x, RIGHT.y);
-        }
-        if (playerKeys[87]) {
+            newTarget.clone(RIGHT);
+        } else if (playerKeys[87]) {
             // w
             interruptAction();
-            newTarget.add(UP.x, UP.y);
+            newTarget.clone(UP);
         } else if (playerKeys[83]) {
             // s
             interruptAction();
-            newTarget.add(DOWN.x, DOWN.y);
+            newTarget.clone(DOWN);
         }
 
         if (releasedKeys[78]) {
