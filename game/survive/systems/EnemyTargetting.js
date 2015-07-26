@@ -42,7 +42,7 @@ function EnemyTargetting(container, socket, Movable, Placement, Path, world, phy
                     cache: true,
                     maxIterations: 10000
                 });
-                socket.emit('path-update', enemy.components.path.path);
+                // socket.emit('path-update', enemy.components.path.path);
             }
         }
     }
