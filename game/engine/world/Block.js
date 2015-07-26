@@ -68,7 +68,7 @@ Block.prototype.getDiagonalNeighbourPositions = function getDiagonalNeighbourPos
 };
 
 Block.prototype.getCenter = function getCenter() {
-    return new physics.vector(this.x, this.y);
+    return new physics.vector(this.x + 0.5, this.y + 0.5);
 };
 
 Block.prototype.setCenter = Block.prototype.set;

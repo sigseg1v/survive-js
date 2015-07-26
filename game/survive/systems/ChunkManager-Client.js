@@ -37,10 +37,8 @@ function ChunkManagerClient(socket, world, game, Model) {
         floorTiles = data.map(function (item) {
             var block = new Block(item.x, item.y);
             var sprite = Model.createSprites('floor')[0];
-            sprite.staticPosition = {
-                x: block.x,
-                y: block.y
-            };
+            var pos = block.getCenter();
+            sprite.staticPosition = pos;
             return {
                 block: block,
                 sprite: sprite

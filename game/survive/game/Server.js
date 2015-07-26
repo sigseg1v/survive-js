@@ -28,8 +28,7 @@ function loadGame() {
 
     var levelData = loader.parse(loader.data);
     var floorTiles = levelData.floors.map(function (floor) {
-        var position = floor.getCenter();
-        return Block.fromPoint(position.x, position.y);
+        return Block.fromPoint(floor.x, floor.y);
     });
     var wallEntities = levelData.walls.map(function (wall) {
         var entity = container.resolve('entity/WallEntity/wall');
