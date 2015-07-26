@@ -151,11 +151,16 @@ module.exports = function (grunt) {
     });
 
     // Register Tasks
-    // Workon
     grunt.registerTask('install', [
         'npm-install',
-        'bowerInstall:dev'
+        'bowerInstall:dev',
+        'init-symlinks'
     ]);
+    grunt.registerTask('init-symlinks', function () {
+        var initSymlinks = require('./grunt/init_symlinks.js');
+        var done = this.async();
+        initSymlinks().then(done);
+    });
     grunt.registerTask('dev', 'Start working on this project.', [
         'jshint:dev',
         'browserify',
