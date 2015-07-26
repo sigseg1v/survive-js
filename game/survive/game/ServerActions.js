@@ -1,7 +1,7 @@
 "use strict";
 var weakmap = require('weakmap');
-var bodies = require('../content/bodies.js');
-var limit = require('../../etc/ratelimiter.js');
+var bodies = require('game/survive/content/bodies');
+var limit = require('game/etc/ratelimiter');
 
 var playerEntityList = new weakmap();
 function trackEntityUnderPlayer(player, entity) {

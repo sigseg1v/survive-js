@@ -1,5 +1,5 @@
 "use strict";
-var limit = require('../../etc/ratelimiter.js');
+var limit = require('game/etc/ratelimiter');
 
 function DynamicPhysicsSyncServer(container, socket, world, game) {
     var PHYSICS_SYNC_POSITION_ERROR = 100;

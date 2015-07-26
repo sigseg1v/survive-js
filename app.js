@@ -1,6 +1,6 @@
 'use strict';
 
-var container = require('./game/inversion/container.js');
+var container = require('game/inversion/container');
 var express = require('express');
 var app = express();
 var port = 3000;
@@ -15,7 +15,7 @@ container.registerAlias('socket', io);
 var rpc = require('socket.io-rpc')(io, app);
 container.registerAlias('serverRpc', rpc);
 
-var gameServer = require('./game/survive/game/Server.js');
+var gameServer = require('game/survive/game/Server');
 
 process.on('uncaughtException', function (exception) {
     if (exception && exception.stack) {

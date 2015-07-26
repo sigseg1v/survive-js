@@ -1,6 +1,6 @@
 "use strict";
-var Component = require('../../engine/Component.js');
-var bodies = require('../content/bodies.js');
+var Component = require('game/engine/Component');
+var bodies = require('game/survive/content/bodies');
 
 function MovableComponent(physics) {
     Component.call(this);

@@ -1,6 +1,6 @@
 "use strict";
 var isServer = typeof window === 'undefined';
-var Component = require('../../engine/Component.js');
+var Component = require('game/engine/Component');
 
 var sprites = {};
 

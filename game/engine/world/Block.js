@@ -1,5 +1,5 @@
 "use strict";
-var physics = require('../../../assets/bower_components/physicsjs/dist/physicsjs-full.js');
+var physics = require('assets/bower_components/physicsjs/dist/physicsjs-full');
 
 function Block(x, y) {
     this.x = x || 0;

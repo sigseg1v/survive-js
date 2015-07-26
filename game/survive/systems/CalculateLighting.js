@@ -1,5 +1,5 @@
 "use strict";
-var limit = require('../../etc/ratelimiter.js');
+var limit = require('game/etc/ratelimiter');
 
 function CalculateLighting(game, Lightsource, pixi) {
     var self = this;

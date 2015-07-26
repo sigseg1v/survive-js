@@ -1,7 +1,7 @@
 "use strict";
 var isServer = typeof window === 'undefined';
-var Entity = require('../Entity.js');
-var Chunk = require('./Chunk.js');
+var Entity = require('game/engine/Entity');
+var Chunk = require('game/engine/world/Chunk');
 var CHUNK_WIDTH = 20;
 var CHUNK_HEIGHT = 12;
 

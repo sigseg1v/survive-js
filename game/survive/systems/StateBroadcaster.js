@@ -1,5 +1,5 @@
 "use strict";
-var limit = require('../../etc/ratelimiter.js');
+var limit = require('game/etc/ratelimiter');
 
 function StateBroadcaster(socket, clientStateManager, Movable, Placement, Name, Health, world) {
     var self = this;

@@ -1,6 +1,6 @@
 "use strict";
 var isServer = typeof window === 'undefined';
-var limit = require('../../etc/ratelimiter.js');
+var limit = require('game/etc/ratelimiter');
 
 function EnemyTargetting(container, socket, Movable, Placement, Path, world, physics, pathfinder) {
     var WP_TAG_RANGE = 1;

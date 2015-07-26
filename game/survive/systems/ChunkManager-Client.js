@@ -1,6 +1,6 @@
 "use strict";
 
-var Block = require('../../engine/world/Block.js');
+var Block = require('game/engine/world/Block');
 
 function ChunkManagerClient(socket, world, game, Model) {
     var self = this;

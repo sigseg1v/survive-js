@@ -1,5 +1,5 @@
 "use strict";
-var limit = require('../../etc/ratelimiter.js');
+var limit = require('game/etc/ratelimiter');
 
 function Input(container, physics, ClientActions, path, pixi, world, game, renderer, Effects) {
     var self = this;

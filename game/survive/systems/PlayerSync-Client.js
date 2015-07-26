@@ -1,5 +1,5 @@
 "use strict";
-var limit = require('../../etc/ratelimiter.js');
+var limit = require('game/etc/ratelimiter');
 
 function PlayerSyncClient(container, socket, game) {
     var player = null;

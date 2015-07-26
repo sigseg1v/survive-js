@@ -1,5 +1,5 @@
 "use strict";
-var Entity = require('../../engine/Entity.js');
+var Entity = require('game/engine/Entity');
 
 function DisplayEntity(Placement, Model, options) {
     Entity.call(this);

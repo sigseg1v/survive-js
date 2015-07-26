@@ -1,5 +1,5 @@
 "use strict";
-var limit = require('../../etc/ratelimiter.js');
+var limit = require('game/etc/ratelimiter');
 
 function UpdateNameplates(Placement, Name) {
     this.step = function step(time) {

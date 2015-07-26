@@ -1,6 +1,6 @@
 (function(exports) {
     "use strict";
-    var container = require('../../../wires.js');
+    var container = require('wires');
 
     function init() {
         loadAssets();
@@ -77,7 +77,7 @@
     }
 
     function loadAssets() {
-        require('../content/sprites.js').register(container);
+        require('game/survive/content/sprites').register(container);
     }
 
     function configureRenderer() {

@@ -1,8 +1,8 @@
 "use strict";
-var replayIntegrator = require('./replay-integrator.js');
-var broadphaseQuadtree = require('./broadphase-quadtree.js');
-var Hex = require('./Hex.js');
-var Block = require('./Block.js');
+var replayIntegrator = require('game/engine/world/replay-integrator');
+var broadphaseQuadtree = require('game/engine/world/broadphase-quadtree');
+var Hex = require('game/engine/world/Hex');
+var Block = require('game/engine/world/Block');
 
 function extend(physics) {
 

@@ -7,11 +7,18 @@ module.exports = function initSymlinks() {
     return Promise.all([
         createDirectoryLink('./node_modules/game', '../game'),
         createDirectoryLink('./node_modules/assets', '../assets'),
-        createDirectoryLink('./node_modules/views', '../views')
+        createDirectoryLink('./node_modules/views', '../views'),
+        createFileLink('./node_modules/wires.js', '../wires.js')
     ]);
 };
 
-function createDirectoryLink(linkFileLocation, relativeLinkToStore) {
+function createDirectoryLink(linkFileLocation, relativeLinkToStore, type) {
+    return createLink(linkFileLocation, relativeLinkToStore, 'dir');
+}
+function createFileLink(linkFileLocation, relativeLinkToStore, type) {
+    return createLink(linkFileLocation, relativeLinkToStore, 'file');
+}
+function createLink(linkFileLocation, relativeLinkToStore, type) {
     return promise_lstat(linkFileLocation)
         .then(function (stat) {
             if (stat.isSymbolicLink()) {
@@ -26,7 +33,7 @@ function createDirectoryLink(linkFileLocation, relativeLinkToStore) {
                 //      symlinkSync(srcPath, dstPath)
                 //          srcPath: path of file or dir relative to dstPath (not relative to cwd)
                 //          dstPath: location relative to cwd where the symlink file will be created
-                fs.symlinkSync(relativeLinkToStore, linkFileLocation, 'dir');
+                fs.symlinkSync(relativeLinkToStore, linkFileLocation, type);
                 console.log('created symlink at', linkFileLocation, 'to', relativeLinkToStore);
             } else {
                 throw err;

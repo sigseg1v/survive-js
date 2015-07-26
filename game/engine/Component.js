@@ -1,5 +1,5 @@
 "use strict";
-var Entity = require('./Entity.js');
+var Entity = require('game/engine/Entity');
 
 function Component() {
     this.name = null;

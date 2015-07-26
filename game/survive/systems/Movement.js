@@ -1,6 +1,6 @@
 "use strict";
 var isServer = typeof window === 'undefined';
-var limit = require('../../etc/ratelimiter.js');
+var limit = require('game/etc/ratelimiter');
 var movingAverage = require('moving-average');
 
 function Movement(container, Block, Entity, Movable, Placement, Follow, world, physics) {

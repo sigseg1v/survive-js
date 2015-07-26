@@ -1,5 +1,5 @@
 "use strict";
-var container = require('../../wires.js');
+var container = require('wires');
 var Block = container.resolve('Block');
 
 var glyphs = {

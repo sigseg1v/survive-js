@@ -1,4 +1,4 @@
-var container = require('../inversion/container.js');
+var container = require('game/inversion/container');
 
 function ClientStateManager() {
     var self = this;

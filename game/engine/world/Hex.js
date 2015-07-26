@@ -1,5 +1,5 @@
 "use strict";
-var physics = require('../../../assets/bower_components/physicsjs/dist/physicsjs-full.js');
+var physics = require('assets/bower_components/physicsjs/dist/physicsjs-full');
 
 function Hex(q, r, scale) {
     this.q = q || 0;

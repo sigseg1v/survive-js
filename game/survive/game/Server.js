@@ -1,9 +1,9 @@
 "use strict";
 
 function loadGame() {
-    var container = require('../../../wires.js');
-    var loader = require('../../../assets/scripts/testWorld.js');
-    var Block = require('../../engine/world/Block.js');
+    var container = require('wires');
+    var loader = require('assets/scripts/testWorld');
+    var Block = require('game/engine/world/Block');
     var game = container.resolve('Game');
     var world = container.resolve('World');
     game.mode = game.runModes.automaticAsync;
@@ -47,7 +47,7 @@ function loadGame() {
 }
 
 function initWebsockets() {
-    var container = require('../../../wires.js');
+    var container = require('wires');
     var ServerActions = container.resolve('ServerActions');
     var io = container.resolve('socket');
     var serverRpc = container.resolve('serverRpc');
@@ -72,7 +72,7 @@ function handleSocketConnected(socket) {
 }
 
 function handlePlayerConfigData(socket, playerData) {
-    var container = require('../../../wires.js');
+    var container = require('wires');
     var world = container.resolve('World');
     var csm = container.resolve('ClientStateManager');
     var game = container.resolve('Game');
@@ -110,7 +110,7 @@ function handlePlayerConfigData(socket, playerData) {
 }
 
 function handleSocketDisconnected(socket) {
-    var container = require('../../../wires.js');
+    var container = require('wires');
     var ServerActions = container.resolve('ServerActions');
     console.log('socket disconnected');
     var csm = container.resolve('ClientStateManager');
@@ -138,7 +138,7 @@ function startServer() {
 }
 
 function getPlayerBySocketId(id) {
-    var container = require('../../../wires.js');
+    var container = require('wires');
     var csm = container.resolve('ClientStateManager');
     var state = csm.idStateMap[id];
     return state ? state.player : null;

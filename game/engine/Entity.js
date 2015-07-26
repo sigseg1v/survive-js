@@ -1,5 +1,5 @@
 "use strict";
-var container = require('../inversion/container.js');
+var container = require('game/inversion/container');
 
 function Entity() {
     this.id = Entity.prototype.idPrefix === '' ?

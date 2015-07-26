@@ -1,6 +1,6 @@
 "use strict";
 
-var container = require('./game/inversion/container.js');
+var container = require('game/inversion/container');
 var Promise = require('bluebird');
 var isServer = typeof window === 'undefined';
 
@@ -30,10 +30,10 @@ if (!isServer) {
     container.registerAlias('documentReady', documentReady.promise);
 }
 
-container.registerAlias('Hex', require('./game/engine/world/Hex.js'));
-container.registerAlias('Block', require('./game/engine/world/Block.js'));
-container.registerType('Graphics', require('./game/engine/presentation/Graphics.js'));
-container.registerInstance('Pathfinder', require('./game/engine/world/Pathfinder.js'));
+container.registerAlias('Hex', require('game/engine/world/Hex'));
+container.registerAlias('Block', require('game/engine/world/Block'));
+container.registerType('Graphics', require('game/engine/presentation/Graphics'));
+container.registerInstance('Pathfinder', require('game/engine/world/Pathfinder'));
 
 if (!isServer) {
     var pixiLib = require('pixi.js');
@@ -42,64 +42,64 @@ if (!isServer) {
     container.registerAlias('lib/pixi.js', pixiLib);
 }
 
-var physjs_patch = require('./assets/bower_components/physicsjs/dist/physicsjs-full.js');
-var physicsExtensions = require('./game/engine/world/physics-extensions.js');
+var physjs_patch = require('assets/bower_components/physicsjs/dist/physicsjs-full');
+var physicsExtensions = require('game/engine/world/physics-extensions');
 physicsExtensions.extend(physjs_patch);
 container.registerAlias('lib/physicsjs', physjs_patch);
-if (isServer) container.registerAlias('Server', require('./game/survive/game/Server.js'));
-if (!isServer) container.registerAlias('Client', require('./game/survive/game/Client.js'));
-if (!isServer) container.registerInstance('ClientMessageHandler', require('./game/survive/game/ClientMessageHandler.js'));
-container.registerInstance('Tuning', require('./game/survive/game/GameTuning.js'));
-container.registerInstance('Constants', require('./game/survive/game/SharedConstants.js'));
+if (isServer) container.registerAlias('Server', require('game/survive/game/Server'));
+if (!isServer) container.registerAlias('Client', require('game/survive/game/Client'));
+if (!isServer) container.registerInstance('ClientMessageHandler', require('game/survive/game/ClientMessageHandler'));
+container.registerInstance('Tuning', require('game/survive/game/GameTuning'));
+container.registerInstance('Constants', require('game/survive/game/SharedConstants'));
 
-container.registerAlias('Entity', require('./game/engine/Entity.js'));
-container.registerAlias('Component', require('./game/engine/Component.js'));
-container.registerType('entity/DisplayEntity', require('./game/survive/entities/DisplayEntity.js'));
-container.registerType('entity/WallEntity', require('./game/survive/entities/WallEntity.js'));
-container.registerType('entity/EnemyEntity', require('./game/survive/entities/EnemyEntity.js'));
-container.registerType('entity/SpawnerEntity', require('./game/survive/entities/SpawnerEntity.js'));
+container.registerAlias('Entity', require('game/engine/Entity'));
+container.registerAlias('Component', require('game/engine/Component'));
+container.registerType('entity/DisplayEntity', require('game/survive/entities/DisplayEntity'));
+container.registerType('entity/WallEntity', require('game/survive/entities/WallEntity'));
+container.registerType('entity/EnemyEntity', require('game/survive/entities/EnemyEntity'));
+container.registerType('entity/SpawnerEntity', require('game/survive/entities/SpawnerEntity'));
 
-container.registerInstance('Game', require('./game/engine/Game.js'));
-container.registerInstance('World', require('./game/engine/world/World.js'));
-if (isServer) container.registerInstance('ClientStateManager', require('./game/engine/ClientStateManager.js'));
-if (isServer) container.registerInstance('ServerActions', require('./game/survive/game/ServerActions.js'));
-if (!isServer) container.registerInstance('ClientActions', require('./game/survive/game/ClientActions.js'));
-container.registerInstance('component/Placement', require('./game/survive/components/Placement.js'));
-container.registerInstance('component/Model', require('./game/survive/components/Model.js'));
-container.registerInstance('component/Movable', require('./game/survive/components/Movable.js'));
-container.registerInstance('component/Follow', require('./game/survive/components/Follow.js'));
-container.registerInstance('component/Lightsource', require('./game/survive/components/Lightsource.js'));
-container.registerInstance('component/Path', require('./game/survive/components/Path.js'));
-container.registerInstance('component/Name', require('./game/survive/components/Name.js'));
-container.registerInstance('component/Use', require('./game/survive/components/Use.js'));
-container.registerInstance('component/Health', require('./game/survive/components/Health.js'));
-container.registerInstance('component/Melee', require('./game/survive/components/Melee.js'));
-container.registerInstance('component/RangedAttack', require('./game/survive/components/RangedAttack.js'));
-container.registerInstance('component/Spawner', require('./game/survive/components/Spawner.js'));
+container.registerInstance('Game', require('game/engine/Game'));
+container.registerInstance('World', require('game/engine/world/World'));
+if (isServer) container.registerInstance('ClientStateManager', require('game/engine/ClientStateManager'));
+if (isServer) container.registerInstance('ServerActions', require('game/survive/game/ServerActions'));
+if (!isServer) container.registerInstance('ClientActions', require('game/survive/game/ClientActions'));
+container.registerInstance('component/Placement', require('game/survive/components/Placement'));
+container.registerInstance('component/Model', require('game/survive/components/Model'));
+container.registerInstance('component/Movable', require('game/survive/components/Movable'));
+container.registerInstance('component/Follow', require('game/survive/components/Follow'));
+container.registerInstance('component/Lightsource', require('game/survive/components/Lightsource'));
+container.registerInstance('component/Path', require('game/survive/components/Path'));
+container.registerInstance('component/Name', require('game/survive/components/Name'));
+container.registerInstance('component/Use', require('game/survive/components/Use'));
+container.registerInstance('component/Health', require('game/survive/components/Health'));
+container.registerInstance('component/Melee', require('game/survive/components/Melee'));
+container.registerInstance('component/RangedAttack', require('game/survive/components/RangedAttack'));
+container.registerInstance('component/Spawner', require('game/survive/components/Spawner'));
 
-container.registerType('entity/PlayerEntity', require('./game/survive/entities/PlayerEntity.js'));
+container.registerType('entity/PlayerEntity', require('game/survive/entities/PlayerEntity'));
 
-if (!isServer) container.registerInstance('system/Renderer', require('./game/survive/systems/Renderer.js'));
-container.registerInstance('system/Movement', require('./game/survive/systems/Movement.js'));
-if (!isServer) container.registerInstance('system/Input', require('./game/survive/systems/Input.js'));
-if (isServer) container.registerInstance('system/StateBroadcaster', require('./game/survive/systems/StateBroadcaster.js'));
-if (!isServer) container.registerInstance('system/StateSyncer', require('./game/survive/systems/StateSyncer.js'));
-if (isServer) container.registerInstance('system/PlayerSync', require('./game/survive/systems/PlayerSync-Server.js'));
-if (!isServer) container.registerInstance('system/PlayerSync', require('./game/survive/systems/PlayerSync-Client.js'));
-if (isServer) container.registerInstance('system/PhysicsSync', require('./game/survive/systems/DynamicPhysicsSync-Server.js'));
-if (!isServer) container.registerInstance('system/PhysicsSync', require('./game/survive/systems/DynamicPhysicsSync-Client.js'));
-if (isServer) container.registerInstance('system/ChunkManager', require('./game/survive/systems/ChunkManager-Server.js'));
-if (!isServer) container.registerInstance('system/ChunkManager', require('./game/survive/systems/ChunkManager-Client.js'));
-container.registerInstance('system/FollowPath', require('./game/survive/systems/FollowPath.js'));
-container.registerInstance('system/Cheats', require('./game/survive/systems/Cheats.js'));
-if (!isServer) container.registerInstance('system/UpdateNameplates', require('./game/survive/systems/UpdateNameplates.js'));
-if (!isServer) container.registerInstance('system/Chat', require('./game/survive/systems/Chat-Client.js'));
-if (!isServer) container.registerInstance('system/CalculateLighting', require('./game/survive/systems/CalculateLighting.js'));
-if (isServer) container.registerInstance('system/SpawnerCycle', require('./game/survive/systems/SpawnerCycle.js'));
-if (isServer) container.registerInstance('system/EnemyTargetting', require('./game/survive/systems/EnemyTargetting.js'));
+if (!isServer) container.registerInstance('system/Renderer', require('game/survive/systems/Renderer'));
+container.registerInstance('system/Movement', require('game/survive/systems/Movement'));
+if (!isServer) container.registerInstance('system/Input', require('game/survive/systems/Input'));
+if (isServer) container.registerInstance('system/StateBroadcaster', require('game/survive/systems/StateBroadcaster'));
+if (!isServer) container.registerInstance('system/StateSyncer', require('game/survive/systems/StateSyncer'));
+if (isServer) container.registerInstance('system/PlayerSync', require('game/survive/systems/PlayerSync-Server'));
+if (!isServer) container.registerInstance('system/PlayerSync', require('game/survive/systems/PlayerSync-Client'));
+if (isServer) container.registerInstance('system/PhysicsSync', require('game/survive/systems/DynamicPhysicsSync-Server'));
+if (!isServer) container.registerInstance('system/PhysicsSync', require('game/survive/systems/DynamicPhysicsSync-Client'));
+if (isServer) container.registerInstance('system/ChunkManager', require('game/survive/systems/ChunkManager-Server'));
+if (!isServer) container.registerInstance('system/ChunkManager', require('game/survive/systems/ChunkManager-Client'));
+container.registerInstance('system/FollowPath', require('game/survive/systems/FollowPath'));
+container.registerInstance('system/Cheats', require('game/survive/systems/Cheats'));
+if (!isServer) container.registerInstance('system/UpdateNameplates', require('game/survive/systems/UpdateNameplates'));
+if (!isServer) container.registerInstance('system/Chat', require('game/survive/systems/Chat-Client'));
+if (!isServer) container.registerInstance('system/CalculateLighting', require('game/survive/systems/CalculateLighting'));
+if (isServer) container.registerInstance('system/SpawnerCycle', require('game/survive/systems/SpawnerCycle'));
+if (isServer) container.registerInstance('system/EnemyTargetting', require('game/survive/systems/EnemyTargetting'));
 
-if (!isServer) container.registerInstance('system/Effects', require('./game/survive/systems/Effects.js'));
+if (!isServer) container.registerInstance('system/Effects', require('game/survive/systems/Effects'));
 
-require('./game/survive/content/entityConfigurations.js').register(container);
+require('game/survive/content/entityConfigurations').register(container);
 
 module.exports = resolver;

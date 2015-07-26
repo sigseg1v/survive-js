@@ -1,5 +1,5 @@
 "use strict";
-var limit = require('../../etc/ratelimiter.js');
+var limit = require('game/etc/ratelimiter');
 
 function DynamicPhysicsSyncClient(container, socket, world, game, physics) {
     var MAX_REPLAY_STATE_QUEUE_LEN = 5;

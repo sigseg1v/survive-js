@@ -1,5 +1,5 @@
 "use strict";
-var Component = require('../../engine/Component.js');
+var Component = require('game/engine/Component');
 
 function PlacementComponent(game, physics) {
     Component.call(this);

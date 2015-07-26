@@ -1,5 +1,5 @@
 "use strict";
-var Entity = require('../../engine/Entity.js');
+var Entity = require('game/engine/Entity');
 
 function PlayerEntity(container, Placement, Model, Movable, Lightsource, Name, Use, Melee, RangedAttack, options) {
     Entity.call(this);
