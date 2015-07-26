@@ -50,6 +50,7 @@ if (isServer) container.registerAlias('Server', require('./game/survive/game/Ser
 if (!isServer) container.registerAlias('Client', require('./game/survive/game/Client.js'));
 if (!isServer) container.registerInstance('ClientMessageHandler', require('./game/survive/game/ClientMessageHandler.js'));
 container.registerInstance('Tuning', require('./game/survive/game/GameTuning.js'));
+container.registerInstance('Constants', require('./game/survive/game/SharedConstants.js'));
 
 container.registerAlias('Entity', require('./game/engine/Entity.js'));
 container.registerAlias('Component', require('./game/engine/Component.js'));
@@ -73,6 +74,7 @@ container.registerInstance('component/Name', require('./game/survive/components/
 container.registerInstance('component/Use', require('./game/survive/components/Use.js'));
 container.registerInstance('component/Health', require('./game/survive/components/Health.js'));
 container.registerInstance('component/Melee', require('./game/survive/components/Melee.js'));
+container.registerInstance('component/RangedAttack', require('./game/survive/components/RangedAttack.js'));
 container.registerInstance('component/Spawner', require('./game/survive/components/Spawner.js'));
 
 container.registerType('entity/PlayerEntity', require('./game/survive/entities/PlayerEntity.js'));

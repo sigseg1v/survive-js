@@ -3,7 +3,7 @@ var limit = require('../../etc/ratelimiter.js');
 
 function DynamicPhysicsSyncClient(container, socket, world, game, physics) {
     var MAX_REPLAY_STATE_QUEUE_LEN = 5;
-    var MAX_POSITION_ERROR = 3;
+    var MAX_POSITION_ERROR = 1;
 
     var physicsDataQueue = [];
 
