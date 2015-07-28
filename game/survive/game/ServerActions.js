@@ -32,7 +32,7 @@ function dataFor(player) {
     return playerDataMap.get(player);
 }
 
-function ServerActions(container, game, world, Server, socket, physics, pathfinder, tuning, clientStateManager) {
+function ServerActions(container, game, world, Server, socket, physics, pathfinder, tuning, clientStateManager, constants) {
     var self = this;
 
     var collisionDetector = physics.behavior('body-collision-detection');
@@ -46,14 +46,15 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
         world.addEntity(enemy);
     }
 
+    self.getPlayerChildEntities = function getPlayerChildEntities(player) {
+        return playerEntityList.has(player) ? playerEntityList.get(player) : [];
+    };
+
+/// @section: melee attack
     var attackHandler = limit.responsive()
         .on('ready', onAttackReady)
         .on('gcd', onAttackGcd)
         .on('cooldown', onAttackCooldown);
-
-    self.getPlayerChildEntities = function getPlayerChildEntities(player) {
-        return playerEntityList.has(player) ? playerEntityList.get(player) : [];
-    };
 
     function onAttackReady(limiter, state, player, client, targetPoint, weapon) {
         var scratch = physics.scratchpad();
@@ -88,10 +89,11 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             return ent && ent.components.health;
         });
 
-        var damage = player.components.melee.damage;
+        var damage = player.components.melee.damage * weapon.damageMultiplier;
         socket.emit('entity-attack', {
             entityId: player.id,
-            targetPoint: targetPoint
+            targetPoint: targetPoint,
+            weapon: weapon.id
         });
 
         if (hit.length === 0) {
@@ -118,6 +120,80 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
     function onAttackGcd(limiter, state, player, client, targetPoint, weapon) { }
 
     function onAttackCooldown(limiter, state, player, client, targetPoint, weapon) { }
+/// @end: melee attack
+
+/// @section: ranged attack
+    var rangedAttackHandler = limit.responsive()
+        .on('ready', onRangedAttackReady)
+        .on('cooldown', onRangedAttackCooldown);
+
+    function rangedAttackCollide(lineStart, lineVector, circle) {
+        var scratch = physics.scratchpad();
+        var startToCircleCenter = scratch.vector().clone(circle.state.pos).vsub(lineStart);
+        var projOntoLine = scratch.vector().clone(startToCircleCenter).vproj(lineVector);
+        var dist = projOntoLine.dist(startToCircleCenter);
+        return scratch.done( dist <= circle.radius && ((projOntoLine.angle() > 0) === (lineVector.angle() > 0)) );
+    }
+
+    function onRangedAttackReady(limiter, state, player, client, targetPoint, weapon) {
+        var scratch = physics.scratchpad();
+
+        var attackStartPos = player.components.movable.body.state.pos;
+        var attackDirection = scratch.vector().clone(targetPoint).vsub(attackStartPos).normalize();
+        var attackRange = weapon.range;
+        var attackLineVector = scratch.vector().clone(attackDirection).mult(attackRange);
+
+        var candidates = [];
+        var loadedChunks = client.getLoadedChunks();
+        loadedChunks.forEach(function (chunk) {
+            var i, ilen, ent;
+            var entIds = chunk.getEntityIds();
+            for (i = 0, ilen = entIds.length; i < ilen; i++) {
+                ent = world.entityById([entIds[i]]);
+                if (ent && ent.components.movable && ent.components.movable.body) {
+                    candidates.push(ent.components.movable.body);
+                }
+            }
+        });
+
+        var hit = world.physics.find({
+            labels: { $in: ['enemy'] },
+            $in: candidates
+        }).filter(function (body) {
+            // only supports circles for now
+            return ('radius' in body) && rangedAttackCollide(attackStartPos, attackLineVector, body);
+        }).map(function (body) {
+            return body.entity();
+        }).filter(function (ent) {
+            return ent && ent.components.health;
+        });
+
+        var damage = player.components.rangedAttack.damage * weapon.damageMultiplier;
+        socket.emit('entity-attack', {
+            entityId: player.id,
+            targetPoint: attackLineVector,
+            weapon: weapon.id
+        });
+
+        hit.forEach(function (ent) {
+            var amount = Math.min(ent.components.health.currentHealth, damage);
+            if (amount < 0) {
+                return;
+            }
+            socket.emit('entity-damaged', {
+                entityId: ent.id,
+                amount: amount
+            });
+            ent.components.health.currentHealth -= amount;
+            if (ent.components.health.currentHealth <= 0) {
+                world.removeEntity(ent);
+            }
+        });
+        scratch.done();
+    }
+
+    function onRangedAttackCooldown(limiter, state, player, client, targetPoint, weapon) { }
+/// @end: ranged attack
 
     self.exposedActions = {
         notifyIdentifier: function notifyIdentifier(identifier) {
@@ -130,11 +206,16 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             spawnEnemyAtLocation(player.components.placement.position);
         },
 
-        attack: function attack(targetPoint, weapon) {
+        attack: function attack(targetPoint, weaponId) {
             var player = Server.getPlayerBySocketId(this.commonId);
             if (!player) return;
             var client = clientStateManager.getClientStateBySocketId(this.commonId);
-            attackHandler.trigger(player.components.melee, [player, client, targetPoint, weapon]);
+
+            if (weaponId === constants.weapons.MELEE.id) {
+                attackHandler.trigger(player.components.melee, [player, client, targetPoint, constants.weapons.MELEE]);
+            } else if (weaponId === constants.weapons.RIFLE.id) {
+                rangedAttackHandler.trigger(player.components.rangedAttack, [player, client, targetPoint, constants.weapons.RIFLE]);
+            }
         },
 
         sendChatMessage: function sendChatMessage(message) {
@@ -153,4 +234,4 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
 }
 
 module.exports = ServerActions;
-module.exports.$inject = ['$container', 'Game', 'World', 'Server', 'socket', 'lib/physicsjs', 'Pathfinder', 'Tuning', 'ClientStateManager'];
+module.exports.$inject = ['$container', 'Game', 'World', 'Server', 'socket', 'lib/physicsjs', 'Pathfinder', 'Tuning', 'ClientStateManager', 'Constants'];

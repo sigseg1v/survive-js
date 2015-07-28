@@ -1,7 +1,7 @@
 "use strict";
 var limit = require('game/etc/ratelimiter');
 
-function Input(container, physics, ClientActions, path, pixi, world, game, renderer, Effects) {
+function Input(container, physics, ClientActions, path, pixi, world, game, renderer, Effects, constants) {
     var self = this;
 
     var playerKeys = {};
@@ -129,7 +129,9 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
         while (mouseClicks.length !== 0) {
             var clickData = mouseClicks.pop();
             if (clickData.button === 0) {
-                attack(clickData);
+                attack(clickData, constants.weapons.MELEE.id);
+            } else if (clickData.button === 1) {
+                attack(clickData, constants.weapons.RIFLE.id);
             }
         }
 
@@ -141,9 +143,9 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
         scratch.done();
     };
 
-    function attack(clickData) {
+    function attack(clickData, weaponId) {
         if (player) {
-            ClientActions.attack({ x: clickData.x, y: clickData.y }, 0);
+            ClientActions.attack({ x: clickData.x, y: clickData.y }, weaponId);
         }
     }
 
@@ -167,4 +169,4 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
 }
 
 module.exports = Input;
-module.exports.$inject = ['$container', 'lib/physicsjs', 'ClientActions', 'Pathfinder', 'lib/pixi.js', 'World', 'Game', 'system/Renderer', 'system/Effects'];
+module.exports.$inject = ['$container', 'lib/physicsjs', 'ClientActions', 'Pathfinder', 'lib/pixi.js', 'World', 'Game', 'system/Renderer', 'system/Effects', 'Constants'];

@@ -40,6 +40,36 @@ function Effects(pixi, physics, game, renderer, Model) {
             game.events.emit('addGraphics', sprite);
             sprite.play();
             scratch.done();
+        },
+        1: function rangedAttack(data) {
+            var scratch = physics.scratchpad();
+            var sprite = Model.createSprites('attack_swing')[0];
+            var sourceScreenspace = renderer.applyCoordinateTransformUnscaled(new pixi.Point(data.sourcePoint.x, data.sourcePoint.y));
+            // targetPoint for ranged attack is the vector of the shot, so we have to add the source point to it
+            var targetVector = scratch.vector().clone(data.targetPoint).add(data.sourcePoint.x, data.sourcePoint.y);
+            var targetScreenspace = renderer.applyCoordinateTransformUnscaled(new pixi.Point(targetVector.x, targetVector.y));
+            var angle = scratch.vector().clone(targetScreenspace).vsub(scratch.vector().clone(sourceScreenspace)).angle();
+            sprite.anchor.set(0, 0.5);
+            sprite.staticPosition = {
+                x: data.sourcePoint.x,
+                y: data.sourcePoint.y
+            };
+            sprite.scale.x = GFX_SCALE / 30;
+            sprite.scale.y = GFX_SCALE / 30;
+            sprite.rotation = angle;
+            sprite.layer = 9;
+            sprite.loop = false;
+            sprite.animationSpeed = 1.6;
+            spritesUnderEffect.push({
+                sprite: sprite,
+                start: sprite.staticPosition,
+                end: sprite.staticPosition,
+                startTime: now(),
+                duration: 'end'
+            });
+            game.events.emit('addGraphics', sprite);
+            sprite.play();
+            scratch.done();
         }
     };
 

@@ -5,8 +5,16 @@ function SharedConstants(game) {
     var self = this;
 
     self.weapons = {
-        MELEE: 0,
-        RIFLE: 1
+        MELEE: {
+            id: 0,
+            range: 1.2,
+            damageMultiplier: 1
+        },
+        RIFLE: {
+            id: 1,
+            range: 8,
+            damageMultiplier: 1
+        }
     };
 
     deepfreeze(self);
