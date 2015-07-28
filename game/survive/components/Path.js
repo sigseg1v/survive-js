@@ -17,6 +17,7 @@ function PathData(comp, entity, options) {
 
     this.path = [];
     this.currentWaypoint = null;
+    this.targetEntityId = null;
 }
 PathData.prototype.toJSON = function toJSON() {
     return null; // no sync
