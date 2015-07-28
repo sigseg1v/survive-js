@@ -7,7 +7,15 @@ function FollowPath(container, game, Movable, Placement, Path, world, physics) {
 
     var waypointsExpired = {};
 
+    game.events.on('removeEntity', onRemoveEntity);
+
     var limit_flushExpiredWaypoints = limit(200, flushExpiredWaypoints);
+
+    function onRemoveEntity(ent) {
+        if (waypointsExpired[ent.id]) {
+            delete waypointsExpired[ent.id];
+        }
+    }
 
     this.step = function step(time) {
         var scratch = physics.scratchpad();
