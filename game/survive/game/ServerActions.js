@@ -131,8 +131,12 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
         var scratch = physics.scratchpad();
         var startToCircleCenter = scratch.vector().clone(circle.state.pos).vsub(lineStart);
         var projOntoLine = scratch.vector().clone(startToCircleCenter).vproj(lineVector);
-        var dist = projOntoLine.dist(startToCircleCenter);
-        return scratch.done( dist <= circle.radius && ((projOntoLine.angle() > 0) === (lineVector.angle() > 0)) );
+
+        return scratch.done(
+            (projOntoLine.dist(startToCircleCenter) <= circle.radius) // ray intersects circle
+            && ((projOntoLine.angle() > 0) === (lineVector.angle() > 0)) // correct direction
+            && (lineVector.norm() >= projOntoLine.norm()) // range is long enough to reach intersection point
+        );
     }
 
     function onRangedAttackReady(limiter, state, player, client, targetPoint, weapon) {

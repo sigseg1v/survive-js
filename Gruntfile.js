@@ -56,7 +56,8 @@ module.exports = function (grunt) {
             jshintrc: true,
             options: {
                 node: true,
-                browser: true
+                browser: true,
+                laxbreak: true
             },
             dev: [
                 'game/**/*.js',
