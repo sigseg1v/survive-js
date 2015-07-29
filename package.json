@@ -13,6 +13,7 @@
     "moving-average": "0.0.5",
     "performance-now": "^0.2.0",
     "pixi-multistyle-text": "git://github.com/griever989/pixi-multistyle-text.git#master",
+    "pixi-tiling-movie-clip": "^0.1.0",
     "pixi.js": "^3.0.6",
     "shuffle-array": "^0.1.0",
     "socket.io": "^1.3.2",

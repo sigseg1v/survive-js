@@ -43,10 +43,17 @@ function Effects(pixi, physics, game, renderer, Model) {
         },
         1: function rangedAttack(data) {
             var scratch = physics.scratchpad();
-            var sprite = Model.createSprites('attack_swing')[0];
+            var sprite = Model.createSprites('bullet_trail')[0];
             var sourceScreenspace = renderer.applyCoordinateTransformUnscaled(new pixi.Point(data.sourcePoint.x, data.sourcePoint.y));
             // targetPoint for ranged attack is the vector of the shot, so we have to add the source point to it
-            var targetVector = scratch.vector().clone(data.targetPoint).add(data.sourcePoint.x, data.sourcePoint.y);
+            var targetSegment = scratch.vector().clone(data.targetPoint);
+
+            // calculate what the length of the ray should be and set the sprites width (it extends in the x direction)
+            var screenspaceBaseLen = scratch.vector().clone(renderer.applyInverseCoordinateTransform(new pixi.Point(sprite.width, 0))).norm();
+            var realSegmentLen = targetSegment.norm();
+            sprite.width *= (realSegmentLen / screenspaceBaseLen);
+
+            var targetVector = scratch.vector().clone(data.targetPoint).vadd(targetSegment);
             var targetScreenspace = renderer.applyCoordinateTransformUnscaled(new pixi.Point(targetVector.x, targetVector.y));
             var angle = scratch.vector().clone(targetScreenspace).vsub(scratch.vector().clone(sourceScreenspace)).angle();
             sprite.anchor.set(0, 0.5);
@@ -59,7 +66,7 @@ function Effects(pixi, physics, game, renderer, Model) {
             sprite.rotation = angle;
             sprite.layer = 9;
             sprite.loop = false;
-            sprite.animationSpeed = 1.6;
+            sprite.animationSpeed = 2;
             spritesUnderEffect.push({
                 sprite: sprite,
                 start: sprite.staticPosition,
