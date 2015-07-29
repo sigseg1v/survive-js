@@ -53,7 +53,7 @@ function Effects(pixi, physics, game, renderer, Model) {
             var realSegmentLen = targetSegment.norm();
             sprite.width *= (realSegmentLen / screenspaceBaseLen);
 
-            var targetVector = scratch.vector().clone(data.targetPoint).vadd(targetSegment);
+            var targetVector = scratch.vector().clone(data.targetPoint).add(data.sourcePoint.x, data.sourcePoint.y);
             var targetScreenspace = renderer.applyCoordinateTransformUnscaled(new pixi.Point(targetVector.x, targetVector.y));
             var angle = scratch.vector().clone(targetScreenspace).vsub(scratch.vector().clone(sourceScreenspace)).angle();
             sprite.anchor.set(0, 0.5);
