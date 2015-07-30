@@ -102,12 +102,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     lightmapRenderer.render(lightmapWorldWrapper);
     self.stage.addChild(lightmapStage);
 
-    game.events.on('dayNightCycle:day', function (data) {
-        self.world.mask = null;
-    });
-    game.events.on('dayNightCycle:night', function (data) {
-        self.world.mask = lightmapStage;
-    });
+    self.world.mask = lightmapStage;
 
     self.stage.addChild(self.world);
 

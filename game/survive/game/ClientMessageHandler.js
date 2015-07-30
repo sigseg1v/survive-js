@@ -10,6 +10,7 @@ function ClientMessageHandler(socket, effects, world, game) {
         socket.on('chat-message', handleChatMessage);
         socket.on('entity-damaged', handleEntityDamaged);
         socket.on('entity-attack', handleEntityAttack);
+        socket.on('lighttrail-create', handleLighttrailCreate);
         // socket.on('path-update', function (path) {
         //     path.forEach(function (node, i) {
         //         setTimeout(effects.drawLocationDebugSprite.bind(null, node), i * 20);
@@ -37,6 +38,10 @@ function ClientMessageHandler(socket, effects, world, game) {
         if (!ent) return;
         game.events.emit('entity-attack', data);
         effects.drawSpellEffect(ent, data.targetPoint, data.weapon);
+    }
+
+    function handleLighttrailCreate(data) {
+        game.events.emit('lighttrailCreated', data);
     }
 }
 

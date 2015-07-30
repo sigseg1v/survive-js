@@ -76,6 +76,7 @@ container.registerInstance('component/Health', require('game/survive/components/
 container.registerInstance('component/Melee', require('game/survive/components/Melee'));
 container.registerInstance('component/RangedAttack', require('game/survive/components/RangedAttack'));
 container.registerInstance('component/Spawner', require('game/survive/components/Spawner'));
+container.registerInstance('component/Lighttrail', require('game/survive/components/Lighttrail'));
 
 container.registerType('entity/PlayerEntity', require('game/survive/entities/PlayerEntity'));
 
@@ -97,6 +98,7 @@ if (!isServer) container.registerInstance('system/Chat', require('game/survive/s
 if (!isServer) container.registerInstance('system/CalculateLighting', require('game/survive/systems/CalculateLighting'));
 if (isServer) container.registerInstance('system/SpawnerCycle', require('game/survive/systems/SpawnerCycle'));
 if (isServer) container.registerInstance('system/EnemyTargetting', require('game/survive/systems/EnemyTargetting'));
+if (isServer) container.registerInstance('system/DeployLighttrails', require('game/survive/systems/DeployLighttrails'));
 
 if (!isServer) container.registerInstance('system/Effects', require('game/survive/systems/Effects'));
 

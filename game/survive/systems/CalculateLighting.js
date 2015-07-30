@@ -1,17 +1,19 @@
 "use strict";
 var limit = require('game/etc/ratelimiter');
 
-function CalculateLighting(game, Lightsource, pixi) {
+function CalculateLighting(game, Lightsource, pixi, renderer) {
     var self = this;
     var stepAmount = 16; // this doesn't really need to match the system step, since this system is probably running on requestAnimationFrame
 
     var entityLightDataMap = {};
+    var lighttrails = [];
 
     game.events.on('addEntity', onAddEntity);
     game.events.on('removeEntity', onRemoveEntity);
+    game.events.on('lighttrailCreated', onLighttrailCreated);
 
     self.step = function step() {
-        var i, l, entity, sprite, data, newCalculated;
+        var i, l, entity, sprite, data, newCalculated, lighttrail;
         for (i = 0, l = Lightsource.entities.length; i < l; ++i) {
             entity = Lightsource.entities[i];
             data = entityLightDataMap[entity.id];
@@ -36,6 +38,19 @@ function CalculateLighting(game, Lightsource, pixi) {
                 }
 
                 sprite.alpha = newCalculated;
+            }
+        }
+
+        var time = game.getTime();
+        for (i = lighttrails.length - 1; i >= 0; i--) {
+            lighttrail = lighttrails[i];
+            if (time.absoluteTotal >= lighttrail.start + lighttrail.duration) {
+                lighttrails.splice(i, 1);
+                game.events.emit('removeLightsource', lighttrail.sprite);
+                lighttrail.sprite.destroy();
+                lighttrail.sprite = null;
+            } else {
+                lighttrail.sprite.alpha = (1 - ((time.absoluteTotal - lighttrail.start) / lighttrail.duration)) * lighttrail.startAlpha;
             }
         }
     };
@@ -68,6 +83,23 @@ function CalculateLighting(game, Lightsource, pixi) {
         delete entityLightDataMap[entity.id];
     }
 
+    function LighttrailData(duration, startAlpha, sprite, start) {
+        this.duration = duration;
+        this.startAlpha = startAlpha;
+        this.sprite = sprite;
+        this.start = start;
+    }
+
+    function onLighttrailCreated(data) {
+        var sprite = createLightingSprite();
+        sprite.scale.x = data.scale;
+        sprite.scale.y = data.scale;
+        sprite.alpha = data.intensity;
+        renderer.applyCoordinateTransform(sprite.position, data.pos.x, data.pos.y);
+        lighttrails.push(new LighttrailData(data.duration, data.intensity, sprite, game.getTime().absoluteTotal));
+        game.events.emit('addLightsource', sprite);
+    }
+
     function createLightTexture() {
         var canvas = document.createElement('canvas');
         canvas.width = 200;
@@ -95,4 +127,4 @@ function CalculateLighting(game, Lightsource, pixi) {
 }
 
 module.exports = CalculateLighting;
-module.exports.$inject = [ 'Game', 'component/Lightsource', 'lib/pixi.js' ];
+module.exports.$inject = [ 'Game', 'component/Lightsource', 'lib/pixi.js', 'system/Renderer' ];

@@ -8,9 +8,16 @@ function newPlayer(container) {
     });
 
     // TODO -- figure out why this doesn't sync to local player
-    ent.components.lightsource.scale = 0.5;
+    ent.components.lightsource.scale = 0.8;
     ent.components.melee.damage = 5;
     ent.components.rangedAttack.damage = 4;
+    var Lighttrail = container.resolve('component/Lighttrail');
+    ent.addComponent(Lighttrail, {
+        scale: 0.7,
+        duration: 6000,
+        intensity: 0.2,
+        cooldown: 300
+    });
     return ent;
 }
 
@@ -19,7 +26,7 @@ function clientPlayer(container) {
         model: { name: 'player' },
         movable: { body: 'Player' }
     });
-    ent.components.lightsource.scale = 0.5;
+    ent.components.lightsource.scale = 0.8;
     return ent;
 }
 
