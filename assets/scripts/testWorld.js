@@ -21,6 +21,7 @@ function parseLevelString(value) {
     var lines = data.split(glyphs.ENDROW);
     var height = lines.length;
     var width = Math.max.apply(Math, lines.map(function(line) { return line.length; }));
+    data = lines.reverse().join(glyphs.ENDROW);
 
     var xStart = -roundAwayFromZero(width / 2);
     var yStart = -roundAwayFromZero(height / 2);
@@ -69,14 +70,22 @@ function roundAwayFromZero(num) {
 }
 
 var data = function(){/*!
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #$
+. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . # # # # # . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+. . . . . . . . . . . . . . . . . . . # # # # # # # . . . . . . . . . . . . . . . . . . # X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+. . . . . . . . . . . . . . . . . # # # X X X X X # . . . . . . . . . . . . . . . . . . # X + X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+. . . . . . . . . . . . . . . . # # X X X # # # X # # # # # # # # # # # # # # # # # # # # X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+. . . . . . . . . . . . # # # # # X X X # # . # X X X X X X X X X X X X X X X X X X X X X X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+. . . . . . . . . . . . # X X X X X # # # . . # X # # # # # # # # # # # # # # # # # # # # X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+. . . . . . . . . . . . # X X X X X # . . . # # X # . . . . . . . . # # # # # # # # . . # X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+. . . . . . . . . . . . # X X X X X # . . . # X X # . . . . . . . . # X X X X X X # . . # X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+# # # # # # # # . . . . # X X X X X # # # # # X X # # # # # # # # # # X X X X X X # . . # X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+# X X X X X X # . . . . # # # # # # # # X X X X X X X X X X X X X X X X X X X X # # . . # X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+# X + X X X X # # . . . . . . . . . . # X X X X X # X X X X X X X X X X X X X X # . . . # X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+# X X X X X X X # # # # # # # # # # # # X X X X # X X X X X X X X X X X X X X X # # # # # X X X # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #$
 # X X X X X X X X X X X X X X X X X X X X X X # X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X #$
 # X X X X X X X X X X X X X X X X X X X X X X # X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X + X #$
 # X X X X X X X X X X X X X X X X X X X X X X # X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X X #$
-# X X X X X X X # # # # # # # # # # # # X X X X # X X X X X X X X X X X X X X X # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #$
-# X + X X X X # # . . . . . . . . . . # X X X X X # X X X X X X X X X X X X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
-# X X X X X X # . . . . . . . . . . . # X X X X X X X X X X X X X X X X X X X X # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
-# # # # # # # # . . . . . . . . . . . # # # # # # # # # # # # # # # # # # # # # # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .$
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #$
 */};
 
 module.exports = {
