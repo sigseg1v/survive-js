@@ -14,8 +14,7 @@ module.exports = function loadBody(physics, name) {
                 { x:   0.5, y:  0.5 },
                 { x:  -0.5, y:  0.5 }
             ],
-            treatment: 'static',
-            labels: ['wall', 'destroyable']
+            treatment: 'static'
         });
     } else if (name === 'Player') {
         body = physics.body('ghost-circle', {
@@ -27,8 +26,7 @@ module.exports = function loadBody(physics, name) {
             treatment: 'dynamic',
             options: {
                 integrationMode: 'future'
-            },
-            labels: ['player']
+            }
         });
     } else if (name === 'GenericEnemy') {
         body = physics.body('collision-circle', {
@@ -40,8 +38,7 @@ module.exports = function loadBody(physics, name) {
             treatment: 'dynamic',
             options: {
                 integrationMode: isServer ? 'normal' : 'future' // server controls enemy physics, client loads
-            },
-            labels: ['enemy']
+            }
         });
     } else if (name === 'AttackArc1'){
         body = physics.body('convex-polygon', {

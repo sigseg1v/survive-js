@@ -18,8 +18,6 @@ function MovableData(comp, physics, entity, options) {
 
     this.ignoreUpdates = false;
 
-    this.entity = entity;
-
     this.body = options.body ? bodies(physics, options.body) : null;
     this.bodyName = options.body;
 
@@ -38,6 +36,7 @@ function MovableData(comp, physics, entity, options) {
     });
 
     if (this.body) {
+        this.body.labels = entity.labels;
         this.body.movespeed(0.0025);
         Object.defineProperty(this, 'speed', {
             get: function () { return this.body.movespeed(); },
@@ -70,6 +69,7 @@ MovableComponent.prototype.reconstruct = function reconstruct(serialized, initia
     if (initialize) {
         this.bodyName = serialized.bodyName;
         this.body = bodies(this._physics, serialized.bodyName);
+        this.body.labels = this.entity.labels;
         this.body.movespeed(0.0025);
         Object.defineProperty(this, 'speed', {
             get: function () { return this.body.movespeed(); },

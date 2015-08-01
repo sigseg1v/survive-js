@@ -7,6 +7,16 @@ function Entity() {
         (Entity.prototype.idPrefix + '$' + Entity.prototype.nextId);
     Entity.prototype.nextId++;
     this.components = {};
+    this._labels = [];
+    Object.defineProperty(this, 'labels', {
+        get: function () { return this._labels; },
+        set: function (val) {
+            while (this._labels.length > 0) {
+                this._labels.pop();
+            }
+            this._labels.push.apply(this.labels, val);
+        }
+    });
 }
 
 Entity.prototype = {
@@ -60,6 +70,7 @@ Entity.prototype = {
                 }
             }
         });
+        ent.labels = serialized.labels;
         return ent;
     },
     deconstruct: function deconstruct() {
@@ -78,7 +89,8 @@ Entity.prototype = {
     toJSON: function toJSON() {
         return {
             id: this.id,
-            components: this.components
+            components: this.components,
+            labels: this.labels
         };
     }
 };

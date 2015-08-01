@@ -3,6 +3,7 @@ var Entity = require('game/engine/Entity');
 
 function WallEntity(Placement, Model, Movable, options) {
     Entity.call(this);
+    this.labels = ['wall', 'destroyable'];
     this.addComponents([Placement, Model, Movable], options);
 }
 WallEntity.prototype = Object.create(Entity.prototype);

@@ -3,6 +3,7 @@ var Entity = require('game/engine/Entity');
 
 function PlayerEntity(container, Placement, Model, Movable, Lightsource, Name, Use, Melee, RangedAttack, options) {
     Entity.call(this);
+    this.labels = ['player'];
     this.addComponents([Placement, Model, Movable, Lightsource, Name, Use, Melee, RangedAttack], options);
 }
 PlayerEntity.prototype = Object.create(Entity.prototype);
