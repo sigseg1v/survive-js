@@ -13,7 +13,9 @@ Component.prototype = {
     // does not attach this to the entities list of components
     registerEntity: function registerEntity(entity, options) {
         this.entities.push(entity);
-        return new this.allocator(entity, options);
+        var componentData = new this.allocator(entity, options);
+        this.initializeComponentData(componentData, entity);
+        return componentData;
     },
     unregisterEntity: function unregisterEntity(entity) {
         var index = this.entities.indexOf(entity);
@@ -42,7 +44,13 @@ Component.prototype = {
         }, this);
         this.changed = {};
         return data;
-    }
+    },
+    initializeComponentData: function initializeComponentData(data, entity) {
+        data.component = this;
+        data.entity = entity;
+        data.injector = "component/" + this.name[0].toUpperCase() + this.name.slice(1);
+    },
+    dependencies: []
 };
 
 module.exports = Component;

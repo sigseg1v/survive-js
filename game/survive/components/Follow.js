@@ -8,12 +8,11 @@ function FollowComponent(physics) {
 }
 FollowComponent.prototype = Object.create(Component.prototype);
 FollowComponent.prototype.constructor = FollowComponent;
+FollowComponent.prototype.dependencies = ["placement"];
 FollowComponent.$inject = ['lib/physicsjs'];
 
 function FollowData(comp, physics, entity, options) {
-    this.injector = 'component/Follow';
-    this.component = comp;
-    this.options = options || {};
+    options = options || {};
 
     this._offset = new physics.vector(0, 0);
     Object.defineProperty(this, 'offset', {
@@ -26,17 +25,16 @@ function FollowData(comp, physics, entity, options) {
         }
     });
 
-    this.snap = this.options.snap;
+    this.snap = options.snap;
 
-    if (this.options.offset) {
-        this.offset = this.options.offset;
+    if (options.offset) {
+        this.offset = options.offset;
     }
-    this.targetId = this.options.targetId || null;
+    this.targetId = options.targetId || null;
 }
 FollowData.prototype.toJSON = function toJSON() {
     return {
         injector: this.injector,
-        options: this.options,
         offset: this._offset,
         targetId: this.targetId
     };

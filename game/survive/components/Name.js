@@ -13,12 +13,10 @@ NameComponent.prototype.constructor = NameComponent;
 NameComponent.$inject = ['Game', '$container'];
 
 function NameData(comp, game, container, entity, options) {
-    this.options = options || {};
-    this.injector = 'component/Name';
-    this.component = comp;
+    options = options || {};
     this.game = game;
 
-    this._name = this.options.name || '';
+    this._name = options.name || '';
     Object.defineProperty(this, 'name', {
         get: function () { return this._name; },
         set: function (val) {
@@ -37,7 +35,6 @@ function NameData(comp, game, container, entity, options) {
 NameData.prototype.toJSON = function toJSON() {
     return {
         injector: this.injector,
-        options: this.options,
         name: this.name
     };
 };

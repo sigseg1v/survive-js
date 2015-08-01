@@ -11,9 +11,7 @@ UseComponent.prototype.constructor = UseComponent;
 UseComponent.$inject = [];
 
 function UseData(comp, options) {
-    this.injector = 'component/Use';
-    this.component = comp;
-    this.options = options || {};
+    options = options || {};
 
     this.cooldown = 1000;
 }

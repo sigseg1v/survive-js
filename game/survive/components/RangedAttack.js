@@ -11,11 +11,9 @@ RangedAttackComponent.prototype.constructor = RangedAttackComponent;
 RangedAttackComponent.$inject = [];
 
 function RangedAttackData(comp, entity, options) {
-    this.injector = 'component/RangedAttack';
-    this.component = comp;
-    this.options = options || {};
+    options = options || {};
 
-    this._damage = this.options.damage || 1;
+    this._damage = options.damage || 1;
     Object.defineProperty(this, 'damage', {
         get: function () { return this._damage; },
         set: function (val) {
@@ -26,7 +24,7 @@ function RangedAttackData(comp, entity, options) {
         }
     });
 
-    this._cooldown = this.options.cooldown || 1000;
+    this._cooldown = options.cooldown || 1000;
     Object.defineProperty(this, 'cooldown', {
         get: function () { return this._cooldown; },
         set: function (val) {
@@ -40,7 +38,6 @@ function RangedAttackData(comp, entity, options) {
 RangedAttackData.prototype.toJSON = function toJSON() {
     return {
         injector: this.injector,
-        options: this.options,
         damage: this.damage,
         cooldown: this.cooldown
     };

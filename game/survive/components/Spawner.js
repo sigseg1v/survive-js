@@ -8,14 +8,13 @@ function SpawnerComponent() {
 }
 SpawnerComponent.prototype = Object.create(Component.prototype);
 SpawnerComponent.prototype.constructor = SpawnerComponent;
+SpawnerComponent.prototype.dependencies = ["placement"];
 SpawnerComponent.$inject = [];
 
 function SpawnerData(comp, entity, options) {
-    this.injector = 'component/Spawner';
-    this.component = comp;
-    this.options = options || {};
+    options = options || {};
 
-    this._type = this.options.type || 'entity/EnemyEntity/slime';
+    this._type = options.type || 'entity/EnemyEntity/slime';
     Object.defineProperty(this, 'type', {
         get: function () { return this._type; },
         set: function (val) {
@@ -26,7 +25,7 @@ function SpawnerData(comp, entity, options) {
         }
     });
 
-    this._cooldown = this.options.cooldown || 5000;
+    this._cooldown = options.cooldown || 5000;
     Object.defineProperty(this, 'cooldown', {
         get: function () { return this._cooldown; },
         set: function (val) {
@@ -40,7 +39,6 @@ function SpawnerData(comp, entity, options) {
 SpawnerData.prototype.toJSON = function toJSON() {
     return {
         injector: this.injector,
-        options: this.options,
         type: this.type,
         cooldown: this.cooldown
     };

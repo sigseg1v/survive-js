@@ -13,7 +13,29 @@ Entity.prototype = {
     nextId: 0,
     idPrefix: '',
     addComponent: function addComponent(component, options) {
-        this.components[component.name] = component.registerEntity(this, options);
+        this.components[component.name] = component.registerEntity(this, options ? options[component.name] : null);
+        this.validateComponents();
+    },
+    addComponents: function addComponents(components, options) {
+        var component;
+        for (var i = 0, len = components.length; i < len; i++) {
+            component = components[i];
+            this.components[component.name] = component.registerEntity(this, options ? options[component.name] : null);
+        }
+        this.validateComponents();
+    },
+    validateComponents: function validateComponents() {
+        var componentData, i, j, ilen, jlen;
+        var componentKeys = Object.keys(this.components);
+        for (i = 0, ilen = componentKeys.length; i < ilen; i++) {
+            componentData = this.components[componentKeys[i]];
+            for (j = 0, jlen = componentData.component.dependencies.length; j < jlen; j++) {
+                if (!this.components[componentData.component.dependencies[j]]) {
+                    throw "component " + componentData.component.name + " depends on " + componentData.component.dependencies[j] + " but it was not found registered on this entity.";
+                }
+            }
+        }
+        return true;
     },
     // check if a component is supported by names as parameters
     supports: function supports() {

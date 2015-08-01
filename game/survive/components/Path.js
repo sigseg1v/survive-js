@@ -11,9 +11,7 @@ PathComponent.prototype.constructor = PathComponent;
 PathComponent.$inject = [];
 
 function PathData(comp, entity, options) {
-    this.injector = 'component/Path';
-    this.component = comp;
-    this.options = options || {};
+    options = options || {};
 
     this.path = [];
     this.currentWaypoint = null;

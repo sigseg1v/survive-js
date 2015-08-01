@@ -11,11 +11,9 @@ HealthComponent.prototype.constructor = HealthComponent;
 HealthComponent.$inject = [];
 
 function HealthData(comp, entity, options) {
-    this.injector = 'component/Health';
-    this.component = comp;
-    this.options = options || {};
+    options = options || {};
 
-    this._currentHealth = this.options.currentHealth || 1;
+    this._currentHealth = options.currentHealth || 1;
     Object.defineProperty(this, 'currentHealth', {
         get: function () { return this._currentHealth; },
         set: function (raw) {
@@ -27,7 +25,7 @@ function HealthData(comp, entity, options) {
         }
     });
 
-    this._maximumHealth = this.options.maximumHealth || 100;
+    this._maximumHealth = options.maximumHealth || 100;
     Object.defineProperty(this, 'maximumHealth', {
         get: function () { return this._maximumHealth; },
         set: function (raw) {
@@ -42,7 +40,6 @@ function HealthData(comp, entity, options) {
 HealthData.prototype.toJSON = function toJSON() {
     return {
         injector: this.injector,
-        options: this.options,
         currentHealth: this.currentHealth,
         maximumHealth: this.maximumHealth
     };

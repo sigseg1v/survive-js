@@ -19,15 +19,14 @@ ModelComponent.prototype.constructor = ModelComponent;
 ModelComponent.$inject = [];
 
 function ModelData(comp, entity, options) {
-    this.options = options || {};
-    this.injector = 'component/Model';
-    this.component = comp;
-    this.sprites = loadModel(this.options.name);
+    options = options || {};
+    this.sprites = options.hasOwnProperty('name') ? loadModel(options.name) : [];
+    this.modelName = options.name;
 }
 ModelData.prototype.toJSON = function toJSON() {
     return {
         injector: this.injector,
-        options: this.options
+        modelName: this.modelName
     };
 };
 
@@ -45,5 +44,11 @@ function loadModel(options) {
 }
 
 ModelComponent.prototype.createSprites = loadModel;
+ModelComponent.prototype.reconstruct = function reconstruct(serialized, initialize) {
+    if (initialize) {
+        this.sprites = loadModel(serialized.modelName);
+        this.modelName = serialized.modelName;
+    }
+};
 
 module.exports = ModelComponent;

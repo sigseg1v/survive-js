@@ -9,17 +9,22 @@ function MovableComponent(physics) {
 }
 MovableComponent.prototype = Object.create(Component.prototype);
 MovableComponent.prototype.constructor = MovableComponent;
+MovableComponent.prototype.dependencies = ["placement"];
 MovableComponent.$inject = ['lib/physicsjs'];
 
 function MovableData(comp, physics, entity, options) {
-    this.injector = 'component/Movable';
-    this.component = comp;
-    this.options = options || {};
+    options = options || {};
     this.moveBehavior = null;
 
     this.ignoreUpdates = false;
 
-    this.body = bodies(physics, this.options.body);
+    this.entity = entity;
+
+    this.body = options.body ? bodies(physics, options.body) : null;
+    this.bodyName = options.body;
+
+    this._physicsControlled = options.physicsControlled;
+    this._physics = physics;
 
     this._velocity = new physics.vector();
     Object.defineProperty(this, 'velocity', {
@@ -32,32 +37,53 @@ function MovableData(comp, physics, entity, options) {
         }
     });
 
-    this.body.movespeed(0.0025);
-    Object.defineProperty(this, 'speed', {
-        get: function () { return this.body.movespeed(); },
-        set: function (val) {
-            val = Number(val);
-            if (this.body.movespeed() !== val) {
-                this.body.movespeed(val);
-                comp.entityDataChanged(entity);
+    if (this.body) {
+        this.body.movespeed(0.0025);
+        Object.defineProperty(this, 'speed', {
+            get: function () { return this.body.movespeed(); },
+            set: function (val) {
+                val = Number(val);
+                if (this.body.movespeed() !== val) {
+                    this.body.movespeed(val);
+                    comp.entityDataChanged(entity);
+                }
             }
-        }
-    });
+        });
+    } else {
+        this.speed = 0;
+    }
+
 }
 MovableData.prototype.toJSON = function toJSON() {
     return {
         injector: this.injector,
-        options: this.options,
+        _physicsControlled: this._physicsControlled,
         speed: this.speed,
-        _velocity: this._velocity
+        _velocity: this._velocity,
+        bodyName: this.bodyName
     };
 };
 MovableData.prototype.linkVelocity = function linkVelocity(vel) {
     this._velocity = vel;
 };
 MovableComponent.prototype.reconstruct = function reconstruct(serialized, initialize) {
+    if (initialize) {
+        this.bodyName = serialized.bodyName;
+        this.body = bodies(this._physics, serialized.bodyName);
+        this.body.movespeed(0.0025);
+        Object.defineProperty(this, 'speed', {
+            get: function () { return this.body.movespeed(); },
+            set: function (val) {
+                val = Number(val);
+                if (this.body.movespeed() !== val) {
+                    this.body.movespeed(val);
+                    this.component.entityDataChanged(this.entity);
+                }
+            }
+        });
+    }
     if (!this.ignoreUpdates) {
-        if (initialize || !(serialized.options && serialized.options.physicsControlled)) {
+        if (initialize || !(serialized._physicsControlled)) {
             this.velocity = serialized._velocity;
         }
         this.speed = Number(serialized.speed);

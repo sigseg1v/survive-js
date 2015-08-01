@@ -10,12 +10,11 @@ function LighttrailComponent() {
 }
 LighttrailComponent.prototype = Object.create(Component.prototype);
 LighttrailComponent.prototype.constructor = LighttrailComponent;
+LighttrailComponent.prototype.dependencies = ["placement"];
 LighttrailComponent.$inject = [ ];
 
 function LighttrailData(comp, entity, options) {
-    this.options = options || {};
-    this.injector = 'component/Lighttrail';
-    this.component = comp;
+    options = options || {};
     this.sprite = null;
 
     Object.defineProperty(this, 'scale', {
@@ -27,7 +26,7 @@ function LighttrailData(comp, entity, options) {
             }
         }
     });
-    this._scale = this.options.scale || 1;
+    this._scale = options.scale || 1;
 
     Object.defineProperty(this, 'cooldown', {
         get: function () { return this._cooldown; },
@@ -38,7 +37,7 @@ function LighttrailData(comp, entity, options) {
             }
         }
     });
-    this._cooldown = this.options.cooldown || 300;
+    this._cooldown = options.cooldown || 300;
 
     Object.defineProperty(this, 'duration', {
         get: function () { return this._duration; },
@@ -49,7 +48,7 @@ function LighttrailData(comp, entity, options) {
             }
         }
     });
-    this._duration = this.options.duration || 3000;
+    this._duration = options.duration || 3000;
 
     Object.defineProperty(this, 'intensity', {
         get: function () { return this._intensity; },
@@ -60,7 +59,7 @@ function LighttrailData(comp, entity, options) {
             }
         }
     });
-    this._intensity = this.options.intensity || 0.2;
+    this._intensity = options.intensity || 0.2;
 }
 LighttrailData.prototype.toJSON = function toJSON() {
     return null;

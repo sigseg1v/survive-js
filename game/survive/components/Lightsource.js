@@ -10,12 +10,11 @@ function LightsourceComponent() {
 }
 LightsourceComponent.prototype = Object.create(Component.prototype);
 LightsourceComponent.prototype.constructor = LightsourceComponent;
+LightsourceComponent.prototype.dependencies = ["placement"];
 LightsourceComponent.$inject = [ ];
 
 function LightsourceData(comp, entity, options) {
-    this.options = options || {};
-    this.injector = 'component/Lightsource';
-    this.component = comp;
+    options = options || {};
     this.sprite = null;
 
     Object.defineProperty(this, 'scale', {
@@ -27,12 +26,11 @@ function LightsourceData(comp, entity, options) {
             }
         }
     });
-    this._scale = this.options.scale || 1;
+    this._scale = options.scale || 1;
 }
 LightsourceData.prototype.toJSON = function toJSON() {
     return {
         injector: this.injector,
-        options: this.options,
         scale: this.scale
     };
 };

@@ -3,9 +3,7 @@ var Entity = require('game/engine/Entity');
 
 function SpawnerEntity(container, Placement, Spawner, options) {
     Entity.call(this);
-    options = options || {};
-    this.addComponent(Placement, options[Placement.name]);
-    this.addComponent(Spawner, options[Spawner.name]);
+    this.addComponents([Placement, Spawner], options);
 }
 SpawnerEntity.prototype = Object.create(Entity.prototype);
 SpawnerEntity.prototype.constructor = SpawnerEntity;
