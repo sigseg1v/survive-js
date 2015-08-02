@@ -77,6 +77,7 @@ container.registerInstance('component/Melee', require('game/survive/components/M
 container.registerInstance('component/RangedAttack', require('game/survive/components/RangedAttack'));
 container.registerInstance('component/Spawner', require('game/survive/components/Spawner'));
 container.registerInstance('component/Lighttrail', require('game/survive/components/Lighttrail'));
+container.registerInstance('component/Aggro', require('game/survive/components/Aggro'));
 
 container.registerType('entity/PlayerEntity', require('game/survive/entities/PlayerEntity'));
 

@@ -35,17 +35,29 @@ function SpawnerData(comp, entity, options) {
             }
         }
     });
+
+    this.entityIds = {};
+    this.entityCount = 0;
+    this.maxEntities = options.maxEntities || 6;
 }
-SpawnerData.prototype.toJSON = function toJSON() {
-    return {
-        injector: this.injector,
-        type: this.type,
-        cooldown: this.cooldown
-    };
+SpawnerData.prototype.spawn = function spawn() {
+    if (this.entityCount >= this.maxEntities) {
+        return null;
+    }
+    var newEnt = require('game/inversion/container').resolve(this.type);
+    newEnt.components.placement.position = this.entity.components.placement.position;
+    this.entityCount++;
+    this.entityIds[newEnt.id] = true;
+    return newEnt;
 };
-SpawnerComponent.prototype.reconstruct = function reconstruct(serialized, initialize) {
-    this._type = serialized.type;
-    this._cooldown = serialized.cooldown;
+SpawnerData.prototype.onEntityRemoved = function onEntityRemoved(ent) {
+    if (this.entityIds.hasOwnProperty(ent.id)) {
+        delete this.entityIds[ent.id];
+        this.entityCount--;
+    }
+};
+SpawnerData.prototype.toJSON = function toJSON() {
+    return null;
 };
 
 module.exports = SpawnerComponent;

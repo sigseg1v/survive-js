@@ -46,6 +46,7 @@ function genericEnemy(container) {
     ent.components.health.currentHealth = 10;
     ent.components.health.maximumHealth = 10;
     ent.components.melee.damage = 1;
+    ent.components.aggro.targetLabels = ['player'];
     return ent;
 }
 

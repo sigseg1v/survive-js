@@ -8,6 +8,7 @@ function PathComponent() {
 }
 PathComponent.prototype = Object.create(Component.prototype);
 PathComponent.prototype.constructor = PathComponent;
+PathComponent.prototype.dependencies = ["placement", "movable"];
 PathComponent.$inject = [];
 
 function PathData(comp, entity, options) {
