@@ -59,6 +59,7 @@
         var chat = container.resolve('system/Chat');
         var calculateLighting = container.resolve('system/CalculateLighting');
         var cheats = container.resolve('system/Cheats');
+        var vision = container.resolve('system/VisionRaycaster');
 
         game.registerSystem(input);
         game.registerSystem(playerSync);
@@ -71,6 +72,7 @@
         game.registerSystem(renderer, true);
         game.registerSystem(chat);
         game.registerSystem(calculateLighting, true);
+        game.registerSystem(vision, true);
         game.registerSystem(cheats);
 
         return game;

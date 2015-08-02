@@ -15,6 +15,10 @@ function GameTuning(game) {
             }
         });
     }
+
+    self.subscribe = function subscribe(name, action) {
+        game.events.on('tuning:' + name, action);
+    };
 }
 
 module.exports = GameTuning;

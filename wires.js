@@ -78,6 +78,7 @@ container.registerInstance('component/RangedAttack', require('game/survive/compo
 container.registerInstance('component/Spawner', require('game/survive/components/Spawner'));
 container.registerInstance('component/Lighttrail', require('game/survive/components/Lighttrail'));
 container.registerInstance('component/Aggro', require('game/survive/components/Aggro'));
+container.registerInstance('component/LightrayIntersector', require('game/survive/components/LightrayIntersector'));
 
 container.registerType('entity/PlayerEntity', require('game/survive/entities/PlayerEntity'));
 
@@ -100,6 +101,7 @@ if (!isServer) container.registerInstance('system/CalculateLighting', require('g
 if (isServer) container.registerInstance('system/SpawnerCycle', require('game/survive/systems/SpawnerCycle'));
 if (isServer) container.registerInstance('system/EnemyTargetting', require('game/survive/systems/EnemyTargetting'));
 if (isServer) container.registerInstance('system/DeployLighttrails', require('game/survive/systems/DeployLighttrails'));
+if (!isServer) container.registerInstance('system/VisionRaycaster', require('game/survive/systems/VisionRaycaster'));
 
 if (!isServer) container.registerInstance('system/Effects', require('game/survive/systems/Effects'));
 
