@@ -15,7 +15,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
     game.events.once('playerLoaded', function(ent) {
         player = ent;
         self.center = player.components.placement.position;
-        lightRadius = player.components.lightsource.scale * 7; // TODO -- fix this hardcoded scale modifier
+        lightRadius = player.components.lightsource.scale * 4; // TODO -- fix this hardcoded scale modifier
     });
 
     // this is intended to be used in an animate loop so do it as fast as called
@@ -84,7 +84,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
         scratch.done();
     };
 
-    function addGeometryFor(entity, scratch) {
+    function addGeometryFor(entity) {
         var i, len;
         var base, offset, next;
         var pos = entity.components.placement.position;
@@ -137,7 +137,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
             output = new physics.vector(closestPoint);
         } else {
             // no intersect -- light extends fully along vector, so add endpoint
-            output = new physics.vector(point);
+            output = new physics.vector(castSegment).vadd(self.center);
         }
         scratch.done();
         return output;
