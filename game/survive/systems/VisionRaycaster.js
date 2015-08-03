@@ -36,6 +36,9 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
                 addGeometryFor(entity);
             }
         }
+
+        addBaseVisionPoints();
+
         for (i = 0, len = points.length; i < len; i++) {
             castToEitherSide(points[i]);
         }
@@ -66,15 +69,8 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
             var currentScratch = scratch.vector();
             var currentPoint;
             for (i = 1; i < pointsToSend.length; i++) {
-                console.log(pointsToSend.length);
                 currentPoint = pointsToSend[i];
                 currentScratch.clone(currentPoint).vsub(self.center);
-                if (Math.abs(currentScratch.angle(lastScratch)) > (Math.PI / 6)) {
-                    var newPoint = new physics.vector(lastScratch).normalize().rotate(-Math.PI / 6).mult(lightRadius).vadd(self.center);
-                    pointsToSend.splice(i, 0, newPoint);
-                    lastScratch.clone(newPoint).vsub(self.center);
-                    continue;
-                }
                 lastScratch.clone(currentScratch);
             }
         }
@@ -103,6 +99,12 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
             offset = new physics.vector(verts[0]).vsub(verts[vertTotalLength - 1]);
             points.push(base);
             segments.push(base, offset);
+        }
+    }
+
+    function addBaseVisionPoints() {
+        for (var i = 0; i < 12; i++) {
+            points.push(new physics.vector(1, 0).rotate(i * Math.PI / 6).mult(lightRadius).vadd(self.center));
         }
     }
 
