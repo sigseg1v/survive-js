@@ -15,7 +15,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
     game.events.once('playerLoaded', function(ent) {
         player = ent;
         self.center = player.components.placement.position;
-        lightRadius = player.components.lightsource.scale * 8; // TODO -- fix this hardcoded scale modifier
+        lightRadius = player.components.lightsource.scale * 7; // TODO -- fix this hardcoded scale modifier
     });
 
     // this is intended to be used in an animate loop so do it as fast as called
@@ -32,15 +32,14 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
         entities = LightrayIntersector.entities; // it's fine to burn through this on the clientside (but it wouldn't be on the server) because the clientside is filtered to visible chunks
         for (i = 0, len = entities.length; i < len; i++) {
             entity = entities[i];
-            if (vectorScratch.clone(entity.components.placement.position).vsub(self.center).norm() <= lightRadius) {
-                addGeometryFor(entity, scratch);
+            if (vectorScratch.clone(entity.components.placement.position).vsub(self.center).norm() <= (lightRadius + 1 /* account for geometry width */)) {
+                addGeometryFor(entity);
             }
         }
         for (i = 0, len = points.length; i < len; i++) {
             castToEitherSide(points[i]);
         }
 
-        // these hold temporary scratch variables so wipe them out
         while (segments.length !== 0) {
             segments.pop();
         }
@@ -48,7 +47,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
             points.pop();
         }
 
-        visionLightmaskPoints.sort(sortByOrientation);
+        sortPointsByOrientation();
 
         var pointsToSend = [];
         var last = visionLightmaskPoints[0];
@@ -63,21 +62,23 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
         }
 
         if (pointsToSend.length > 1) {
-            var lastAngle = pointsToSend[0].angle();
-            var currentAngle, currentPoint;
-            for (i = 0; i < pointsToSend.length; i++) {
+            var lastScratch = scratch.vector().clone(pointsToSend[0]).vsub(self.center);
+            var currentScratch = scratch.vector();
+            var currentPoint;
+            for (i = 1; i < pointsToSend.length; i++) {
+                console.log(pointsToSend.length);
                 currentPoint = pointsToSend[i];
-                currentAngle = currentPoint.angle();
-                if (Math.abs(currentAngle - lastAngle) > (Math.PI / 6)) {
-                    currentPoint = new physics.vector(currentPoint).normalize().mult(lightRadius).rotate(-Math.PI / 6);
-                    pointsToSend.splice(i, 0, currentPoint);
-                    currentAngle = currentPoint.angle();
-                    i++;
+                currentScratch.clone(currentPoint).vsub(self.center);
+                if (Math.abs(currentScratch.angle(lastScratch)) > (Math.PI / 6)) {
+                    var newPoint = new physics.vector(lastScratch).normalize().rotate(-Math.PI / 6).mult(lightRadius).vadd(self.center);
+                    pointsToSend.splice(i, 0, newPoint);
+                    lastScratch.clone(newPoint).vsub(self.center);
+                    continue;
                 }
-                lastAngle = currentAngle;
+                lastScratch.clone(currentScratch);
             }
         }
-
+        console.log(pointsToSend);
         game.events.emit('vision:pointsUpdated', pointsToSend);
 
         scratch.done();
@@ -90,24 +91,17 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
         var verts = entity.components.movable.body.geometry.vertices;
         var vertTotalLength = verts.length;
         if (verts && vertTotalLength > 1) {
-            for (i = 0, len = (vertTotalLength % 2 === 0) ? vertTotalLength : vertTotalLength - 1; i < len; i+=2) {
+            for (i = 0, len = vertTotalLength - 1; i < len; i++) {
                 // this results in a ton of overlap between neighbours -- might be able to optimize
-                base = scratch.vector().clone(verts[i]).vadd(pos);
-                offset = scratch.vector().clone(verts[i + 1]).vsub(verts[i]);
-                next = scratch.vector().clone(base).vadd(offset);
-                points.push(base, next);
-                segments.push(base, offset);
-            }
-            if (vertTotalLength % 2 !== 0) {
-                // add final vert since we iterated in increments of 2 above
-                base = scratch.vector().clone(verts[vertTotalLength - 2]).vadd(pos);
-                offset = scratch.vector().clone(verts[vertTotalLength - 1]).vsub(verts[vertTotalLength - 2]);
+                base = new physics.vector(verts[i]).vadd(pos);
+                offset = new physics.vector(verts[i + 1]).vsub(verts[i]);
                 points.push(base);
                 segments.push(base, offset);
             }
             // close it
-            base = scratch.vector().clone(verts[vertTotalLength - 1]).vadd(pos);
-            offset = scratch.vector().clone(verts[0]).vsub(verts[vertTotalLength - 1]);
+            base = new physics.vector(verts[vertTotalLength - 1]).vadd(pos);
+            offset = new physics.vector(verts[0]).vsub(verts[vertTotalLength - 1]);
+            points.push(base);
             segments.push(base, offset);
         }
     }
@@ -115,8 +109,8 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
     function castToEitherSide(point) {
         var scratch = physics.scratchpad();
         var up = scratch.vector().clone(point).vsub(self.center).rotate(0.00001).normalize().mult(lightRadius);
-        var down = scratch.vector().clone(point).vsub(self.center).rotate(-0.00001).normalize().mult(lightRadius);
         visionLightmaskPoints.push(castToward(up));
+        var down = scratch.vector().clone(point).vsub(self.center).rotate(-0.00001).normalize().mult(lightRadius);
         visionLightmaskPoints.push(castToward(down));
         scratch.done();
     }
@@ -124,17 +118,16 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
     function castToward(point) {
         var scratch = physics.scratchpad();
         var castSegment = scratch.vector().clone(point);
-        var outputPoint = scratch.vector();
         var scratchNorm = scratch.vector();
         var closestPoint = null;
         var output;
         for (var i = 0, len = segments.length; i < len; i+=2) {
-            var intersects = segmentIntersects(self.center, castSegment, segments[i], segments[i+1], outputPoint);
+            var intersects = segmentIntersects(self.center, castSegment, segments[i], segments[i+1]);
             if (intersects) {
                 if (closestPoint === null) {
-                    closestPoint = scratch.vector(outputPoint);
-                } else if (scratchNorm.clone(outputPoint).vsub(self.center).norm() < scratchNorm.clone(closestPoint).vsub(self.center).norm()){
-                    closestPoint.clone(outputPoint);
+                    closestPoint = scratch.vector(intersects);
+                } else if (scratchNorm.clone(intersects).vsub(self.center).norm() < scratchNorm.clone(closestPoint).vsub(self.center).norm()){
+                    closestPoint.clone(intersects);
                 }
             }
         }
@@ -151,7 +144,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
     }
 
     // http://stackoverflow.com/a/565282
-    function segmentIntersects(segAoffset, segA, segBoffset, segB, outputPoint) {
+    function segmentIntersects(segAoffset, segA, segBoffset, segB) {
         var scratch = physics.scratchpad();
         var u, t;
         var p = segAoffset, q = segBoffset, r = segA, s = segB;
@@ -172,12 +165,9 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
             u = q_sub_p.cross(r) / r_cross_s;
             if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
                 // lines meet at point (p + tr) which is the same as (q + us)
-                if (outputPoint) {
-                    return scratch.done(outputPoint.clone(p).vadd(scratch.vector().clone(r).mult(t)));
-                } else {
-                    scratch.done();
-                    return true;
-                }
+                var out = new physics.vector(p).vadd(scratch.vector().clone(r).mult(t));
+                scratch.done();
+                return out;
             }
             // else -- lines do not intersect
         }
@@ -185,10 +175,18 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
         return false;
     }
 
-    function sortByOrientation(a, b) {
-        var a_angle = a.angle();
-        var b_angle = b.angle();
-        return b_angle - a_angle;
+    function sortPointsByOrientation() {
+        var scratch = physics.scratchpad();
+        var angleScratch = scratch.vector();
+        visionLightmaskPoints.sort(sortByOffsetOrientation);
+
+        scratch.done();
+
+        function sortByOffsetOrientation(a, b) {
+            var a_angle = angleScratch.clone(a).vsub(self.center).angle();
+            var b_angle = angleScratch.clone(b).vsub(self.center).angle();
+            return b_angle - a_angle;
+        }
     }
 }
 

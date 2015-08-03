@@ -125,9 +125,6 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     game.events.on('vision:pointsUpdated', onVisionPointsUpdated);
 
     function onVisionPointsUpdated(points) {
-        console.log(points.map(function (p) {
-            return p.angle();
-        }));
         var i, len;
         if (points.length === 0) {
             if (visionMask !== null) {
@@ -156,7 +153,6 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
 
         visionMask.clear();
         visionMask.beginFill(0xFFFFFF);
-        console.log('line start');
         for (i = 0, len = points.length; i < len; i++) {
             visionPointPool[i].copy(points[i]);
             applyCoordinateTransform(visionPointPool[i]);
