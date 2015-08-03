@@ -33,21 +33,14 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
         for (i = 0, len = entities.length; i < len; i++) {
             entity = entities[i];
             if (vectorScratch.clone(entity.components.placement.position).vsub(self.center).norm() <= (lightRadius + 1 /* account for geometry width */)) {
-                addGeometryFor(entity);
+                addGeometryFor(entity, scratch);
             }
         }
 
-        addBaseVisionPoints();
+        addBaseVisionPoints(scratch);
 
         for (i = 0, len = points.length; i < len; i++) {
             castToEitherSide(points[i]);
-        }
-
-        while (segments.length !== 0) {
-            segments.pop();
-        }
-        while (points.length !== 0) {
-            points.pop();
         }
 
         sortPointsByOrientation();
@@ -77,10 +70,17 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
         console.log(pointsToSend);
         game.events.emit('vision:pointsUpdated', pointsToSend);
 
+        while (segments.length !== 0) {
+            segments.pop();
+        }
+        while (points.length !== 0) {
+            points.pop();
+        }
+
         scratch.done();
     };
 
-    function addGeometryFor(entity) {
+    function addGeometryFor(entity, scratch) {
         var i, len;
         var base, offset, next;
         var pos = entity.components.placement.position;
@@ -89,22 +89,22 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
         if (verts && vertTotalLength > 1) {
             for (i = 0, len = vertTotalLength - 1; i < len; i++) {
                 // this results in a ton of overlap between neighbours -- might be able to optimize
-                base = new physics.vector(verts[i]).vadd(pos);
-                offset = new physics.vector(verts[i + 1]).vsub(verts[i]);
+                base = scratch.vector().clone(verts[i]).vadd(pos);
+                offset = scratch.vector().clone(verts[i + 1]).vsub(verts[i]);
                 points.push(base);
                 segments.push(base, offset);
             }
             // close it
-            base = new physics.vector(verts[vertTotalLength - 1]).vadd(pos);
-            offset = new physics.vector(verts[0]).vsub(verts[vertTotalLength - 1]);
+            base = scratch.vector().clone(verts[vertTotalLength - 1]).vadd(pos);
+            offset = scratch.vector().clone(verts[0]).vsub(verts[vertTotalLength - 1]);
             points.push(base);
             segments.push(base, offset);
         }
     }
 
-    function addBaseVisionPoints() {
+    function addBaseVisionPoints(scratch) {
         for (var i = 0; i < 12; i++) {
-            points.push(new physics.vector(1, 0).rotate(i * Math.PI / 6).mult(lightRadius).vadd(self.center));
+            points.push(scratch.vector().set(1, 0).rotate(i * Math.PI / 6).mult(lightRadius).vadd(self.center));
         }
     }
 
