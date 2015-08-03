@@ -108,13 +108,12 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
         }
     }
 
+    var castToEitherSide_scratch = new physics.vector();
     function castToEitherSide(point) {
-        var scratch = physics.scratchpad();
-        var up = scratch.vector().clone(point).vsub(self.center).rotate(0.00001).normalize().mult(lightRadius);
+        var up = castToEitherSide_scratch.clone(point).vsub(self.center).rotate(0.00001).normalize().mult(lightRadius);
         visionLightmaskPoints.push(castToward(up));
-        var down = scratch.vector().clone(point).vsub(self.center).rotate(-0.00001).normalize().mult(lightRadius);
+        var down = castToEitherSide_scratch.clone(point).vsub(self.center).rotate(-0.00001).normalize().mult(lightRadius);
         visionLightmaskPoints.push(castToward(down));
-        scratch.done();
     }
 
     function castToward(point) {
@@ -127,7 +126,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
             var intersects = segmentIntersects(self.center, castSegment, segments[i], segments[i+1]);
             if (intersects) {
                 if (closestPoint === null) {
-                    closestPoint = scratch.vector(intersects);
+                    closestPoint = scratch.vector().clone(intersects);
                 } else if (scratchNorm.clone(intersects).vsub(self.center).norm() < scratchNorm.clone(closestPoint).vsub(self.center).norm()){
                     closestPoint.clone(intersects);
                 }
@@ -146,11 +145,11 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
     }
 
     // http://stackoverflow.com/a/565282
+    var intersect_scratch = new physics.vector();
     function segmentIntersects(segAoffset, segA, segBoffset, segB) {
-        var scratch = physics.scratchpad();
         var u, t;
         var p = segAoffset, q = segBoffset, r = segA, s = segB;
-        var q_sub_p = scratch.vector().clone(q).vsub(p);
+        var q_sub_p = intersect_scratch.clone(q).vsub(p);
         var r_cross_s = r.cross(s);
         if (r_cross_s === 0) {
             // in this case, it is possible that the lines are:
@@ -160,20 +159,17 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
             //     parallel and non-intersecting
             //     this occurs when q_sub_p.cross(r) !== 0
             // in both cases we want to just return false, so don't even do the calculations
-            scratch.done();
             return false;
         } else {
             t = q_sub_p.cross(s) / r_cross_s;
             u = q_sub_p.cross(r) / r_cross_s;
             if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
                 // lines meet at point (p + tr) which is the same as (q + us)
-                var out = new physics.vector(p).vadd(scratch.vector().clone(r).mult(t));
-                scratch.done();
+                var out = new physics.vector(p).vadd(intersect_scratch.clone(r).mult(t));
                 return out;
             }
             // else -- lines do not intersect
         }
-        scratch.done();
         return false;
     }
 
