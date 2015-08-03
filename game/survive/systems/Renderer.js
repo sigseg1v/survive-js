@@ -136,7 +136,7 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         }
         if (visionMask === null) {
             visionMask = new pixi.Graphics();
-            //lightmapWorld.mask = visionMask;
+            lightmapWorld.mask = visionMask;
             lightmapWorld.addChild(visionMask);
         }
 
@@ -156,16 +156,16 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         for (i = 0, len = points.length; i < len; i++) {
             visionPointPool[i].copy(points[i]);
             applyCoordinateTransform(visionPointPool[i]);
-            //visionPolyPoints.push(visionPointPool[i]);
+            visionPolyPoints.push(visionPointPool[i]);
             // console.log('line to', visionPointPool[i].x, visionPointPool[i].y);
             // if (i === 0) {
             //     visionMask.moveTo(visionPointPool[i].x, visionPointPool[i].y);
             // } else {
             //     visionMask.lineTo(visionPointPool[i].x, visionPointPool[i].y);
             // }
-            visionMask.drawRect(visionPointPool[i].x, visionPointPool[i].y, 10, 10);
+            //visionMask.drawRect(visionPointPool[i].x, visionPointPool[i].y, 10, 10);
         }
-        //visionMask.drawPolygon(visionPolyPoints);
+        visionMask.drawPolygon(visionPolyPoints);
         visionMask.endFill();
     }
 

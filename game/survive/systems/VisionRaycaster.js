@@ -15,7 +15,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
     game.events.once('playerLoaded', function(ent) {
         player = ent;
         self.center = player.components.placement.position;
-        lightRadius = player.components.lightsource.scale * 4; // TODO -- fix this hardcoded scale modifier
+        lightRadius = player.components.lightsource.scale * 7; // TODO -- fix this hardcoded scale modifier
     });
 
     // this is intended to be used in an animate loop so do it as fast as called
