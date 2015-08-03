@@ -112,12 +112,66 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
 
     //var throttledSort = td.throttle(200, false, zSort, true);
 
+    var visionPointPool = [];
+    var visionPolyPoints = [];
+    var visionMask = null;
+
     game.events.on('addEntity', onAddEntity);
     game.events.on('removeEntity', onRemoveEntity);
     game.events.on('addGraphics', onAddGraphics);
     game.events.on('removeGraphics', onRemoveGraphics);
     game.events.on('addLightsource', onAddLightsource);
     game.events.on('removeLightsource', onRemoveLightsource);
+    game.events.on('vision:pointsUpdated', onVisionPointsUpdated);
+
+    function onVisionPointsUpdated(points) {
+        console.log(points.map(function (p) {
+            return p.angle();
+        }));
+        var i, len;
+        if (points.length === 0) {
+            if (visionMask !== null) {
+                self.stage.removeChild(visionMask);
+                visionMask = null;
+            }
+            lightmapWorld.mask = null;
+            return;
+        }
+        if (visionMask === null) {
+            visionMask = new pixi.Graphics();
+            //lightmapWorld.mask = visionMask;
+            lightmapWorld.addChild(visionMask);
+        }
+
+        // just increment the pool to as large as we need it
+        if (visionPointPool.length < points.length) {
+            for (i = 0, len = points.length - visionPointPool.length; i < len; i++) {
+                visionPointPool.push(new pixi.Point());
+            }
+        }
+
+        while (visionPolyPoints.length !== 0) {
+            visionPolyPoints.pop();
+        }
+
+        visionMask.clear();
+        visionMask.beginFill(0xFFFFFF);
+        console.log('line start');
+        for (i = 0, len = points.length; i < len; i++) {
+            visionPointPool[i].copy(points[i]);
+            applyCoordinateTransform(visionPointPool[i]);
+            //visionPolyPoints.push(visionPointPool[i]);
+            // console.log('line to', visionPointPool[i].x, visionPointPool[i].y);
+            // if (i === 0) {
+            //     visionMask.moveTo(visionPointPool[i].x, visionPointPool[i].y);
+            // } else {
+            //     visionMask.lineTo(visionPointPool[i].x, visionPointPool[i].y);
+            // }
+            visionMask.drawRect(visionPointPool[i].x, visionPointPool[i].y, 10, 10);
+        }
+        //visionMask.drawPolygon(visionPolyPoints);
+        visionMask.endFill();
+    }
 
     function isValidLayer(layer) {
         return !(layer < 0 || layer >= 10);
