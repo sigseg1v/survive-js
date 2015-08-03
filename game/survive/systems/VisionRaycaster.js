@@ -6,6 +6,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
     var segments = []; // even indicies are vectors to start of segment, odd indicies are the vector along the segment
     var points = []; // vectors from body.vertices
     var visionLightmaskPoints = [];
+    var pointsToSend = [];
     var player = null;
 
     self.center = new physics.vector();
@@ -29,6 +30,10 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
             visionLightmaskPoints.pop();
         }
 
+        while (pointsToSend.length !== 0) {
+            pointsToSend.pop();
+        }
+
         entities = LightrayIntersector.entities; // it's fine to burn through this on the clientside (but it wouldn't be on the server) because the clientside is filtered to visible chunks
         for (i = 0, len = entities.length; i < len; i++) {
             entity = entities[i];
@@ -45,7 +50,6 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
 
         sortPointsByOrientation();
 
-        var pointsToSend = [];
         var last = visionLightmaskPoints[0];
         if (visionLightmaskPoints.length > 0) {
             pointsToSend.push(last);
@@ -67,7 +71,6 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
                 lastScratch.clone(currentScratch);
             }
         }
-        console.log(pointsToSend);
         game.events.emit('vision:pointsUpdated', pointsToSend);
 
         while (segments.length !== 0) {

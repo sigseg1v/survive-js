@@ -100,6 +100,10 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     var lightmapStage = new pixi.Sprite(lightmapRenderer);
     lightmapWorldWrapper.addChild(lightmapWorld);
     lightmapRenderer.render(lightmapWorldWrapper);
+    var blurFilter = new pixi.filters.BlurFilter();
+    blurFilter.padding = 2;
+    blurFilter.blur = 2;
+    lightmapWorld.filters = [blurFilter];
     self.stage.addChild(lightmapStage);
 
     self.world.mask = lightmapStage;
