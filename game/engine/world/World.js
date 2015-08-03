@@ -109,11 +109,13 @@ BlockGridStore.prototype.insertAt = function insertAt(x, y, item) {
         this.items[x][y] = [];
     }
     this.items[x][y].push(item);
+    this.game.events.emit('world:geometryChanged', item);
 };
 BlockGridStore.prototype.removeAt = function removeAt(x, y, item) {
     var index = this.items[x][y].indexOf(item);
     if (index !== -1) {
         this.items[x][y].splice(this.items[x][y].indexOf(item), 1);
+        this.game.events.emit('world:geometryChanged', item);
     } else {
         console.log('Attempt to remove item from BlockGridStore that does not exist.');
     }

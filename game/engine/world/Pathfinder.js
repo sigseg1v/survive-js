@@ -66,15 +66,8 @@ function Pathfinder(physics, world, game) {
         return ( (x & 0x80000000) | ((y & 0x80000000) >>> 1) | ((x & 0x7FFF) << 15) | (y & 0x7FFF) )|0;
     }
 
-    game.events.on('addEntity', function (ent) {
-        if (ent.components.movable && ent.components.movable.body.treatment === 'static') {
-            cachedPaths = {};
-        }
-    });
-    game.events.on('removeEntity', function (ent) {
-        if (ent.components.movable && ent.components.movable.body.treatment === 'static') {
-            cachedPaths = {};
-        }
+    game.events.on('world:geometryChanged', function (body) {
+        cachedPaths = {};
     });
 
     self.clearCache = function () {
