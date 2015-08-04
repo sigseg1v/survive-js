@@ -96,6 +96,26 @@ World.prototype.queryStaticItemsAtPoint = function queryStaticItemsAtPoint(point
 World.prototype.queryStaticItemsAt = function queryStaticItemsAt(x, y) {
     return this.staticItemStore.queryAt(Math.floor(x), Math.floor(y));
 };
+// World.prototype.findAllStaticItems = function findAllStaticItems() {
+//     var i, j, k, ilen, jlen, klen, nodeArray;
+//     var items = this.staticItemStore.items;
+//     var allItems = [];
+//     // this code assumes that the array is more values than holes and that it's faster to enumerate than use Object.keys
+//     for (i = 0, ilen = items.length; i < ilen; i++) {
+//         if (items[i] === undefined) {
+//             continue;
+//         }
+//         for (j = 0, jlen = items[i].length; j < jlen; j++) {
+//             nodeArray = items[i][j];
+//             if (nodeArray !== undefined) {
+//                 for (k = 0, klen = nodeArray.length; k < klen; k++) {
+//                     allItems.push(nodeArray[k]);
+//                 }
+//             }
+//         }
+//     }
+//     return allItems;
+// };
 
 function BlockGridStore() {
     this.items = [];
@@ -109,15 +129,15 @@ BlockGridStore.prototype.insertAt = function insertAt(x, y, item) {
         this.items[x][y] = [];
     }
     this.items[x][y].push(item);
-    this.game.events.emit('world:geometryChanged', item);
 };
 BlockGridStore.prototype.removeAt = function removeAt(x, y, item) {
     var index = this.items[x][y].indexOf(item);
     if (index !== -1) {
         this.items[x][y].splice(this.items[x][y].indexOf(item), 1);
-        this.game.events.emit('world:geometryChanged', item);
+        return true;
     } else {
         console.log('Attempt to remove item from BlockGridStore that does not exist.');
+        return false;
     }
 };
 BlockGridStore.prototype.queryAt = function queryAt(x, y) {
@@ -314,12 +334,12 @@ World.prototype.checkEntityCrossingChunkBoundary = function checkEntityCrossingC
     return false;
 };
 
-World.prototype.addEntity = function addEntity(entity, skipNotify) {
+World.prototype.addEntity = function addEntity(entity, multiple) {
     if (this.entitiesById[entity.id]) {
-        return;
+        return false;
     }
     if (!isServer && this.permanentlyRemovedEntityIdSet[entity.id]) {
-        return;
+        return false;
     }
     // this.entities.push(entity);
     this.entitiesById[entity.id] = entity;
@@ -346,10 +366,14 @@ World.prototype.addEntity = function addEntity(entity, skipNotify) {
         entity.__ignorePhysics = false;
         this.physics.add(movable);
 
+        // NOTE: this condition has to match the condition in addEntities
         if (movable.treatment === 'static') {
             var scratch = this.__physics.scratchpad();
             var block = scratch.block().set(movable.state.pos.x, movable.state.pos.y);
             this.staticItemStore.insertAt(block.x, block.y, movable);
+            if (!multiple) {
+                this.game.events.emit('world:geometryChanged', { added: [movable] });
+            }
             scratch.done();
             // this.staticItemsTree.trackBody({ body: movable });
         } else {
@@ -362,7 +386,7 @@ World.prototype.addEntity = function addEntity(entity, skipNotify) {
         this.updateChunksForEntity(entity);
     }
 
-    if (isServer && !skipNotify) {
+    if (isServer && !multiple) {
         var clients = this.clientStateManager.clients;
         var client;
         for (var i = 0, len = clients.length; i < len; i++) {
@@ -374,13 +398,25 @@ World.prototype.addEntity = function addEntity(entity, skipNotify) {
     }
 
     this.game.events.emit('addEntity', entity);
+    return entity;
 };
 
 World.prototype.addEntities = function addEntities(entities) {
     var self = this;
-    entities.forEach(function (entity) {
-        World.prototype.addEntity.call(self, entity);
+    var added = entities.filter(function (entity) {
+        return World.prototype.addEntity.call(self, entity, /* multiple: */ true);
     });
+    if (added.length > 0) {
+        self.game.events.emit('world:geometryChanged',
+            {
+                added: added.filter(function (ent) {
+                    // NOTE: this condition has to match the condition for adding to the static map in addEntity
+                    return (ent.components.movable && ent.components.movable.body.treatment === 'static');
+                }).map(function (ent) {
+                    return ent.components.movable.body;
+                })
+            });
+    }
 };
 
 World.prototype.setFloor = function setFloor(floorTiles) {
@@ -425,7 +461,10 @@ World.prototype.removeEntity = function removeEntity(entity) {
         if (movable.treatment === 'static') {
             var scratch = this.__physics.scratchpad();
             var block = scratch.block().set(movable.state.pos.x, movable.state.pos.y);
-            this.staticItemStore.removeAt(block.x, block.y, movable);
+            var removed = this.staticItemStore.removeAt(block.x, block.y, movable);
+            if (removed) {
+                this.game.events.emit('world:geometryChanged', { removed: [movable] });
+            }
             scratch.done();
             // this.staticItemsTree.untrackBody({ body: movable });
         } else {

@@ -3,8 +3,14 @@
 function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
     var self = this;
 
+    // worldBoundary points and segments are calculated from data coming out of the boundary manager
+    var worldBoundaryPoints = [];
+    var worldBoundarySegments = []; // even indicies are vectors to start of segment, odd indicies are the vector along the segment
+
+    // segments and points are for entities with LightrayIntersector
+    var points = [];
     var segments = []; // even indicies are vectors to start of segment, odd indicies are the vector along the segment
-    var points = []; // vectors from body.vertices
+
     var visionLightmaskPoints = [];
     var pointsToSend = [];
     var player = null;
@@ -18,6 +24,26 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
         self.center = player.components.placement.position;
         lightRadius = player.components.lightsource.scale * 10; // TODO -- fix this hardcoded scale modifier
     });
+
+    game.events.on('world:boundaryChanged', onWorldBoundaryPointsChanged);
+    function onWorldBoundaryPointsChanged(data) {
+        var i, ilen, j, jlen, base, offset;
+        while (worldBoundaryPoints.length !== 0) {
+            worldBoundaryPoints.pop();
+        }
+        while (worldBoundarySegments.length !== 0) {
+            worldBoundarySegments.pop();
+        }
+        for (i = 0, ilen = data.shells.length; i < ilen; i++) {
+            // note that the boundary data contains the end point same as start point in each polygon
+            for (j = 0, jlen = data.shells[i].length - 1; j < jlen; j++) {
+                base = new physics.vector(data.shells[i][j]);
+                offset = new physics.vector(data.shells[i][j + 1]).vsub(base);
+                worldBoundaryPoints.push(base);
+                worldBoundarySegments.push(base, offset);
+            }
+        }
+    }
 
     // this is intended to be used in an animate loop so do it as fast as called
     self.step = function step() {
@@ -42,6 +68,14 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
             }
         }
 
+        // also copy in world geometry data
+        for (i = 0, len = worldBoundaryPoints.length; i < len; i++) {
+            points.push(worldBoundaryPoints[i]);
+        }
+        for (i = 0, len = worldBoundarySegments.length; i < len; i++) {
+            segments.push(worldBoundarySegments[i]);
+        }
+
         addBaseVisionPoints(scratch);
 
         for (i = 0, len = points.length; i < len; i++) {
@@ -50,6 +84,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
 
         sortPointsByOrientation();
 
+        // remove duplicates -- we could probably use some different kind of simplify step here
         var last = visionLightmaskPoints[0];
         if (visionLightmaskPoints.length > 0) {
             pointsToSend.push(last);

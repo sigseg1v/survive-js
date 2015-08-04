@@ -12,6 +12,7 @@
         var world = container.resolve('World');
         var messageHandler = container.resolve('ClientMessageHandler');
         var actions = container.resolve('ClientActions');
+        container.resolve('BoundaryManager');
 
         socket.once('playerId', function (id) {
             player.id = id;
