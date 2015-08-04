@@ -16,6 +16,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
     var player = null;
 
     self.center = new physics.vector();
+    var layerRoofOffset = new physics.vector(-0.5, 0.5);
     var lightRadius = 1;
 
     // TODO -- this should actually be a promise and not a game event
@@ -161,9 +162,11 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
     var castToEitherSide_scratch = new physics.vector();
     function castToEitherSide(point) {
         var up = castToEitherSide_scratch.clone(point).vsub(self.center).rotate(0.00001).normalize().mult(lightRadius);
-        visionLightmaskPoints.push(castToward(up));
+        var upHit = castToward(up).vadd(layerRoofOffset);
+        visionLightmaskPoints.push(upHit);
         var down = castToEitherSide_scratch.clone(point).vsub(self.center).rotate(-0.00001).normalize().mult(lightRadius);
-        visionLightmaskPoints.push(castToward(down));
+        var downHit = castToward(down).vadd(layerRoofOffset);
+        visionLightmaskPoints.push(downHit);
     }
 
     var castToward_scratch1 = new physics.vector();
@@ -239,8 +242,8 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
         visionLightmaskPoints.sort(sortByOffsetOrientation);
 
         function sortByOffsetOrientation(a, b) {
-            var a_angle = angleScratch.clone(a).vsub(self.center).angle();
-            var b_angle = angleScratch.clone(b).vsub(self.center).angle();
+            var a_angle = angleScratch.clone(a).vsub(self.center).vsub(layerRoofOffset).angle();
+            var b_angle = angleScratch.clone(b).vsub(self.center).vsub(layerRoofOffset).angle();
             return b_angle - a_angle;
         }
     }
