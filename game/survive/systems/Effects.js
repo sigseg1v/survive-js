@@ -95,7 +95,7 @@ function Effects(pixi, physics, game, renderer, Model) {
         for (index = 0; index < spritesUnderEffect.length; /* nop */) {
             entry = spritesUnderEffect[index];
             if ((entry.duration === 'end' && !entry.sprite.playing) || currentTime - entry.startTime > entry.duration) {
-                game.events.emit('removeGraphics', entry.sprite);
+                game.events.emit(entry.overlay ? 'removeOverlayGraphics' : 'removeGraphics', entry.sprite);
                 spritesUnderEffect.splice(index, 1);
                 // removed from array, so don't increment index
             } else if (entry.duration === 'end' && entry.sprite.playing) {
@@ -164,7 +164,6 @@ function Effects(pixi, physics, game, renderer, Model) {
         sprite.anchor.set(0.5, 0.5);
         sprite.scale.x = GFX_SCALE / 40;
         sprite.scale.y = GFX_SCALE / 40;
-        sprite.layer = 9;
         var difference = { x: 0, y: -1 };
         renderer.applyInverseCoordinateTransformUnscaled(difference);
         var pos = { x: entity.components.placement.position.x + difference.x, y: entity.components.placement.position.y + difference.y };
@@ -179,9 +178,10 @@ function Effects(pixi, physics, game, renderer, Model) {
             },
             end: endPos,
             startTime: now(),
-            duration: 800
+            duration: 800,
+            overlay: true
         });
-        game.events.emit('addGraphics', sprite);
+        game.events.emit('addOverlayGraphics', sprite);
     };
 
     function randomizePositionInplace(pos, xdelta, ydelta) {

@@ -22,7 +22,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
     game.events.once('playerLoaded', function(ent) {
         player = ent;
         self.center = player.components.placement.position;
-        lightRadius = player.components.lightsource.scale * 10; // TODO -- fix this hardcoded scale modifier
+        lightRadius = player.components.lightsource.scale * 20; // TODO -- fix this hardcoded scale modifier
     });
 
     game.events.on('world:boundaryChanged', onWorldBoundaryPointsChanged);

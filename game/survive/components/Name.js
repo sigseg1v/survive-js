@@ -47,7 +47,7 @@ NameComponent.prototype.reconstruct = function reconstruct(serialized, initializ
 };
 NameData.prototype.deconstruct = function deconstruct() {
     if (!isServer) {
-        this.game.events.emit('removeGraphics', this.graphics.textData);
+        this.game.events.emit('removeOverlayGraphics', this.graphics.textData);
     }
 };
 function initNameplate(data, container) {
@@ -55,8 +55,7 @@ function initNameplate(data, container) {
     graphics.setText(data.name, { font: '12px Michroma', fill: 'green' });
     graphics.offset.x = (graphics.getTextWidth() / 2) * -1;
     graphics.offset.y = -1.5;
-    graphics.textData.layer = 8;
-    data.game.events.emit('addGraphics', graphics.textData);
+    data.game.events.emit('addOverlayGraphics', graphics.textData);
     data.graphics = graphics;
 }
 

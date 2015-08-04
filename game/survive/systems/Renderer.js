@@ -10,66 +10,6 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     self.width = 1280;
     self.height = 720;
 
-    function applyCoordinateTransform(target, x, y) {
-        if (x === undefined) {
-            x = target.x;
-        }
-        if (y === undefined) {
-            y = target.y;
-        }
-        x *= GFX_SCALE;
-        y *= GFX_SCALE * -1;
-        target.x = x - y;
-        target.y = (x + y) / 2;
-
-        return target;
-    }
-
-    function applyInverseCoordinateTransform(target, x, y) {
-        if (x === undefined) {
-            x = target.x;
-        }
-        if (y === undefined) {
-            y = target.y;
-        }
-
-        target.x = x / 2 + y;
-        target.y = y - (x / 2);
-        target.x /= GFX_SCALE;
-        target.y /= GFX_SCALE * -1;
-
-        return target;
-    }
-
-    function applyCoordinateTransformUnscaled(target, x, y) {
-        if (x === undefined) {
-            x = target.x;
-        }
-        if (y === undefined) {
-            y = target.y;
-        }
-        y *= -1;
-        target.x = x - y;
-        target.y = (x + y) / 2;
-
-        return target;
-    }
-
-    function applyInverseCoordinateTransformUnscaled(target, x, y) {
-        if (x === undefined) {
-            x = target.x;
-        }
-        if (y === undefined) {
-            y = target.y;
-        }
-
-        target.x = x / 2 + y;
-        target.y = y - (x / 2);
-        target.y *= -1;
-
-        return target;
-    }
-
     self.applyCoordinateTransform = applyCoordinateTransform;
     self.applyInverseCoordinateTransform = applyInverseCoordinateTransform;
     self.applyCoordinateTransformUnscaled = applyCoordinateTransformUnscaled;
@@ -80,7 +20,6 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
 
     self.renderer = renderer;
     self.stage = new pixi.Container(0x272b30);
-    //self.stage.rotation = - Math.PI / 3;
     self.world = new pixi.Container();
     self.worldOffset = { x: -3 , y: -6 };
 
@@ -93,6 +32,9 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
 
     self.zoom = 1;
     self.focus = null;
+
+    var worldOverlay = new pixi.Container();
+    self.stage.addChild(worldOverlay);
 
     var lightmapRenderer = new pixi.RenderTexture(renderer, self.width, self.height);
     var lightmapWorldWrapper = new pixi.Container();
@@ -124,6 +66,8 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     game.events.on('removeEntity', onRemoveEntity);
     game.events.on('addGraphics', onAddGraphics);
     game.events.on('removeGraphics', onRemoveGraphics);
+    game.events.on('addOverlayGraphics', onAddOverlayGraphics);
+    game.events.on('removeOverlayGraphics', onRemoveOverlayGraphics);
     game.events.on('addLightsource', onAddLightsource);
     game.events.on('removeLightsource', onRemoveLightsource);
     game.events.on('vision:pointsUpdated', onVisionPointsUpdated);
@@ -235,6 +179,17 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
         }
     }
 
+    function onAddOverlayGraphics(graphics) {
+        if (graphics.hasOwnProperty('staticPosition')) {
+            applyCoordinateTransform(graphics.position, graphics.staticPosition.x, graphics.staticPosition.y);
+        }
+        worldOverlay.addChild(graphics);
+    }
+
+    function onRemoveOverlayGraphics(graphics) {
+        worldOverlay.removeChild(graphics);
+    }
+
     function computeZFromWorldPosition(worldPosition, graphics, skipReposition) {
         var newZ = worldPosition.y - worldPosition.x;
         if (graphics.z !== newZ) {
@@ -286,19 +241,21 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     }
 
     self.step = function step() {
-        var i, l, j, jl, entity, sprites, sprite, placement, scale;
+        var i, l, j, jl, entity, sprites, sprite, placement, scale, xTransform, yTransform;
 
+        // TODO -- do we want maybe add yet another overlay ontop of this one that is unscaled?
+        worldOverlay.scale.x = self.zoom / GFX_SCALE;
+        worldOverlay.scale.y = self.zoom / GFX_SCALE;
         self.world.scale.x = self.zoom / GFX_SCALE;
         self.world.scale.y = self.zoom / GFX_SCALE;
         lightmapWorld.scale.x = self.zoom / GFX_SCALE;
         lightmapWorld.scale.y = self.zoom / GFX_SCALE;
         if (self.focus) {
-            applyCoordinateTransform(self.world.position, ((self.focus.x + self.worldOffset.x) * self.zoom * -1 + (self.width / 2)) / GFX_SCALE, ((self.focus.y + self.worldOffset.y) * self.zoom * 1 + (self.height / 2)) / GFX_SCALE * -1);
-            applyCoordinateTransform(lightmapWorld.position, ((self.focus.x + self.worldOffset.x) * self.zoom * -1 + (self.width / 2)) / GFX_SCALE, ((self.focus.y + self.worldOffset.y) * self.zoom * 1 + (self.height / 2)) / GFX_SCALE * -1);
-            // self.world.position.x = self.focus.x * self.zoom * -1 + (self.width / 2);
-            // self.world.position.y = self.focus.y * self.zoom * 1 + (self.height / 2);
-            // lightmapWorld.position.x = self.focus.x * self.zoom * -1 + (self.width / 2);
-            // lightmapWorld.position.y = self.focus.y * self.zoom * 1 + (self.height / 2);
+            xTransform = ((self.focus.x + self.worldOffset.x) * self.zoom * -1 + (self.width / 2)) / GFX_SCALE;
+            yTransform = ((self.focus.y + self.worldOffset.y) * self.zoom * 1 + (self.height / 2)) / GFX_SCALE * -1;
+            applyCoordinateTransform(worldOverlay.position, xTransform, yTransform);
+            applyCoordinateTransform(self.world.position, xTransform, yTransform);
+            applyCoordinateTransform(lightmapWorld.position, xTransform, yTransform);
         }
 
         for (i = 0, l = Model.entities.length; i < l; ++i) {
@@ -339,6 +296,66 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
 
         renderer.render(self.stage);
     };
+
+    function applyCoordinateTransform(target, x, y) {
+        if (x === undefined) {
+            x = target.x;
+        }
+        if (y === undefined) {
+            y = target.y;
+        }
+        x *= GFX_SCALE;
+        y *= GFX_SCALE * -1;
+        target.x = x - y;
+        target.y = (x + y) / 2;
+
+        return target;
+    }
+
+    function applyInverseCoordinateTransform(target, x, y) {
+        if (x === undefined) {
+            x = target.x;
+        }
+        if (y === undefined) {
+            y = target.y;
+        }
+
+        target.x = x / 2 + y;
+        target.y = y - (x / 2);
+        target.x /= GFX_SCALE;
+        target.y /= GFX_SCALE * -1;
+
+        return target;
+    }
+
+    function applyCoordinateTransformUnscaled(target, x, y) {
+        if (x === undefined) {
+            x = target.x;
+        }
+        if (y === undefined) {
+            y = target.y;
+        }
+        y *= -1;
+        target.x = x - y;
+        target.y = (x + y) / 2;
+
+        return target;
+    }
+
+    function applyInverseCoordinateTransformUnscaled(target, x, y) {
+        if (x === undefined) {
+            x = target.x;
+        }
+        if (y === undefined) {
+            y = target.y;
+        }
+
+        target.x = x / 2 + y;
+        target.y = y - (x / 2);
+        target.y *= -1;
+
+        return target;
+    }
 
     Object.defineProperty(this, 'mouse', {
         get: function () { return renderer.plugins.interaction.mouse; }
