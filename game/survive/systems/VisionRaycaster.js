@@ -51,6 +51,8 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
         var entity, entities;
         var scratch = physics.scratchpad();
         var vectorScratch = scratch.vector();
+        var point;
+        var segStart, segVec;
 
         while (visionLightmaskPoints.length !== 0) {
             visionLightmaskPoints.pop();
@@ -68,12 +70,22 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
             }
         }
 
-        // also copy in world geometry data
+        // also copy in world geometry data -- we can still filter out a lot of it based on the light radius
         for (i = 0, len = worldBoundaryPoints.length; i < len; i++) {
-            points.push(worldBoundaryPoints[i]);
+            point = worldBoundaryPoints[i];
+            if (vectorScratch.clone(point).vsub(self.center).norm() <= lightRadius) {
+                points.push(point);
+            }
         }
-        for (i = 0, len = worldBoundarySegments.length; i < len; i++) {
-            segments.push(worldBoundarySegments[i]);
+        for (i = 0, len = worldBoundarySegments.length; i < len; i+=2) {
+            segStart = worldBoundarySegments[i];
+            segVec = worldBoundarySegments[i + 1];
+            // use twice the light radius when trying to see if wall segments intersect with the
+            // vision radius, because we want lines connect to those off the screen to appear straighter
+            if (segmentIntersectsCircle(segStart, segVec, self.center, lightRadius * 2)) {
+                segments.push(segStart);
+                segments.push(segVec);
+            }
         }
 
         addBaseVisionPoints(scratch);
@@ -210,6 +222,15 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
             // else -- lines do not intersect
         }
         return false;
+    }
+
+    var segmentIntersectsCircle_scratch1 = new physics.vector();
+    var segmentIntersectsCircle_scratch2 = new physics.vector();
+    function segmentIntersectsCircle(lineStart, lineVector, circleCenter, circleRadius) {
+        var startToCircleCenter = segmentIntersectsCircle_scratch1.clone(circleCenter).vsub(lineStart);
+        var projOntoLine = segmentIntersectsCircle_scratch2.clone(startToCircleCenter).vproj(lineVector);
+        // TODO -- I am not sure if this is actually correct or if I have to check the length of one of these vectors
+        return (projOntoLine.dist(startToCircleCenter) <= circleRadius);
     }
 
     var sortPointsByOrientation_scratch = new physics.vector();
