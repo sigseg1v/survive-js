@@ -73,14 +73,18 @@ function ChunkManagerClient(socket, world, game, Model) {
         }
         pruning = true;
         var entity;
+        var toBatchRemove = [];
         var numToPruneThisRun = Math.min(20, pruneCandidates.length);
         while (numToPruneThisRun-- > 0) {
             entity = pruneCandidates.pop();
             // need to retest here to see both if the ent still exists and if it's still
             // in place to be removed, since we are processing this array over multiple cycles
             if (world.entityById(entity.id) && !entityIsInLoadedChunk(entity)) {
-                world.removeEntity(entity);
+                toBatchRemove.push(entity);
             }
+        }
+        if (toBatchRemove.length > 0) {
+            world.removeEntities(toBatchRemove);
         }
         if (pruneCandidates.length > 0) {
             // this takes an amazing amount of stress off the frame processing length,

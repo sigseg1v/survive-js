@@ -43,6 +43,7 @@ function VisionRaycaster(game, tuning, LightrayIntersector, physics) {
                 worldBoundarySegments.push(base, offset);
             }
         }
+        console.log(worldBoundaryPoints.length);
     }
 
     // this is intended to be used in an animate loop so do it as fast as called

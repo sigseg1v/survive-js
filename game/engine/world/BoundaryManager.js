@@ -14,7 +14,6 @@ function BoundaryManager(physics, world, game) {
 
     var worldPolys = [];
 
-    // TODO -- this will get called every time something is removed (but add is batched)
     game.events.on('world:geometryChanged', onWorldGeometryChanged);
 
     function onWorldGeometryChanged(data) {
@@ -37,7 +36,7 @@ function BoundaryManager(physics, world, game) {
         var unionedWorld = jsts.operation.union.CascadedPolygonUnion.union(worldPolys);
         if (data.removed && toRemove.length > 0) {
             var unionedRemove = jsts.operation.union.CascadedPolygonUnion.union(toRemove);
-            console.log('do set difference on items to remove');
+            unionedWorld = unionedWorld.difference(unionedRemove);
         }
         worldPolys = unionedWorld.geometries ? unionedWorld.geometries : [ unionedWorld ];
 
