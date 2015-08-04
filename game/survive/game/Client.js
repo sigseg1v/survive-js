@@ -1,8 +1,12 @@
 (function(exports) {
     "use strict";
     var container = require('wires');
+    var initialized = false;
 
     function init() {
+        if (initialized) {
+            throw "game already initialized";
+        }
         loadAssets();
         var game = loadGame();
         var renderer = configureRenderer();
@@ -12,7 +16,6 @@
         var world = container.resolve('World');
         var messageHandler = container.resolve('ClientMessageHandler');
         var actions = container.resolve('ClientActions');
-        container.resolve('BoundaryManager');
 
         socket.once('playerId', function (id) {
             player.id = id;
@@ -36,9 +39,14 @@
 
         // start the game
         window.setInterval(game.run, 1000/60);
+
+        initialized = true;
     }
 
     function login(data) {
+        if (!initialized) {
+            throw "game must be initialized before calling login";
+        }
         var socket = container.resolve('socket');
 
         socket.emit('playerConfigData', data);
@@ -61,6 +69,9 @@
         var calculateLighting = container.resolve('system/CalculateLighting');
         var cheats = container.resolve('system/Cheats');
         var vision = container.resolve('system/VisionRaycaster');
+
+        // need this to get instantiated immediately (before world loaded) -- could be a race condition here
+        container.resolve('BoundaryManager');
 
         game.registerSystem(input);
         game.registerSystem(playerSync);

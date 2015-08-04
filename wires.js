@@ -34,7 +34,10 @@ container.registerAlias('Hex', require('game/engine/world/Hex'));
 container.registerAlias('Block', require('game/engine/world/Block'));
 container.registerType('Graphics', require('game/engine/presentation/Graphics'));
 container.registerInstance('Pathfinder', require('game/engine/world/Pathfinder'));
-container.registerInstance('BoundaryManager', require('game/engine/world/BoundaryManager'));
+if (!isServer) {
+    // server doesn't care about wasting calculations on walls since client only needs it for vision
+    container.registerInstance('BoundaryManager', require('game/engine/world/BoundaryManager'));
+}
 
 if (!isServer) {
     var pixiLib = require('pixi.js');
