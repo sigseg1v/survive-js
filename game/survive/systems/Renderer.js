@@ -33,9 +33,6 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     self.zoom = 1;
     self.focus = null;
 
-    var worldOverlay = new pixi.Container();
-    self.stage.addChild(worldOverlay);
-
     var lightmapRenderer = new pixi.RenderTexture(renderer, self.width, self.height);
     var lightmapWorldWrapper = new pixi.Container();
     var lightmapWorld = new pixi.Container();
@@ -51,6 +48,9 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     self.world.mask = lightmapStage;
 
     self.stage.addChild(self.world);
+
+    var worldOverlay = new pixi.Container();
+    self.stage.addChild(worldOverlay);
 
     domLoaded.then(function () {
         document.getElementById('game-viewport').appendChild(renderer.view);
