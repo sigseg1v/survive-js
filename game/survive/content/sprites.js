@@ -165,6 +165,7 @@ function register(container) {
         }
 
         sprite.clip = action + "_" + direction;
+        sprite.rotation = 0;
     }
 
     function orientationToDirection(o) {

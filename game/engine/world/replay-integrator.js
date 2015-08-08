@@ -133,8 +133,8 @@ function extend(physics) {
                             //
 
                             if (state.angular.vel === state.old.angular.vel && body.started()){
-
-                                state.angular.vel = (state.angular.pos - state.old.angular.pos);
+                                // disable this code path because otherwise, manually overwriting angular position will make things explode
+                                //state.angular.vel = (state.angular.pos - state.old.angular.pos);
 
                             } else {
 

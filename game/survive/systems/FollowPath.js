@@ -40,7 +40,7 @@ function FollowPath(container, game, Movable, Placement, Path, world, physics) {
             if (comp.currentWaypoint) {
                 movable.velocity.clone(wpVector.clone(comp.currentWaypoint).vsub(placement.position).normalize().mult(movable.speed));
                 if (!movable.velocity.equals(physics.vector.zero)) {
-                    placement.orientation = movable.velocity.angle() * -1;
+                    placement.orientation = movable.velocity.angle();
                 }
             }
         });
