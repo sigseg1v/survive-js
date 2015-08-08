@@ -45,7 +45,7 @@ function parseLevelString(value) {
             walls.push(placement);
         } else if (node === glyphs.SPAWNER) {
             other.push(function() {
-                var ent = container.resolve('entity/SpawnerEntity/slime');
+                var ent = container.resolve('entity/SpawnerEntity/zombie');
                 ent.components.placement.position = placement.getCenter();
                 return ent;
             });

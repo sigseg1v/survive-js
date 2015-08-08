@@ -22,11 +22,11 @@ function FollowPath(container, game, Movable, Placement, Path, world, physics) {
         var wpVector = scratch.vector();
         Path.forWith([Movable.name, Placement.name], function (ent) {
             var comp = ent.components.path;
-            var position = ent.components.placement.position;
+            var placement = ent.components.placement;
             var movable = ent.components.movable;
             if (comp.currentWaypoint) {
                 wpVector.clone(comp.currentWaypoint);
-                if (wpVector.dist(position) < WP_TAG_RANGE) {
+                if (wpVector.dist(placement.position) < WP_TAG_RANGE) {
                     if (!trySetNextWaypoint(comp)) {
                         waypointsExpired[ent.id] = ent;
                     }
@@ -38,7 +38,10 @@ function FollowPath(container, game, Movable, Placement, Path, world, physics) {
             }
 
             if (comp.currentWaypoint) {
-                movable.velocity.clone(wpVector.clone(comp.currentWaypoint).vsub(position).normalize().mult(movable.speed));
+                movable.velocity.clone(wpVector.clone(comp.currentWaypoint).vsub(placement.position).normalize().mult(movable.speed));
+                if (!movable.velocity.equals(physics.vector.zero)) {
+                    placement.orientation = movable.velocity.angle() * -1;
+                }
             }
         });
 

@@ -50,9 +50,23 @@ function genericEnemy(container) {
     return ent;
 }
 
+function zombieEnemy(container) {
+    var ent = container.resolve('entity/EnemyEntity', {
+        model: {
+            name: 'zombie'
+        },
+        movable: { body: 'GenericEnemy' }
+    });
+    ent.components.health.currentHealth = 10;
+    ent.components.health.maximumHealth = 10;
+    ent.components.melee.damage = 1;
+    ent.components.aggro.targetLabels = ['player'];
+    return ent;
+}
+
 function spawnerEntity(container) {
     var ent = container.resolve('entity/SpawnerEntity');
-    ent.components.spawner.type = 'entity/EnemyEntity/slime';
+    ent.components.spawner.type = 'entity/EnemyEntity/zombie';
     ent.components.spawner.cooldown = 5000;
     return ent;
 }
@@ -62,7 +76,8 @@ function register(container) {
     container.registerType('entity/PlayerEntity/clientPlayer', clientPlayer.bind(null, container));
     container.registerType('entity/WallEntity/wall', wallEntity.bind(null, container));
     container.registerType('entity/EnemyEntity/slime', genericEnemy.bind(null, container));
-    container.registerType('entity/SpawnerEntity/slime', spawnerEntity.bind(null, container));
+    container.registerType('entity/EnemyEntity/zombie', zombieEnemy.bind(null, container));
+    container.registerType('entity/SpawnerEntity/zombie', spawnerEntity.bind(null, container));
 }
 
 module.exports = {

@@ -269,7 +269,11 @@ function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
                     applyCoordinateTransform(sprite.position, placement.position.x, placement.position.y);
                     // sprite.position.x = placement.position.x * GFX_SCALE;
                     // sprite.position.y = placement.position.y * -1 * GFX_SCALE;
-                    sprite.rotation = placement.orientation * -1;
+                    if (sprite.renderLogic) {
+                        sprite.renderLogic(entity);
+                    } else {
+                        sprite.rotation = placement.orientation * -1;
+                    }
                 }
             }
         }

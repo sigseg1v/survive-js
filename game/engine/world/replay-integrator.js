@@ -69,7 +69,7 @@ function extend(physics) {
                                 }
                             }
 
-                            state.angular.pos = futureState.previous ? futureState.previous.state.angular.pos : state.vel.angle();
+                            state.angular.pos = futureState.state.angular.pos;
                             state.acc.zero();
                             state.angular.vel = 0;
                             body.clearOlderReplayStates(futureState);
@@ -205,14 +205,18 @@ function extend(physics) {
                         // Angular components
                         //
 
+                        if (body.integrationMode() === 'future') {
+                            state.old.angular.pos = state.angular.pos;
+                            state.old.angular.vel = state.angular.vel;
+                        } else {
+                            state.angular.vel *= dt * dtcorr;
 
-                        state.angular.vel *= dt * dtcorr;
+                            state.old.angular.pos = state.angular.pos;
 
-                        state.old.angular.pos = state.angular.pos;
-
-                        state.angular.pos += state.angular.vel;
-                        state.angular.vel /= dt * dtcorr;
-                        state.old.angular.vel = state.angular.vel;
+                            state.angular.pos += state.angular.vel;
+                            state.angular.vel /= dt * dtcorr;
+                            state.old.angular.vel = state.angular.vel;
+                        }
                     }
                 }
 

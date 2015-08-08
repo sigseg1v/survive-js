@@ -70,8 +70,8 @@ PlacementComponent.prototype.reconstruct = function reconstruct(serialized, init
     if (!this.ignoreUpdates) {
         if (initialize || !(serialized._physicsControlled)) {
             this._position.clone(serialized._position);
+            this.orientation = serialized.orientation;
         }
-        this.orientation = serialized.orientation;
     }
 };
 
