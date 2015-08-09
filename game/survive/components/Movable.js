@@ -1,4 +1,5 @@
 "use strict";
+var isServer = typeof window === 'undefined';
 var Component = require('game/engine/Component');
 var bodies = require('game/survive/content/bodies');
 
@@ -64,6 +65,20 @@ MovableData.prototype.toJSON = function toJSON() {
 };
 MovableData.prototype.linkVelocity = function linkVelocity(vel) {
     this._velocity = vel;
+};
+MovableData.prototype.finishComposition = function finishComposition(entity) {
+    this.body.state.pos.clone(entity.components.placement.position);
+    this.body.state.vel.clone(this.velocity);
+    entity.components.placement.linkPosition(this.body.state.pos);
+    if (!this.body.fixedOrientation()) {
+        entity.components.placement.linkOrientation(this.body.state.angular);
+    }
+    this.linkVelocity(this.body.state.vel);
+    if (isServer && this.body.integrationMode() !== 'disabled') {
+        this.body.integrationMode('normal');
+    }
+
+    this.body.entity(entity);
 };
 MovableComponent.prototype.reconstruct = function reconstruct(serialized, initialize) {
     if (initialize) {

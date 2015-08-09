@@ -31,6 +31,40 @@ function extend(physics) {
     });
 
     physics.body.mixin({
+        fixedOrientation: function (val) {
+            var body = this;
+
+            if (val && !body._fixedOrientation) {
+                // init
+                body._fixedOrientation = true;
+
+                body._storedAngularPos = 0;
+                body._storedOldAngularPos = 0;
+                Object.defineProperty(body.state.angular, 'pos', {
+                    get: function () { return 0; },
+                    set: function (val) { body._storedAngularPos = val; }
+                });
+                Object.defineProperty(body.state.old.angular, 'pos', {
+                    get: function () { return 0; },
+                    set: function (val) { body._storedOldAngularPos = val; }
+                });
+            } else if (val !== undefined) { // guard against getter where val is undefined
+                if (!val && body._fixedOrientation) {
+                    delete body.state.angular.pos;
+                    body.state.angular.pos = body._storedAngularPos || 0;
+                    delete body.state.old.angular.pos;
+                    body.state.old.angular.pos = body._storedOldAngularPos || 0;
+                }
+
+                // just set
+                body._fixedOrientation = !!val;
+            }
+
+            return body._fixedOrientation || false;
+        }
+    });
+
+    physics.body.mixin({
         integrationMode: function (val) {
             if (val !== undefined) {
                 this._integrationMode = val;
@@ -123,7 +157,45 @@ function extend(physics) {
         }
     });
 
-    physics.body('ghost-circle', 'circle', function (parent) {
+    physics.body('base-convex-polygon', 'convex-polygon', function (parent) {
+        var defaults = {
+            collisionMode: 'normal',
+            integrationMode: 'normal',
+            fixedOrientation: false
+        };
+
+        return {
+            init: function init(args) {
+                parent.init.call(this, args);
+                var options = physics.util.extend({}, defaults, args.options);
+
+                this.collisionMode(options.collisionMode);
+                this.integrationMode(options.integrationMode);
+                this.fixedOrientation(options.fixedOrientation);
+            }
+        };
+    });
+
+    physics.body('base-circle', 'circle', function (parent) {
+        var defaults = {
+            collisionMode: 'normal',
+            integrationMode: 'normal',
+            fixedOrientation: false
+        };
+
+        return {
+            init: function init(args) {
+                parent.init.call(this, args);
+                var options = physics.util.extend({}, defaults, args.options);
+
+                this.collisionMode(options.collisionMode);
+                this.integrationMode(options.integrationMode);
+                this.fixedOrientation(options.fixedOrientation);
+            }
+        };
+    });
+
+    physics.body('ghost-circle', 'base-circle', function (parent) {
         var defaults = {
             collisionMode: 'static-only'
         };
@@ -134,12 +206,11 @@ function extend(physics) {
                 var options = physics.util.extend({}, defaults, args.options);
 
                 this.collisionMode(options.collisionMode);
-                this.integrationMode(options.integrationMode);
             }
         };
     });
 
-    physics.body('collision-circle', 'circle', function (parent) {
+    physics.body('collision-circle', 'base-circle', function (parent) {
         var defaults = {
             collisionMode: 'normal'
         };
@@ -150,7 +221,6 @@ function extend(physics) {
                 var options = physics.util.extend({}, defaults, args.options);
 
                 this.collisionMode(options.collisionMode);
-                this.integrationMode(options.integrationMode);
             }
         };
     });

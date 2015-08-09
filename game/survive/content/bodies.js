@@ -4,7 +4,7 @@ var isServer = typeof window === 'undefined';
 module.exports = function loadBody(physics, name) {
     var body;
     if (name === 'Wall') {
-        body = physics.body('convex-polygon', {
+        body = physics.body('base-convex-polygon', {
             x: 0,
             y: 0,
             restitution: 0,
@@ -14,7 +14,11 @@ module.exports = function loadBody(physics, name) {
                 { x:   0.5, y:  0.5 },
                 { x:  -0.5, y:  0.5 }
             ],
-            treatment: 'static'
+            treatment: 'static',
+            options: {
+                integrationMode: 'disabled',
+                fixedOrientation: true
+            }
         });
     } else if (name === 'Player') {
         body = physics.body('ghost-circle', {
@@ -38,6 +42,29 @@ module.exports = function loadBody(physics, name) {
             treatment: 'dynamic',
             options: {
                 integrationMode: isServer ? 'normal' : 'future' // server controls enemy physics, client loads
+            }
+        });
+    } else if (name === 'Zombie') {
+        body = physics.body(/* 'base-convex-polygon' */ 'collision-circle', {
+            x: 0,
+            y: 0,
+            // vertices: [
+            //     { x:  0.0, y: -0.2 },
+            //     { x: -0.1, y: -0.15 },
+            //     { x: -0.15, y: 0 },
+            //     { x: -0.1, y:  0.15 },
+            //     { x:  0.0, y:  0.2 },
+            //     { x:  0.1, y:  0.15 },
+            //     { x:  0.15, y: 0 },
+            //     { x:  0.1, y: -0.15 }
+            // ],
+            radius: 0.3,
+            restitution: 0,
+            cof: 0,
+            treatment: 'dynamic',
+            options: {
+                integrationMode: isServer ? 'normal' : 'future', // server controls enemy physics, client loads
+                fixedOrientation: true
             }
         });
     } else if (name === 'AttackArc1'){

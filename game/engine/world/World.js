@@ -352,17 +352,6 @@ World.prototype.addEntity = function addEntity(entity, multiple) {
 
     var movable = entity.components.movable ? entity.components.movable.body : null;
     if (movable) {
-        movable.state.pos.clone(entity.components.placement.position);
-        movable.state.vel.clone(entity.components.movable.velocity);
-        entity.components.placement.linkPosition(movable.state.pos);
-        entity.components.placement.linkOrientation(movable.state.angular);
-        entity.components.movable.linkVelocity(movable.state.vel);
-        if (isServer && movable.integrationMode() !== 'disabled') {
-            movable.integrationMode('normal');
-        }
-
-        movable.entity(entity);
-
         entity.__ignorePhysics = false;
         this.physics.add(movable);
 

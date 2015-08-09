@@ -55,7 +55,7 @@ function zombieEnemy(container) {
         model: {
             name: 'zombie'
         },
-        movable: { body: 'GenericEnemy' }
+        movable: { body: 'Zombie' }
     });
     ent.components.health.currentHealth = 10;
     ent.components.health.maximumHealth = 10;

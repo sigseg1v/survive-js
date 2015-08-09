@@ -137,7 +137,7 @@ function register(container) {
         });
         sprite.play("walk_left");
         sprite.anchor.x = 0.5;
-        sprite.anchor.y = 0.5;
+        sprite.anchor.y = 0.65;
         sprite.position.x = 0;
         sprite.position.y = 0;
         sprite.scale.x = 1;
