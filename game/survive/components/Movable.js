@@ -19,7 +19,9 @@ function MovableData(comp, physics, entity, options) {
 
     this.ignoreUpdates = false;
 
-    this.body = options.body ? bodies(physics, options.body) : null;
+    var loadedBody = bodies(physics, options.body);
+    this.body = loadedBody ? loadedBody.body : null;
+    this.hitbox = loadedBody ? loadedBody.hitbox : null;
     this.bodyName = options.body;
 
     this._physicsControlled = options.physicsControlled;
@@ -53,6 +55,9 @@ function MovableData(comp, physics, entity, options) {
         this.speed = 0;
     }
 
+    if (this.hitbox) {
+        this.hitbox.state.pos = entity.components.placement.position;
+    }
 }
 MovableData.prototype.toJSON = function toJSON() {
     return {
@@ -74,16 +79,30 @@ MovableData.prototype.finishComposition = function finishComposition(entity) {
         entity.components.placement.linkOrientation(this.body.state.angular);
     }
     this.linkVelocity(this.body.state.vel);
+
+    this.body.entity(entity);
+
+    if (this.hitbox) {
+        this.hitbox.state.pos = entity.components.placement.position;
+        this.hitbox.entity(entity);
+    }
+
     if (isServer && this.body.integrationMode() !== 'disabled') {
         this.body.integrationMode('normal');
     }
-
-    this.body.entity(entity);
 };
 MovableComponent.prototype.reconstruct = function reconstruct(serialized, initialize) {
     if (initialize) {
         this.bodyName = serialized.bodyName;
-        this.body = bodies(this._physics, serialized.bodyName);
+        var loadedBody = bodies(this._physics, serialized.bodyName);
+        this.body = loadedBody.body;
+        if (this.body) {
+            this.body.entity(this.entity);
+        }
+        this.hitbox = loadedBody.hitbox;
+        if (this.hitbox) {
+            this.hitbox.entity(this.entity);
+        }
         this.body.labels = this.entity.labels;
         this.body.movespeed(0.0025);
         Object.defineProperty(this, 'speed', {

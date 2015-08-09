@@ -37,7 +37,7 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
 
     var collisionDetector = physics.behavior('body-collision-detection');
     var pool = {
-        attackArc1: bodies(physics, 'AttackArc1')
+        attackArc1: bodies(physics, 'AttackArc1').hitbox
     };
 
     function spawnEnemyAtLocation(location) {
@@ -72,16 +72,12 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             var entIds = chunk.getEntityIds();
             for (i = 0, ilen = entIds.length; i < ilen; i++) {
                 ent = world.entityById([entIds[i]]);
-                if (ent && ent.components.movable && ent.components.movable.body) {
-                    candidates.push(ent.components.movable.body);
+                if (ent && ent.components.movable && ent.labels.indexOf('enemy') !== -1) {
+                    candidates.push(ent.components.movable.hitbox || ent.components.movable.body);
                 }
             }
         });
-
-        var hit = world.physics.find({
-            labels: { $in: ['enemy'] },
-            $in: candidates
-        }).filter(function (body) {
+        var hit = candidates.filter(function (body) {
             return physics.aabb.overlap(attackArcAabb, body.aabb()) && !!collisionDetector.checkGJK(body, attackArc);
         }).map(function (body) {
             return body.entity();
@@ -127,7 +123,7 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
         .on('ready', onRangedAttackReady)
         .on('cooldown', onRangedAttackCooldown);
 
-    function rangedAttackCollide(lineStart, lineVector, circle) {
+    function rangedAttackCircleBodyCollide(lineStart, lineVector, circle) {
         var scratch = physics.scratchpad();
         var startToCircleCenter = scratch.vector().clone(circle.state.pos).vsub(lineStart);
         var projOntoLine = scratch.vector().clone(startToCircleCenter).vproj(lineVector);
@@ -137,6 +133,25 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             && ((projOntoLine.angle() > 0) === (lineVector.angle() > 0)) // correct direction
             && (lineVector.norm() >= projOntoLine.norm()) // range is long enough to reach intersection point
         );
+    }
+
+    function getRangedAttackLineSegmentBody(lineStart, lineVector) {
+        var length = lineVector.norm();
+        var halfWidth = 0.05;
+        var body = physics.body('convex-polygon', {
+            x: lineStart.x,
+            y: lineStart.y,
+            offset: new physics.vector(length * 0.5, 0), // offset by center of mass (will be exactly in the middle of the line)
+            vertices: [
+                { x:  0.0,      y: -halfWidth },
+                { x:  length,   y: -halfWidth },
+                { x:  length,   y:  halfWidth },
+                { x:  0.0,      y:  halfWidth },
+            ],
+            treatment: 'static'
+        });
+        body.state.angular.pos = lineVector.angle();
+        return body;
     }
 
     function onRangedAttackReady(limiter, state, player, client, targetPoint, weapon) {
@@ -154,18 +169,23 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             var entIds = chunk.getEntityIds();
             for (i = 0, ilen = entIds.length; i < ilen; i++) {
                 ent = world.entityById([entIds[i]]);
-                if (ent && ent.components.movable && ent.components.movable.body) {
-                    candidates.push(ent.components.movable.body);
+                if (ent && ent.components.movable && ent.labels.indexOf('enemy') !== -1) {
+                    candidates.push(ent.components.movable.hitbox || ent.components.movable.body);
                 }
             }
         });
 
-        var hit = world.physics.find({
-            labels: { $in: ['enemy'] },
-            $in: candidates
-        }).filter(function (body) {
-            // only supports circles for now
-            return ('radius' in body) && rangedAttackCollide(attackStartPos, attackLineVector, body);
+        var lineSegmentCollisionBody = getRangedAttackLineSegmentBody(attackStartPos, attackLineVector);
+        var lineSegmentCollisionBodyAabb = lineSegmentCollisionBody.aabb();
+
+        var hit = candidates.filter(function (body) {
+            if ('radius' in body) {
+                // line segment <-> circle collision is fast, so use it if we can
+                return rangedAttackCircleBodyCollide(attackStartPos, attackLineVector, body);
+            } else {
+                // otherwise, we need to use something like bounding box -> GJK
+                return physics.aabb.overlap(lineSegmentCollisionBodyAabb, body.aabb()) && !!collisionDetector.checkGJK(body, lineSegmentCollisionBody);
+            }
         }).map(function (body) {
             return body.entity();
         }).filter(function (ent) {
