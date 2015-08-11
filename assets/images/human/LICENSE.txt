@@ -1,0 +1,7 @@
+human.blend
+CC-BY 3.0 http://creativecommons.org/licenses/by/3.0/
+Author: Clint Bellanger
+Title: Base Human Models (Low Poly)
+Link: http://opengameart.org/content/base-human-models-low-poly
+
+Modifications in player.blend by Max Verigin (griever989)
