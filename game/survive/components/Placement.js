@@ -41,13 +41,28 @@ function PlacementData(comp, game, physics, entity, options) {
             }
         }
     });
+
+    // amount of time (in milliseconds) it takes to turn 180 degrees
+    this._orientationSmoothing = options.orientationSmoothing || 0;
+    Object.defineProperty(this, 'orientationSmoothing', {
+        configurable: true,
+        get: function () { return this._orientationSmoothing; },
+        set: function (val) {
+            if (Number.isNaN(val)) return;
+            if (this._orientationSmoothing !== val) {
+                this._orientationSmoothing = val;
+                comp.entityDataChanged(entity);
+            }
+        }
+    });
 }
 PlacementData.prototype.toJSON = function toJSON() {
     return {
         injector: this.injector,
         _position: this._position,
         _physicsControlled: this._physicsControlled,
-        orientation: this.orientation
+        orientation: this.orientation,
+        orientationSmoothing: this.orientationSmoothing
     };
 };
 PlacementData.prototype.linkPosition = function linkPosition(pos) {
@@ -71,6 +86,7 @@ PlacementComponent.prototype.reconstruct = function reconstruct(serialized, init
         if (initialize || !(serialized._physicsControlled)) {
             this._position.clone(serialized._position);
             this.orientation = serialized.orientation;
+            this.orientationSmoothing = serialized.orientationSmoothing;
         }
     }
 };

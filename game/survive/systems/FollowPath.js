@@ -16,10 +16,11 @@ function FollowPath(container, game, Movable, Placement, Path, world, physics) {
             delete waypointsExpired[ent.id];
         }
     }
-
+    
     this.step = function step(time) {
         var scratch = physics.scratchpad();
         var wpVector = scratch.vector();
+        var currentAngleVector = scratch.vector();
         Path.forWith([Movable.name, Placement.name], function (ent) {
             var comp = ent.components.path;
             var placement = ent.components.placement;
@@ -40,7 +41,20 @@ function FollowPath(container, game, Movable, Placement, Path, world, physics) {
             if (comp.currentWaypoint) {
                 movable.velocity.clone(wpVector.clone(comp.currentWaypoint).vsub(placement.position).normalize().mult(movable.speed));
                 if (!movable.velocity.equals(physics.vector.zero)) {
-                    placement.orientation = movable.velocity.angle();
+                    var angle = movable.velocity.angle();
+                    if (placement.orientation != angle) {
+                        if (placement.orientationSmoothing) {
+                            currentAngleVector.set(1, 0).rotate(placement.orientation);
+                            var difference = currentAngleVector.angle(movable.velocity);
+                            var amountToRotate = (Math.PI / difference) * (time.elapsedSinceUpdate / placement.orientationSmoothing);
+                            if (Math.abs(amountToRotate) > Math.abs(difference)) {
+                                amountToRotate = difference;
+                            }
+                            currentAngleVector.rotate(amountToRotate * -1);
+                            angle = currentAngleVector.angle();
+                        }
+                        placement.orientation = angle;
+                    }
                 }
             }
         });
