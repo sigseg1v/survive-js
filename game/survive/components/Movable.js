@@ -24,7 +24,7 @@ function MovableData(comp, physics, entity, options) {
     this.hitbox = loadedBody ? loadedBody.hitbox : null;
     this.bodyName = options.body;
 
-    this._physicsControlled = options.physicsControlled;
+    this.physicsControlled = options.physicsControlled;
     this._physics = physics;
 
     this._velocity = new physics.vector();
@@ -62,7 +62,6 @@ function MovableData(comp, physics, entity, options) {
 MovableData.prototype.toJSON = function toJSON() {
     return {
         injector: this.injector,
-        _physicsControlled: this._physicsControlled,
         speed: this.speed,
         _velocity: this._velocity,
         bodyName: this.bodyName
@@ -117,7 +116,7 @@ MovableComponent.prototype.reconstruct = function reconstruct(serialized, initia
         });
     }
     if (!this.ignoreUpdates) {
-        if (initialize || !(serialized._physicsControlled)) {
+        if (initialize || !(this.physicsControlled)) {
             this.velocity = serialized._velocity;
         }
         this.speed = Number(serialized.speed);

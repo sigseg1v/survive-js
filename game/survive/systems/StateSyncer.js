@@ -25,6 +25,12 @@ function StateSyncer(container, socket, world, Movable, Placement, physics) {
             // TODO -- reduce calls to new
             var localEnt = world.entityById(change.id);
             if (!localEnt) return;
+            if (localEnt.components.movable) {
+                localEnt.components.movable.physicsControlled = true;
+            }
+            if (localEnt.components.placement) {
+                localEnt.components.placement.physicsControlled = true;
+            }
             if (localEnt.components.movable && localEnt.components.movable.body.integrationMode() === 'future') {
                 var state = {
                     pos: new physics.vector(change.data.pos),

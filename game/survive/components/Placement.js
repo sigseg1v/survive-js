@@ -16,7 +16,7 @@ function PlacementData(comp, game, physics, entity, options) {
 
     this.ignoreUpdates = false;
 
-    this._physicsControlled = options.physicsControlled;
+    this.physicsControlled = options.physicsControlled;
 
     this._position = new physics.vector(0, 0);
     Object.defineProperty(this, 'position', {
@@ -60,7 +60,6 @@ PlacementData.prototype.toJSON = function toJSON() {
     return {
         injector: this.injector,
         _position: this._position,
-        _physicsControlled: this._physicsControlled,
         orientation: this.orientation,
         orientationSmoothing: this.orientationSmoothing
     };
@@ -83,7 +82,7 @@ PlacementData.prototype.linkOrientation = function linkOrientation(angular) {
 };
 PlacementComponent.prototype.reconstruct = function reconstruct(serialized, initialize) {
     if (!this.ignoreUpdates) {
-        if (initialize || !(serialized._physicsControlled)) {
+        if (initialize || !(this.physicsControlled)) {
             this._position.clone(serialized._position);
             this.orientation = serialized.orientation;
             this.orientationSmoothing = serialized.orientationSmoothing;
