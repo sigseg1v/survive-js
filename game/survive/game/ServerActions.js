@@ -1,39 +1,9 @@
 "use strict";
-var weakmap = require('weakmap');
 var bodies = require('game/survive/content/bodies');
 var limit = require('game/etc/ratelimiter');
 var constants = require('game/survive/game/SharedConstants');
 
-var playerEntityList = new weakmap();
-function trackEntityUnderPlayer(player, entity) {
-    if (!playerEntityList.has(player)) {
-        playerEntityList.set(player, []);
-    }
-    playerEntityList.get(player).push(entity);
-}
-function removeEntityUnderPlayer(player, entity) {
-    if (playerEntityList.has(player)) {
-        var list = playerEntityList.get(player);
-        var index = list.indexOf(entity);
-        if (index !== -1) {
-            list.splice(index, 1);
-        }
-    }
-}
-
-function PlayerData() {
-    this.weapon = constants.weapons.MELEE.id;
-}
-
-var playerDataMap = new weakmap();
-function dataFor(player) {
-    if (!playerDataMap.has(player)) {
-        playerDataMap.set(player, new PlayerData());
-    }
-    return playerDataMap.get(player);
-}
-
-function ServerActions(container, game, world, Server, socket, physics, pathfinder, tuning, clientStateManager) {
+function ServerActions(container, game, world, Server, socket, physics, pathfinder, tuning, clientStateManager, playerStateManager) {
     var self = this;
 
     var collisionDetector = physics.behavior('body-collision-detection');
@@ -46,10 +16,6 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
         enemy.components.placement.position = location;
         world.addEntity(enemy);
     }
-
-    self.getPlayerChildEntities = function getPlayerChildEntities(player) {
-        return playerEntityList.has(player) ? playerEntityList.get(player) : [];
-    };
 
 /// @section: melee attack
     var attackHandler = limit.responsive()
@@ -237,8 +203,9 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             if (Object.keys(constants.weapons).some(function (k) {
                 return constants.weapons[k].id === id;
             })) {
-                var playerData = dataFor(player);
+                var playerData = playerStateManager.dataFor(player);
                 playerData.weapon = id;
+                playerStateManager.sendDataTo(player);
             }
         },
 
@@ -246,7 +213,7 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             var player = Server.getPlayerBySocketId(this.commonId);
             if (!player) return;
             var client = clientStateManager.getClientStateBySocketId(this.commonId);
-            var playerData = dataFor(player);
+            var playerData = playerStateManager.dataFor(player);
             var weaponId = playerData.weapon;
 
             switch (weaponId) {
@@ -275,4 +242,4 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
 }
 
 module.exports = ServerActions;
-module.exports.$inject = ['$container', 'Game', 'World', 'Server', 'socket', 'lib/physicsjs', 'Pathfinder', 'Tuning', 'ClientStateManager'];
+module.exports.$inject = ['$container', 'Game', 'World', 'Server', 'socket', 'lib/physicsjs', 'Pathfinder', 'Tuning', 'ClientStateManager', 'PlayerState'];

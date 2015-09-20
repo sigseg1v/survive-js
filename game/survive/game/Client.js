@@ -66,6 +66,7 @@
         var physicsSync = container.resolve('system/PhysicsSync');
         var nameplates = container.resolve('system/UpdateNameplates');
         var chat = container.resolve('system/Chat');
+        var ui = container.resolve('system/ResourceUI');
         var calculateLighting = container.resolve('system/CalculateLighting');
         var cheats = container.resolve('system/Cheats');
         var vision = container.resolve('system/VisionRaycaster');
@@ -83,6 +84,7 @@
         game.registerSystem(effects, true);
         game.registerSystem(renderer, true);
         game.registerSystem(chat);
+        game.registerSystem(ui);
         game.registerSystem(calculateLighting, true);
         game.registerSystem(vision, true);
         game.registerSystem(cheats);

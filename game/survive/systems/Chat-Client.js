@@ -7,7 +7,6 @@ function ChatClient(game, renderer, pixi, documentReady, ClientActions) {
     var maxChatHeight = 400;
     var messages = [];
 
-    var chatEntryStyle = { font: 'bold 12px Michroma', fill: 'grey', stroke: 'white', strokeThickness: 1 };
     var chatMessageStyle = { font: 'bold 12px Michroma', fill: 'black', stroke: 'white', strokeThickness: 1 };
 
     var chat = new pixi.Container();

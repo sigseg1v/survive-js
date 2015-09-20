@@ -1,4 +1,5 @@
 "use strict";
+require('array.prototype.find');
 
 var container = require('game/inversion/container');
 var Promise = require('bluebird');
@@ -65,6 +66,8 @@ container.registerType('entity/SpawnerEntity', require('game/survive/entities/Sp
 container.registerInstance('Game', require('game/engine/Game'));
 container.registerInstance('World', require('game/engine/world/World'));
 if (isServer) container.registerInstance('ClientStateManager', require('game/engine/ClientStateManager'));
+if (isServer) container.registerInstance('PlayerState', require('game/survive/game/PlayerState-Server'));
+if (!isServer) container.registerInstance('PlayerState', require('game/survive/game/PlayerState-Client'));
 if (isServer) container.registerInstance('ServerActions', require('game/survive/game/ServerActions'));
 if (!isServer) container.registerInstance('ClientActions', require('game/survive/game/ClientActions'));
 container.registerInstance('component/Placement', require('game/survive/components/Placement'));
@@ -100,6 +103,7 @@ container.registerInstance('system/FollowPath', require('game/survive/systems/Fo
 container.registerInstance('system/Cheats', require('game/survive/systems/Cheats'));
 if (!isServer) container.registerInstance('system/UpdateNameplates', require('game/survive/systems/UpdateNameplates'));
 if (!isServer) container.registerInstance('system/Chat', require('game/survive/systems/Chat-Client'));
+if (!isServer) container.registerInstance('system/ResourceUI', require('game/survive/systems/ResourceUI'));
 if (!isServer) container.registerInstance('system/CalculateLighting', require('game/survive/systems/CalculateLighting'));
 if (isServer) container.registerInstance('system/SpawnerCycle', require('game/survive/systems/SpawnerCycle'));
 if (isServer) container.registerInstance('system/EnemyTargetting', require('game/survive/systems/EnemyTargetting'));

@@ -100,6 +100,9 @@ function handlePlayerConfigData(socket, playerData) {
 
     socket.emit('worldLoaded');
 
+    var playerState = container.resolve('PlayerState');
+    socket.emit('playerState:update', playerState.dataFor(player));
+
     // tell everyone except this user that the player was created
     socket.broadcast.emit('World.addEntity', player);
     game.events.emit('userConnected', {
@@ -113,7 +116,7 @@ function handlePlayerConfigData(socket, playerData) {
 
 function handleSocketDisconnected(socket) {
     var container = require('wires');
-    var ServerActions = container.resolve('ServerActions');
+    var playerState = container.resolve('PlayerState');
     console.log('socket disconnected');
     var csm = container.resolve('ClientStateManager');
     var state = csm.getClientState(socket);
@@ -121,7 +124,7 @@ function handleSocketDisconnected(socket) {
     if (player) {
         var world = container.resolve('World');
 
-        ServerActions.getPlayerChildEntities(player).forEach(function (child) {
+        playerState.getPlayerChildEntities(player).forEach(function (child) {
             world.removeEntity(child);
         });
 

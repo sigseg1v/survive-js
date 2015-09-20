@@ -8,6 +8,19 @@ function ClientStateManager() {
 ClientStateManager.prototype.getClientState = function getClientState(socket) {
     return this.idStateMap[socket.id.toString()];
 };
+ClientStateManager.prototype.getClientStateForPlayer = function getClientStateForPlayer(player) {
+    var client = null;
+    for (var i = 0, len = this.clients.length; i < len; i++) {
+        if (this.clients[i].player === player) {
+            client = this.clients[i];
+            break;
+        }
+    }
+    if (client) {
+        return client;
+    }
+    return null;
+};
 ClientStateManager.prototype.getClientStateBySocketId = function getClientStateBySocketId(id) {
     return this.idStateMap[id];
 };
