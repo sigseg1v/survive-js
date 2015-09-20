@@ -1,7 +1,8 @@
 "use strict";
 var limit = require('game/etc/ratelimiter');
+var constants = require('game/survive/game/SharedConstants');
 
-function Input(container, physics, ClientActions, path, pixi, world, game, renderer, Effects, constants) {
+function Input(container, physics, ClientActions, path, pixi, world, game, renderer, Effects) {
     var self = this;
 
     var playerKeys = {};
@@ -126,12 +127,22 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
             releasedKeys[78] = false;
         }
 
+        if (releasedKeys[49]) {
+            // 1
+            ClientActions.selectWeapon(constants.weapons.MELEE.id);
+            releasedKeys[49] = false;
+        }
+
+        if (releasedKeys[50]) {
+            // 2
+            ClientActions.selectWeapon(constants.weapons.RIFLE.id);
+            releasedKeys[50] = false;
+        }
+
         while (mouseClicks.length !== 0) {
             var clickData = mouseClicks.pop();
             if (clickData.button === 0) {
-                attack(clickData, constants.weapons.MELEE.id);
-            } else if (clickData.button === 1) {
-                attack(clickData, constants.weapons.RIFLE.id);
+                attack(clickData);
             }
         }
 
@@ -143,9 +154,9 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
         scratch.done();
     };
 
-    function attack(clickData, weaponId) {
+    function attack(clickData) {
         if (player) {
-            ClientActions.attack({ x: clickData.x, y: clickData.y }, weaponId);
+            ClientActions.attack({ x: clickData.x, y: clickData.y });
         }
     }
 
@@ -169,4 +180,4 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
 }
 
 module.exports = Input;
-module.exports.$inject = ['$container', 'lib/physicsjs', 'ClientActions', 'Pathfinder', 'lib/pixi.js', 'World', 'Game', 'system/Renderer', 'system/Effects', 'Constants'];
+module.exports.$inject = ['$container', 'lib/physicsjs', 'ClientActions', 'Pathfinder', 'lib/pixi.js', 'World', 'Game', 'system/Renderer', 'system/Effects'];

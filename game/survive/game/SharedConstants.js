@@ -1,10 +1,8 @@
 "use strict";
 var deepfreeze = require('deep-freeze');
 
-function SharedConstants(game) {
-    var self = this;
-
-    self.weapons = {
+module.exports = deepfreeze({
+    weapons: {
         MELEE: {
             id: 0,
             range: 1.2,
@@ -15,10 +13,5 @@ function SharedConstants(game) {
             range: 8,
             damageMultiplier: 1
         }
-    };
-
-    deepfreeze(self);
-}
-
-module.exports = SharedConstants;
-module.exports.$inject = [ 'Game' ];
+    }
+});

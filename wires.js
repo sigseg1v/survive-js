@@ -54,7 +54,6 @@ if (isServer) container.registerAlias('Server', require('game/survive/game/Serve
 if (!isServer) container.registerAlias('Client', require('game/survive/game/Client'));
 if (!isServer) container.registerInstance('ClientMessageHandler', require('game/survive/game/ClientMessageHandler'));
 container.registerInstance('Tuning', require('game/survive/game/GameTuning'));
-container.registerInstance('Constants', require('game/survive/game/SharedConstants'));
 
 container.registerAlias('Entity', require('game/engine/Entity'));
 container.registerAlias('Component', require('game/engine/Component'));
