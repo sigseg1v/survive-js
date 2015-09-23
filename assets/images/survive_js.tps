@@ -88,9 +88,9 @@
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
-            <int>4096</int>
+            <int>2048</int>
             <key>height</key>
-            <int>4096</int>
+            <int>2048</int>
         </QSize>
         <key>fixedTextureSize</key>
         <QSize>
@@ -505,6 +505,126 @@
             <filename>zombie/zombie285.png</filename>
             <filename>zombie/zombie286.png</filename>
             <filename>zombie/zombie287.png</filename>
+            <filename>human/player_run0.png</filename>
+            <filename>human/player_run1.png</filename>
+            <filename>human/player_run2.png</filename>
+            <filename>human/player_run3.png</filename>
+            <filename>human/player_run4.png</filename>
+            <filename>human/player_run5.png</filename>
+            <filename>human/player_run6.png</filename>
+            <filename>human/player_run7.png</filename>
+            <filename>human/player_run8.png</filename>
+            <filename>human/player_run9.png</filename>
+            <filename>human/player_run10.png</filename>
+            <filename>human/player_run11.png</filename>
+            <filename>human/player_run12.png</filename>
+            <filename>human/player_run13.png</filename>
+            <filename>human/player_run14.png</filename>
+            <filename>human/player_run15.png</filename>
+            <filename>human/player_run16.png</filename>
+            <filename>human/player_run17.png</filename>
+            <filename>human/player_run18.png</filename>
+            <filename>human/player_run19.png</filename>
+            <filename>human/player_run20.png</filename>
+            <filename>human/player_run21.png</filename>
+            <filename>human/player_run22.png</filename>
+            <filename>human/player_run23.png</filename>
+            <filename>human/player_run24.png</filename>
+            <filename>human/player_run25.png</filename>
+            <filename>human/player_run26.png</filename>
+            <filename>human/player_run27.png</filename>
+            <filename>human/player_run28.png</filename>
+            <filename>human/player_run29.png</filename>
+            <filename>human/player_run30.png</filename>
+            <filename>human/player_run31.png</filename>
+            <filename>human/player_run32.png</filename>
+            <filename>human/player_run33.png</filename>
+            <filename>human/player_run34.png</filename>
+            <filename>human/player_run35.png</filename>
+            <filename>human/player_run36.png</filename>
+            <filename>human/player_run37.png</filename>
+            <filename>human/player_run38.png</filename>
+            <filename>human/player_run39.png</filename>
+            <filename>human/player_run40.png</filename>
+            <filename>human/player_run41.png</filename>
+            <filename>human/player_run42.png</filename>
+            <filename>human/player_run43.png</filename>
+            <filename>human/player_run44.png</filename>
+            <filename>human/player_run45.png</filename>
+            <filename>human/player_run46.png</filename>
+            <filename>human/player_run47.png</filename>
+            <filename>human/player_run48.png</filename>
+            <filename>human/player_run49.png</filename>
+            <filename>human/player_run50.png</filename>
+            <filename>human/player_run51.png</filename>
+            <filename>human/player_run52.png</filename>
+            <filename>human/player_run53.png</filename>
+            <filename>human/player_run54.png</filename>
+            <filename>human/player_run55.png</filename>
+            <filename>human/player_run56.png</filename>
+            <filename>human/player_run57.png</filename>
+            <filename>human/player_run58.png</filename>
+            <filename>human/player_run59.png</filename>
+            <filename>human/player_run60.png</filename>
+            <filename>human/player_run61.png</filename>
+            <filename>human/player_run62.png</filename>
+            <filename>human/player_run63.png</filename>
+            <filename>human/player_run64.png</filename>
+            <filename>human/player_run65.png</filename>
+            <filename>human/player_run66.png</filename>
+            <filename>human/player_run67.png</filename>
+            <filename>human/player_run68.png</filename>
+            <filename>human/player_run69.png</filename>
+            <filename>human/player_run70.png</filename>
+            <filename>human/player_run71.png</filename>
+            <filename>human/player_run72.png</filename>
+            <filename>human/player_run73.png</filename>
+            <filename>human/player_run74.png</filename>
+            <filename>human/player_run75.png</filename>
+            <filename>human/player_run76.png</filename>
+            <filename>human/player_run77.png</filename>
+            <filename>human/player_run78.png</filename>
+            <filename>human/player_run79.png</filename>
+            <filename>human/player_stand0.png</filename>
+            <filename>human/player_stand1.png</filename>
+            <filename>human/player_stand2.png</filename>
+            <filename>human/player_stand3.png</filename>
+            <filename>human/player_stand4.png</filename>
+            <filename>human/player_stand5.png</filename>
+            <filename>human/player_stand6.png</filename>
+            <filename>human/player_stand7.png</filename>
+            <filename>human/player_stand8.png</filename>
+            <filename>human/player_stand9.png</filename>
+            <filename>human/player_stand10.png</filename>
+            <filename>human/player_stand11.png</filename>
+            <filename>human/player_stand12.png</filename>
+            <filename>human/player_stand13.png</filename>
+            <filename>human/player_stand14.png</filename>
+            <filename>human/player_stand15.png</filename>
+            <filename>human/player_stand16.png</filename>
+            <filename>human/player_stand17.png</filename>
+            <filename>human/player_stand18.png</filename>
+            <filename>human/player_stand19.png</filename>
+            <filename>human/player_stand20.png</filename>
+            <filename>human/player_stand21.png</filename>
+            <filename>human/player_stand22.png</filename>
+            <filename>human/player_stand23.png</filename>
+            <filename>human/player_stand24.png</filename>
+            <filename>human/player_stand25.png</filename>
+            <filename>human/player_stand26.png</filename>
+            <filename>human/player_stand27.png</filename>
+            <filename>human/player_stand28.png</filename>
+            <filename>human/player_stand29.png</filename>
+            <filename>human/player_stand30.png</filename>
+            <filename>human/player_stand31.png</filename>
+            <filename>human/player_stand32.png</filename>
+            <filename>human/player_stand33.png</filename>
+            <filename>human/player_stand34.png</filename>
+            <filename>human/player_stand35.png</filename>
+            <filename>human/player_stand36.png</filename>
+            <filename>human/player_stand37.png</filename>
+            <filename>human/player_stand38.png</filename>
+            <filename>human/player_stand39.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

@@ -8,16 +8,57 @@ function register(container) {
     var pixi = container.resolve('lib/pixi.js');
     var modelComponent = container.resolve('component/Model');
     modelComponent.registerSpriteLoader('player', function () {
-        var sprite = new pixi.Sprite(pixi.Texture.fromImage("images/player_ship.png"));
+        var sprite = new MultiMovieClip({
+            "stance_left": getTextureRange('player_stand', 'png', 0, 4),
+            "stance_up_left": getTextureRange('player_stand', 'png',  0 + 5, 4 + 5),
+            "stance_up": getTextureRange('player_stand', 'png',  0 + 10, 4 + 10),
+            "stance_up_right": getTextureRange('player_stand', 'png',  0 + 15, 4 + 15),
+            "stance_right": getTextureRange('player_stand', 'png',  0 + 20, 4 + 20),
+            "stance_down_right": getTextureRange('player_stand', 'png',  0 + 25, 4 + 25),
+            "stance_down": getTextureRange('player_stand', 'png',  0 + 30, 4 + 30),
+            "stance_down_left": getTextureRange('player_stand', 'png',  0 + 35, 4 + 35),
+
+            "walk_left": getTextureRange('player_run', 'png', 0, 9),
+            "walk_up_left": getTextureRange('player_run', 'png', 0 + 10, 9 + 10),
+            "walk_up": getTextureRange('player_run', 'png', 0 + 20, 9 + 20),
+            "walk_up_right": getTextureRange('player_run', 'png', 0 + 30, 9 + 30),
+            "walk_right": getTextureRange('player_run', 'png', 0 + 40, 9 + 40),
+            "walk_down_right": getTextureRange('player_run', 'png', 0 + 50, 9 + 50),
+            "walk_down": getTextureRange('player_run', 'png', 0 + 60, 9 + 60),
+            "walk_down_left": getTextureRange('player_run', 'png', 0 + 70, 9 + 70),
+        });
+        sprite.play("walk_left");
         sprite.anchor.x = 0.5;
         sprite.anchor.y = 0.5;
         sprite.position.x = 0;
         sprite.position.y = 0;
-        sprite.scale.x = 1.7320507999999961 * GFX_SCALE / 60 /*px*/;
-        sprite.scale.y = 2 * GFX_SCALE / 60 /*px*/;
+        sprite.scale.x = 0.5;
+        sprite.scale.y = 0.5;
         sprite.layer = 2;
+        sprite.renderLogic = playerRenderLogic.bind(null, sprite);
         return [sprite];
     });
+    function playerRenderLogic(sprite, entity) {
+        var placement = entity.components.placement;
+        var movable = entity.components.movable;
+        var action = "walk";
+        var direction = "left";
+        if (movable) {
+            if (movable.velocity.norm() === 0) {
+                action = "stance";
+                sprite.animationSpeed = 0.1;
+            } else {
+                action = "walk";
+                sprite.animationSpeed = 0.3;
+            }
+        }
+        if (placement) {
+            direction = orientationToDirection(placement.orientation, (Math.PI / 4) + (Math.PI / 8));
+        }
+
+        sprite.clip = action + "_" + direction;
+        sprite.rotation = 0;
+    }
     modelComponent.registerSpriteLoader('floor', function () {
         var sprite = spriteFromGenericHex("images/iso_dirt_z1.png");
         sprite.layer = 0;
@@ -168,7 +209,8 @@ function register(container) {
         sprite.rotation = 0;
     }
 
-    function orientationToDirection(o) {
+    function orientationToDirection(base, offset) {
+        var o = base + (offset || 0);
         var direction;
         var orientation = o % (Math.PI * 2);
         orientation = o < (Math.PI / 4) ? o + (Math.PI * 2) : o;
