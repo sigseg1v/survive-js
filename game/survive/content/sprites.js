@@ -53,7 +53,7 @@ function register(container) {
             }
         }
         if (placement) {
-            direction = orientationToDirection(placement.orientation, (Math.PI / 4) + (Math.PI / 8));
+            direction = orientationToDirection(placement.orientation);
         }
 
         sprite.clip = action + "_" + direction;

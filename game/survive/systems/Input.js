@@ -170,9 +170,17 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
 
     function setPlayerOrientation(mouseData) {
         var scratch = physics.scratchpad();
-        if (player && player.components.model.sprites.length > 0) {
-            var playerStageVector = scratch.vector().clone(player.components.model.sprites[0].toGlobal(renderer.stage.position));
-            player.components.placement.orientation = scratch.vector().clone(mouseData.global).vsub(playerStageVector).angle() * -1;
+        // make orientation follow mouse
+        // if (player && player.components.model.sprites.length > 0) {
+        //     var playerStageVector = scratch.vector().clone(player.components.model.sprites[0].toGlobal(renderer.stage.position));
+        //     player.components.placement.orientation = scratch.vector().clone(mouseData.global).vsub(playerStageVector).angle() * -1;
+        //     
+        //     player.components.movable.body.state.angular.vel = 0;
+        // }
+        
+        // make orientation follow velocity
+        if (player && !player.components.movable.velocity.equals(physics.vector.zero)) {
+            player.components.placement.orientation = player.components.movable.velocity.angle();
             player.components.movable.body.state.angular.vel = 0;
         }
         scratch.done();
