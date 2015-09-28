@@ -23,11 +23,52 @@ function removeEntityUnderPlayer(player, entity) {
 
 function PlayerData() {
     this.weapon = constants.weapons.MELEE.id;
+    this.pendingActions = [];
 }
 PlayerData.prototype.toJSON = function () {
     return {
-        weapon: this.weapon
+        weapon: this.weapon,
+        pendingActions: this.pendingActions
     };
+};
+
+function DeferredAction(playerData, completionFunction, minimumCastTime) {
+    if (!completionFunction) {
+        throw 'DeferredAction requires a completion function.';
+    }
+    if (!playerData) {
+        throw 'DeferredAction must be attached to player data.';
+    }
+    this.uniqueId = DeferredAction.prototype.idCounter++;
+    this.playerData = playerData;
+    this.completionFunction = completionFunction;
+    this.minimumCastTime = minimumCastTime || 0;
+    this.started = null;
+}
+DeferredAction.prototype.idCounter = 0;
+DeferredAction.prototype.start = function start() {
+    this.playerData.pendingActions.push(this);
+    this.started = Number(new Date());
+    return this;
+};
+DeferredAction.prototype.complete = function complete() {
+    if (!this.started || Number(new Date()) < this.started + this.mimimumCastTime) {
+        return false;
+    }
+    this.completionFunction.call(this);
+    var index = this.playerData.pendingActions.indexOf(this);
+    if (index !== -1) {
+        this.playerData.pendingActions.splice(index, 1);
+    }
+    return true;
+};
+DeferredAction.prototype.cancel = function cancel() {
+    var index = this.playerData.pendingActions.indexOf(this);
+    if (index !== -1) {
+        this.playerData.pendingActions.splice(index, 1);
+        return true;
+    }
+    return false;
 };
 
 function PlayerStateServer(stateManager) {
@@ -42,6 +83,32 @@ function PlayerStateServer(stateManager) {
             playerDataMap.set(player, new PlayerData());
         }
         return playerDataMap.get(player);
+    };
+
+    self.cancelPendingActions = function cancelPendingActions(player) {
+        var data = self.dataFor(player);
+        while (data.pendingActions.length !== 0) {
+            data.pendingActions.pop().cancel();
+        }
+    };
+
+    self.startAction = function startAction(player, completeAction, castTime) {
+        var data = self.dataFor(player);
+        var action = new DeferredAction(data, completeAction, castTime);
+        action.start();
+        return action;
+    };
+
+    self.findActionById = function findActionById(player, id) {
+        var data = self.dataFor(player);
+        var action = null;
+        for (var i = 0, len = data.pendingActions.length; i < len; i++) {
+            if (data.pendingActions[i].uniqueId === id) {
+                action = data.pendingActions[i];
+                break;
+            }
+        }
+        return action;
     };
 
     self.sendDataTo = function sendDataTo(player) {

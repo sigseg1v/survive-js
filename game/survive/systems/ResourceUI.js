@@ -24,6 +24,16 @@ function ResourceUI(game, renderer, pixi, playerState) {
         }
     });
 
+    game.events.on('cast:start', function () {
+        console.log('starting cast');
+    });
+    game.events.on('cast:update', function (completion) {
+        console.log('casting... ', completion);
+    });
+    game.events.on('cast:end', function () {
+        console.log('cast ended');
+    });
+
     self.step = null;
 }
 

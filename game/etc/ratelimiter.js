@@ -62,6 +62,7 @@ rateLimit.byCooldown = function byCooldown(component, fn, args, thisArg) {
 //                     cooldown (required)
 //                     globalCooldown (optional)
 //                args: passed on to the handlers of emit events
+//          check(state, args): returns an object detailing what event trigger will run, and a completion function allowing triggering after
 //          on: allows registering to emitted events (with the EventEmitter.on interface)
 //          clearReadyCooldown(state): clear the cooldown timer for this state. This is useful if, for example, the ready state fires but there was nothing to do and you want to make things ready again after the gcd.
 //          clearAllCooldowns(state): clear all timers for this state
@@ -86,6 +87,37 @@ rateLimit.responsive = function () {
                 timer.last = now;
             }
             emitter.emit.apply(emitter, [eventName, limiter, state].concat(args));
+            return {
+                event: eventName
+            };
+        },
+        check: function trigger(state, args) {
+            var timer = timerFor(state);
+            var now = pnow();
+            var eventName;
+            if (('globalCooldown' in state) && (now - timer.lastGlobal <= state.globalCooldown)) {
+                eventName = 'gcd';
+            } else if (now - timer.last <= state.cooldown) {
+                eventName = 'cooldown';
+            } else {
+                eventName = 'ready';
+            }
+            var calculationTime = now;
+            return {
+                event: eventName,
+                trigger: function () {
+                    if (eventName === 'gcd') {
+                        timer.lastGlobal = calculationTime;
+                    } else if (eventName === 'cooldown') {
+                        timer.lastGlobal = calculationTime;
+                        timer.last = calculationTime;
+                    } else {
+                        timer.lastGlobal = calculationTime;
+                        timer.last = calculationTime;
+                    }
+                    emitter.emit.apply(emitter, [eventName, limiter, state].concat(args));
+                }
+            };
         },
         clearReadyCooldown: function clearReadyCooldown(state) {
             var timer = timerFor(state);

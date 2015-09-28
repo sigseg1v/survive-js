@@ -200,6 +200,9 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
         selectWeapon: function selectWeapon(id) {
             var player = Server.getPlayerBySocketId(this.commonId);
             if (!player) return;
+
+            playerStateManager.cancelPendingActions(player);
+
             if (Object.keys(constants.weapons).some(function (k) {
                 return constants.weapons[k].id === id;
             })) {
@@ -214,16 +217,48 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             if (!player) return;
             var client = clientStateManager.getClientStateBySocketId(this.commonId);
             var playerData = playerStateManager.dataFor(player);
+
+            // cancel anything in progress
+            playerStateManager.cancelPendingActions(player);
+
             var weaponId = playerData.weapon;
+            var check = null;
+            var returnValue = null;
 
             switch (weaponId) {
                 case constants.weapons.MELEE.id:
                     attackHandler.trigger(player.components.melee, [player, client, targetPoint, constants.weapons.MELEE]);
                     break;
                 case constants.weapons.RIFLE.id:
-                    rangedAttackHandler.trigger(player.components.rangedAttack, [player, client, targetPoint, constants.weapons.RIFLE]);
+                    check = rangedAttackHandler.check(player.components.rangedAttack, [player, client, targetPoint, constants.weapons.RIFLE]);
+                    if (check.event === 'ready') {
+                        var action = playerStateManager.startAction(player, check.trigger, constants.weapons.RIFLE.castTime);
+                        returnValue = {
+                            actionId: action.uniqueId,
+                            castTime: constants.weapons.RIFLE.castTime
+                        };
+                    } else {
+                        check.trigger();
+                    }
                     break;
             }
+            return returnValue;
+        },
+
+        completeAction: function completeAction(actionIdentifier) {
+            var player = Server.getPlayerBySocketId(this.commonId);
+            if (!player) return;
+            var action = playerStateManager.findActionById(player, actionIdentifier);
+            if (!action) return;
+            action.complete();
+        },
+
+        cancelAction: function cancelAction(actionIdentifier) {
+            var player = Server.getPlayerBySocketId(this.commonId);
+            if (!player) return;
+            var action = playerStateManager.findActionById(player, actionIdentifier);
+            if (!action) return;
+            action.cancel();
         },
 
         sendChatMessage: function sendChatMessage(message) {

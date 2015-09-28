@@ -2,12 +2,14 @@
 var limit = require('game/etc/ratelimiter');
 var constants = require('game/survive/game/SharedConstants');
 
-function Input(container, physics, ClientActions, path, pixi, world, game, renderer, Effects) {
+function Input(container, physics, ClientActions, path, pixi, world, game, playerState, renderer, Effects) {
     var self = this;
 
     var playerKeys = {};
     var releasedKeys = {};
-    var mouseClicks = [];
+    var mouseDownEvents = [];
+    var mouseUpEvents = [];
+    var holdingMouse = false;
 
     var player = null;
     game.events.on('playerLoaded', function (ent) { player = ent; });
@@ -15,7 +17,8 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
     document.addEventListener('keydown', playerKeysDown, false);
     document.addEventListener('keyup', playerKeysUp, false);
     document.addEventListener('keypress', playerKeyPress, false);
-    document.addEventListener('click', mouseClick, false);
+    document.addEventListener('mousedown', mouseDown, false);
+    document.addEventListener('mouseup', mouseUp, false);
 
     var chatOpen = false;
     game.events.on('close-chat-entry', function () {
@@ -25,15 +28,29 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
         chatOpen = true;
     });
 
+    var currentAction = null;
+    var attackStartTime = null;
+
     function interruptAction() {
         //using = false;
     }
 
+    var limit_updateCast = limit(50, updateCast);
+
     var pointScratch = new pixi.Point();
-    function mouseClick(e) {
+    function mouseDown(e) {
         renderer.mouse.getLocalPosition(renderer.world, pointScratch);
         renderer.applyInverseCoordinateTransform(pointScratch);
-        mouseClicks.push({
+        mouseDownEvents.push({
+            button: e.button,
+            x: pointScratch.x,
+            y: pointScratch.y
+        });
+    }
+    function mouseUp(e) {
+        renderer.mouse.getLocalPosition(renderer.world, pointScratch);
+        renderer.applyInverseCoordinateTransform(pointScratch);
+        mouseUpEvents.push({
             button: e.button,
             x: pointScratch.x,
             y: pointScratch.y
@@ -85,6 +102,7 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
     self.step = function step() {
         var scratch = physics.scratchpad();
         var newTarget = scratch.vector().zero();
+        var clickData;
 
         if (playerKeys[87] && playerKeys[65] && !playerKeys[83] && !playerKeys[68]) {
             // w + a
@@ -139,11 +157,19 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
             releasedKeys[50] = false;
         }
 
-        while (mouseClicks.length !== 0) {
-            var clickData = mouseClicks.pop();
+        while (mouseDownEvents.length !== 0) {
+            clickData = mouseDownEvents.pop();
             if (clickData.button === 0) {
                 attack(clickData);
             }
+            holdingMouse = true;
+        }
+        while (mouseUpEvents.length !== 0) {
+            clickData = mouseUpEvents.pop();
+            if (clickData.button === 0) {
+                finishAttack(clickData);
+            }
+            holdingMouse = false;
         }
 
         newTarget.rotate(Math.PI / 2);
@@ -151,13 +177,53 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
         setPlayerVelocity(newTarget);
         setPlayerOrientation(renderer.mouse);
 
+        limit_updateCast();
+
         scratch.done();
     };
 
     function attack(clickData) {
-        if (player) {
-            ClientActions.attack({ x: clickData.x, y: clickData.y });
+        if (currentAction && currentAction.isPending()) {
+            // if we are waiting for the servers response on an action, keep waiting
+            return;
         }
+        if (player && playerState) {
+            if (playerState.state.weapon === constants.weapons.MELEE.id) {
+                ClientActions.attack({ x: clickData.x, y: clickData.y });
+            } else if (playerState.state.weapon === constants.weapons.RIFLE.id) {
+                currentAction = ClientActions.attack({ x: clickData.x, y: clickData.y });
+                currentAction.then(function (action) {
+                    if (action === null) {
+                        stopCast();
+                        return;
+                    }
+                });
+                currentAction.error(function () {
+                    stopCast();
+                });
+                attackStartTime = Number(new Date());
+                startCast();
+            }
+        }
+    }
+
+    function finishAttack(clickData) {
+        if (!currentAction) {
+            return;
+        }
+
+        var storedStartTime = attackStartTime;
+        currentAction.then(function (action) {
+            if (action !== null) {
+                if (storedStartTime !== null && Number(new Date()) > (storedStartTime + action.castTime)) {
+                    ClientActions.completeAction(action.actionId);
+                } else {
+                    ClientActions.cancelAction(action.actionId);
+                }
+            }
+        });
+
+        stopCast();
     }
 
     function setPlayerVelocity(target) {
@@ -174,10 +240,10 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
         // if (player && player.components.model.sprites.length > 0) {
         //     var playerStageVector = scratch.vector().clone(player.components.model.sprites[0].toGlobal(renderer.stage.position));
         //     player.components.placement.orientation = scratch.vector().clone(mouseData.global).vsub(playerStageVector).angle() * -1;
-        //     
+        //
         //     player.components.movable.body.state.angular.vel = 0;
         // }
-        
+
         // make orientation follow velocity
         if (player && !player.components.movable.velocity.equals(physics.vector.zero)) {
             player.components.placement.orientation = player.components.movable.velocity.angle();
@@ -185,7 +251,30 @@ function Input(container, physics, ClientActions, path, pixi, world, game, rende
         }
         scratch.done();
     }
+
+    function startCast() {
+        game.events.emit('cast:start');
+    }
+    function updateCast() {
+        if (currentAction && currentAction.isFulfilled()) {
+            currentAction.then(function (action) {
+                var now = Number(new Date());
+                var completion;
+                if (now >= (attackStartTime + action.castTime)) {
+                    completion = 1;
+                } else {
+                    completion = (now - attackStartTime) / action.castTime;
+                }
+                game.events.emit('cast:update', completion);
+            });
+        }
+    }
+    function stopCast() {
+        game.events.emit('cast:end');
+        currentAction = null;
+        attackStartTime = null;
+    }
 }
 
 module.exports = Input;
-module.exports.$inject = ['$container', 'lib/physicsjs', 'ClientActions', 'Pathfinder', 'lib/pixi.js', 'World', 'Game', 'system/Renderer', 'system/Effects'];
+module.exports.$inject = ['$container', 'lib/physicsjs', 'ClientActions', 'Pathfinder', 'lib/pixi.js', 'World', 'Game', 'PlayerState', 'system/Renderer', 'system/Effects'];

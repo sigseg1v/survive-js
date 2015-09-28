@@ -1,5 +1,7 @@
 "use strict";
 
+var Promise = require('bluebird');
+
 var rpc = null;
 
 function ClientActions(container, game, world, socket, rpcClientPromise, pixi) {
@@ -37,9 +39,23 @@ function ClientActions(container, game, world, socket, rpcClientPromise, pixi) {
 
     self.attack = function attack(targetPoint) {
         if (!rpc) {
+            return Promise.resolve();
+        }
+        return rpc.attack(targetPoint);
+    };
+
+    self.completeAction = function completeAction(actionIdentifier) {
+        if (!rpc) {
             return;
         }
-        rpc.attack(targetPoint);
+        rpc.completeAction(actionIdentifier);
+    };
+
+    self.cancelAction = function cancelAction(actionIdentifier) {
+        if (!rpc) {
+            return;
+        }
+        rpc.cancelAction(actionIdentifier);
     };
 
     self.sendChatMessage = function sendChatMessage(message) {
