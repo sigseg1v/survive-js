@@ -91,7 +91,7 @@ rateLimit.responsive = function () {
                 event: eventName
             };
         },
-        check: function trigger(state, args) {
+        check: function check(state, args) {
             var timer = timerFor(state);
             var now = pnow();
             var eventName;
