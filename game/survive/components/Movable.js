@@ -38,6 +38,15 @@ function MovableData(comp, physics, entity, options) {
         }
     });
 
+    this._canMove = true;
+    Object.defineProperty(this, 'canMove', {
+        get: function() { return this._canMove; },
+        set: function (val) {
+            this._canMove = !!val;
+            comp.entityDataChanged(entity);
+        }
+    });
+
     if (this.body) {
         this.body.labels = entity.labels;
         this.body.movespeed(0.0025);
@@ -64,7 +73,8 @@ MovableData.prototype.toJSON = function toJSON() {
         injector: this.injector,
         speed: this.speed,
         _velocity: this._velocity,
-        bodyName: this.bodyName
+        bodyName: this.bodyName,
+        canMove: this.canMove
     };
 };
 MovableData.prototype.linkVelocity = function linkVelocity(vel) {
@@ -120,6 +130,7 @@ MovableComponent.prototype.reconstruct = function reconstruct(serialized, initia
             this.velocity = serialized._velocity;
         }
         this.speed = Number(serialized.speed);
+        this.canMove = !!serialized.canMove;
     }
 };
 

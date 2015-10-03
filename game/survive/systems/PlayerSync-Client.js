@@ -18,7 +18,9 @@ function PlayerSyncClient(container, socket, game) {
 
     var sendPlayerData_limit = limit(1000/10, sendPlayerData);
     this.step = function step() {
-        sendPlayerData_limit();
+        if (player !== null && player.components.movable.canMove) {
+            sendPlayerData_limit();
+        }
     };
 
     function sendPlayerData() {

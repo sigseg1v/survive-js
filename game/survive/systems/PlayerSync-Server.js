@@ -7,11 +7,14 @@ function PlayerSyncServer(container, game, physics) {
         var socket = data.socket;
 
         function onPlayerAction(action) {
-            if (action.position) {
-                player.components.placement.position = action.position;
-            }
-            if (action.velocity) {
-                player.components.movable.velocity = action.velocity;
+            if (player.components.movable.canMove) {
+                if (action.position) {
+                    // TODO: there is currently nothing preventing a player from teleport hacking
+                    player.components.placement.position = action.position;
+                }
+                if (action.velocity) {
+                    player.components.movable.velocity = action.velocity;
+                }
             }
             if (action.orientation !== null && action.orientation !== undefined) {
                 player.components.placement.orientation = action.orientation;

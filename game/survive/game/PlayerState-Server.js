@@ -32,7 +32,7 @@ PlayerData.prototype.toJSON = function () {
     };
 };
 
-function DeferredAction(playerData, completionFunction, minimumCastTime) {
+function DeferredAction(playerData, startFunction, completionFunction, cancellationFunction, minimumCastTime) {
     if (!completionFunction) {
         throw 'DeferredAction requires a completion function.';
     }
@@ -41,7 +41,9 @@ function DeferredAction(playerData, completionFunction, minimumCastTime) {
     }
     this.uniqueId = DeferredAction.prototype.idCounter++;
     this.playerData = playerData;
+    this.startFunction = startFunction;
     this.completionFunction = completionFunction;
+    this.cancellationFunction = cancellationFunction;
     this.minimumCastTime = minimumCastTime || 0;
     this.started = null;
 }
@@ -49,6 +51,7 @@ DeferredAction.prototype.idCounter = 0;
 DeferredAction.prototype.start = function start() {
     this.playerData.pendingActions.push(this);
     this.started = Number(new Date());
+    this.startFunction.call(this);
     return this;
 };
 DeferredAction.prototype.complete = function complete() {
@@ -63,12 +66,12 @@ DeferredAction.prototype.complete = function complete() {
     return true;
 };
 DeferredAction.prototype.cancel = function cancel() {
+    this.cancellationFunction.call(this);
     var index = this.playerData.pendingActions.indexOf(this);
     if (index !== -1) {
         this.playerData.pendingActions.splice(index, 1);
-        return true;
     }
-    return false;
+    return true;
 };
 
 function PlayerStateServer(stateManager) {
@@ -92,9 +95,9 @@ function PlayerStateServer(stateManager) {
         }
     };
 
-    self.startAction = function startAction(player, completeAction, castTime) {
+    self.startAction = function startAction(player, startFunction, completeFunction, cancelFunction, castTime) {
         var data = self.dataFor(player);
-        var action = new DeferredAction(data, completeAction, castTime);
+        var action = new DeferredAction(data, startFunction, completeFunction, cancelFunction, castTime);
         action.start();
         return action;
     };

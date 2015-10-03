@@ -232,7 +232,20 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
                 case constants.weapons.RIFLE.id:
                     check = rangedAttackHandler.check(player.components.rangedAttack, [player, client, targetPoint, constants.weapons.RIFLE]);
                     if (check.event === 'ready') {
-                        var action = playerStateManager.startAction(player, check.trigger, constants.weapons.RIFLE.castTime);
+                        var action = playerStateManager.startAction(
+                            player,
+                            function startCast() {
+                                player.components.movable.canMove = false;
+                                player.components.movable.velocity = physics.vector.zero;
+                            },
+                            function finishCast() {
+                                check.trigger();
+                                player.components.movable.canMove = true;
+                            },
+                            function cancelCast() {
+                                player.components.movable.canMove = true;
+                            },
+                            constants.weapons.RIFLE.castTime);
                         returnValue = {
                             actionId: action.uniqueId,
                             castTime: constants.weapons.RIFLE.castTime

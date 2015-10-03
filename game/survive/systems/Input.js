@@ -29,7 +29,6 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
     });
 
     var currentAction = null;
-    var attackStartTime = null;
 
     function interruptAction() {
         //using = false;
@@ -183,27 +182,24 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
     };
 
     function attack(clickData) {
-        if (currentAction && currentAction.isPending()) {
+        if (currentAction && currentAction.response.isPending()) {
             // if we are waiting for the servers response on an action, keep waiting
             return;
         }
         if (player && playerState) {
-            if (playerState.state.weapon === constants.weapons.MELEE.id) {
-                ClientActions.attack({ x: clickData.x, y: clickData.y });
-            } else if (playerState.state.weapon === constants.weapons.RIFLE.id) {
-                currentAction = ClientActions.attack({ x: clickData.x, y: clickData.y });
-                currentAction.then(function (action) {
-                    if (action === null) {
-                        stopCast();
-                        return;
-                    }
-                });
-                currentAction.error(function () {
+            var attackAction = ClientActions.attack(
+                { x: clickData.x, y: clickData.y },
+                function onStart() {
+                    startCast();
+                },
+                function onComplete() {
                     stopCast();
-                });
-                attackStartTime = Number(new Date());
-                startCast();
-            }
+                },
+                function onCancel() {
+                    stopCast();
+                }
+            );
+            currentAction = attackAction;
         }
     }
 
@@ -211,25 +207,18 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
         if (!currentAction) {
             return;
         }
-
-        var storedStartTime = attackStartTime;
-        currentAction.then(function (action) {
-            if (action !== null) {
-                if (storedStartTime !== null && Number(new Date()) > (storedStartTime + action.castTime)) {
-                    ClientActions.completeAction(action.actionId);
-                } else {
-                    ClientActions.cancelAction(action.actionId);
-                }
-            }
-        });
-
-        stopCast();
+        currentAction.complete();
+        currentAction = null;
     }
 
     function setPlayerVelocity(target) {
         var scratch = physics.scratchpad();
         if (player) {
-            player.components.movable.velocity = scratch.vector().clone(target).normalize().mult(player.components.movable.speed);
+            if (player.components.movable.canMove) {
+                player.components.movable.velocity = scratch.vector().clone(target).normalize().mult(player.components.movable.speed);
+            } else {
+                player.components.movable.velocity = physics.vector.zero;
+            }
         }
         scratch.done();
     }
@@ -256,14 +245,16 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
         game.events.emit('cast:start');
     }
     function updateCast() {
-        if (currentAction && currentAction.isFulfilled()) {
-            currentAction.then(function (action) {
+        if (currentAction && currentAction.response.isFulfilled()) {
+            currentAction.response.then(function (action) {
+                if (action === null)
+                    return;
                 var now = Number(new Date());
                 var completion;
-                if (now >= (attackStartTime + action.castTime)) {
+                if (now >= (currentAction.started + action.castTime)) {
                     completion = 1;
                 } else {
-                    completion = (now - attackStartTime) / action.castTime;
+                    completion = (now - currentAction.started) / action.castTime;
                 }
                 game.events.emit('cast:update', completion);
             });
@@ -272,7 +263,6 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
     function stopCast() {
         game.events.emit('cast:end');
         currentAction = null;
-        attackStartTime = null;
     }
 }
 
