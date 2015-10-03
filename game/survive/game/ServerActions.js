@@ -230,7 +230,7 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
                     attackHandler.trigger(player.components.melee, [player, client, targetPoint, constants.weapons.MELEE]);
                     break;
                 case constants.weapons.RIFLE.id:
-                    check = rangedAttackHandler.check(player.components.rangedAttack, [player, client, targetPoint, constants.weapons.RIFLE]);
+                    check = rangedAttackHandler.check(player.components.rangedAttack);
                     if (check.event === 'ready') {
                         var action = playerStateManager.startAction(
                             player,
@@ -238,11 +238,13 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
                                 player.components.movable.canMove = false;
                                 player.components.movable.velocity = physics.vector.zero;
                             },
-                            function finishCast() {
-                                check.trigger();
+                            function finishCast(data) {
+                                // update targetPoint to what we want to aim at when finishing
+                                targetPoint = data;
+                                check.trigger([player, client, targetPoint, constants.weapons.RIFLE]);
                                 player.components.movable.canMove = true;
                             },
-                            function cancelCast() {
+                            function cancelCast(data) {
                                 player.components.movable.canMove = true;
                             },
                             constants.weapons.RIFLE.castTime);
@@ -258,20 +260,20 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             return returnValue;
         },
 
-        completeAction: function completeAction(actionIdentifier) {
+        completeAction: function completeAction(actionIdentifier, data) {
             var player = Server.getPlayerBySocketId(this.commonId);
             if (!player) return;
             var action = playerStateManager.findActionById(player, actionIdentifier);
             if (!action) return;
-            action.complete();
+            action.complete(data);
         },
 
-        cancelAction: function cancelAction(actionIdentifier) {
+        cancelAction: function cancelAction(actionIdentifier, data) {
             var player = Server.getPlayerBySocketId(this.commonId);
             if (!player) return;
             var action = playerStateManager.findActionById(player, actionIdentifier);
             if (!action) return;
-            action.cancel();
+            action.cancel(data);
         },
 
         sendChatMessage: function sendChatMessage(message) {

@@ -28,7 +28,7 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
         chatOpen = true;
     });
 
-    var currentAction = null;
+    var casting = null;
 
     function interruptAction() {
         //using = false;
@@ -166,7 +166,7 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
         while (mouseUpEvents.length !== 0) {
             clickData = mouseUpEvents.pop();
             if (clickData.button === 0) {
-                finishAttack(clickData);
+                finishCast(clickData);
             }
             holdingMouse = false;
         }
@@ -182,7 +182,7 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
     };
 
     function attack(clickData) {
-        if (currentAction && currentAction.response.isPending()) {
+        if (casting && casting.response.isPending()) {
             // if we are waiting for the servers response on an action, keep waiting
             return;
         }
@@ -199,16 +199,16 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
                     stopCast();
                 }
             );
-            currentAction = attackAction;
+            casting = attackAction;
         }
     }
 
-    function finishAttack(clickData) {
-        if (!currentAction) {
+    function finishCast(clickData) {
+        if (!casting) {
             return;
         }
-        currentAction.complete();
-        currentAction = null;
+        casting.complete({ x: clickData.x, y: clickData.y });
+        casting = null;
     }
 
     function setPlayerVelocity(target) {
@@ -225,18 +225,22 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
 
     function setPlayerOrientation(mouseData) {
         var scratch = physics.scratchpad();
-        // make orientation follow mouse
-        // if (player && player.components.model.sprites.length > 0) {
-        //     var playerStageVector = scratch.vector().clone(player.components.model.sprites[0].toGlobal(renderer.stage.position));
-        //     player.components.placement.orientation = scratch.vector().clone(mouseData.global).vsub(playerStageVector).angle() * -1;
-        //
-        //     player.components.movable.body.state.angular.vel = 0;
-        // }
+        if (player) {
+            if (!player.components.movable.canMove) {
+                // make orientation follow mouse
+                if (player.components.model.sprites.length > 0) {
+                    var playerStageVector = scratch.vector().clone(player.components.model.sprites[0].toGlobal(renderer.stage.position));
+                    player.components.placement.orientation = scratch.vector().clone(mouseData.global).vsub(playerStageVector).rotate(-((Math.PI / 4) + (Math.PI / 8))).angle() * -1;
 
-        // make orientation follow velocity
-        if (player && !player.components.movable.velocity.equals(physics.vector.zero)) {
-            player.components.placement.orientation = player.components.movable.velocity.angle();
-            player.components.movable.body.state.angular.vel = 0;
+                    player.components.movable.body.state.angular.vel = 0;
+                }
+            } else {
+                // make orientation follow velocity
+                if (!player.components.movable.velocity.equals(physics.vector.zero)) {
+                    player.components.placement.orientation = player.components.movable.velocity.angle();
+                    player.components.movable.body.state.angular.vel = 0;
+                }
+            }
         }
         scratch.done();
     }
@@ -245,16 +249,16 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
         game.events.emit('cast:start');
     }
     function updateCast() {
-        if (currentAction && currentAction.response.isFulfilled()) {
-            currentAction.response.then(function (action) {
+        if (casting && casting.response.isFulfilled()) {
+            casting.response.then(function (action) {
                 if (action === null)
                     return;
                 var now = Number(new Date());
                 var completion;
-                if (now >= (currentAction.started + action.castTime)) {
+                if (now >= (casting.started + action.castTime)) {
                     completion = 1;
                 } else {
-                    completion = (now - currentAction.started) / action.castTime;
+                    completion = (now - casting.started) / action.castTime;
                 }
                 game.events.emit('cast:update', completion);
             });
@@ -262,7 +266,7 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
     }
     function stopCast() {
         game.events.emit('cast:end');
-        currentAction = null;
+        casting = null;
     }
 }
 

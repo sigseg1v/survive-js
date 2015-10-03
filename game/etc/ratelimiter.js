@@ -62,7 +62,7 @@ rateLimit.byCooldown = function byCooldown(component, fn, args, thisArg) {
 //                     cooldown (required)
 //                     globalCooldown (optional)
 //                args: passed on to the handlers of emit events
-//          check(state, args): returns an object detailing what event trigger will run, and a completion function allowing triggering after
+//          check(state): returns an object detailing what event trigger will run, and a completion function allowing triggering after with <retval>.trigger(args)
 //          on: allows registering to emitted events (with the EventEmitter.on interface)
 //          clearReadyCooldown(state): clear the cooldown timer for this state. This is useful if, for example, the ready state fires but there was nothing to do and you want to make things ready again after the gcd.
 //          clearAllCooldowns(state): clear all timers for this state
@@ -91,7 +91,7 @@ rateLimit.responsive = function () {
                 event: eventName
             };
         },
-        check: function check(state, args) {
+        check: function check(state) {
             var timer = timerFor(state);
             var now = pnow();
             var eventName;
@@ -105,7 +105,7 @@ rateLimit.responsive = function () {
             var calculationTime = now;
             return {
                 event: eventName,
-                trigger: function () {
+                trigger: function trigger(args) {
                     if (eventName === 'gcd') {
                         timer.lastGlobal = calculationTime;
                     } else if (eventName === 'cooldown') {

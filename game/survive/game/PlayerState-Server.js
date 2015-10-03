@@ -51,14 +51,14 @@ DeferredAction.prototype.idCounter = 0;
 DeferredAction.prototype.start = function start() {
     this.playerData.pendingActions.push(this);
     this.started = Number(new Date());
-    this.startFunction.call(this);
+    this.startFunction.apply(this, arguments);
     return this;
 };
 DeferredAction.prototype.complete = function complete() {
     if (!this.started || Number(new Date()) < this.started + this.mimimumCastTime) {
         return false;
     }
-    this.completionFunction.call(this);
+    this.completionFunction.apply(this, arguments);
     var index = this.playerData.pendingActions.indexOf(this);
     if (index !== -1) {
         this.playerData.pendingActions.splice(index, 1);
@@ -66,7 +66,7 @@ DeferredAction.prototype.complete = function complete() {
     return true;
 };
 DeferredAction.prototype.cancel = function cancel() {
-    this.cancellationFunction.call(this);
+    this.cancellationFunction.apply(this, arguments);
     var index = this.playerData.pendingActions.indexOf(this);
     if (index !== -1) {
         this.playerData.pendingActions.splice(index, 1);

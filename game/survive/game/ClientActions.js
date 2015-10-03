@@ -65,13 +65,13 @@ function ClientActions(container, physics, game, world, socket, rpcClientPromise
         return {
             response: promise,
             started: startTime,
-            complete: function () {
+            complete: function (data) {
                 promise.then(function (action) {
                     if (action === null) return;
                     if (Number(new Date()) >= (startTime + action.castTime)) {
-                        self.completeAction(action.actionId);
+                        self.completeAction(action.actionId, data);
                     } else {
-                        self.cancelAction(action.actionId);
+                        self.cancelAction(action.actionId, data);
                     }
                 });
                 player.components.movable.canMove = true;
@@ -88,18 +88,18 @@ function ClientActions(container, physics, game, world, socket, rpcClientPromise
         };
     };
 
-    self.completeAction = function completeAction(actionIdentifier) {
+    self.completeAction = function completeAction(actionIdentifier, data) {
         if (!rpc) {
             return;
         }
-        rpc.completeAction(actionIdentifier);
+        rpc.completeAction(actionIdentifier, data);
     };
 
-    self.cancelAction = function cancelAction(actionIdentifier) {
+    self.cancelAction = function cancelAction(actionIdentifier, data) {
         if (!rpc) {
             return;
         }
-        rpc.cancelAction(actionIdentifier);
+        rpc.cancelAction(actionIdentifier, data);
     };
 
     self.sendChatMessage = function sendChatMessage(message) {
