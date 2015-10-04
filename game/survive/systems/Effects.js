@@ -1,5 +1,25 @@
 "use strict";
 var now = require('performance-now');
+var weakmap = require('weakmap');
+
+var entityControlledSpritesMap = new weakmap();
+
+function getSpriteDataFor(entity, type) {
+    if (!entityControlledSpritesMap.has(entity)) {
+        entityControlledSpritesMap.set(entity, new EntitySpriteData());
+    }
+    return entityControlledSpritesMap.get(entity)[type];
+}
+function removeSpriteUnderEntity(entity, type) {
+    if (entityControlledSpritesMap.has(entity)) {
+        var data = entityControlledSpritesMap.get(entity);
+        data[type] = null;
+    }
+}
+
+function EntitySpriteData() {
+    this.castbar = null;
+}
 
 function Effects(pixi, physics, game, renderer, Model) {
     var self = this;
@@ -184,11 +204,17 @@ function Effects(pixi, physics, game, renderer, Model) {
         game.events.emit('addOverlayGraphics', sprite);
     };
 
-    function randomizePositionInplace(pos, xdelta, ydelta) {
-        pos.x = pos.x + Math.random() * xdelta * 2 - xdelta;
-        pos.y = pos.y + Math.random() * ydelta * 2 - ydelta;
-        return pos;
-    }
+    self.drawCastBar = function drawCastBar(entity, value, total) {
+        var sprite = getSpriteDataFor(entity, 'castbar');
+        if (!sprite) {
+            //sprite = new;
+        }
+        // do stuff
+    };
+
+    self.destroyCastBar = function destroyCastBar(entity) {
+        removeSpriteUnderEntity(entity, 'castbar');
+    };
 }
 
 module.exports = Effects;
