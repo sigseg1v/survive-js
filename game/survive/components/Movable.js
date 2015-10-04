@@ -49,7 +49,7 @@ function MovableData(comp, physics, entity, options) {
 
     if (this.body) {
         this.body.labels = entity.labels;
-        this.body.movespeed(0.0025);
+        this.body.movespeed(options.speed || 0.0025);
         Object.defineProperty(this, 'speed', {
             get: function () { return this.body.movespeed(); },
             set: function (val) {
@@ -61,7 +61,7 @@ function MovableData(comp, physics, entity, options) {
             }
         });
     } else {
-        this.speed = 0;
+        this.speed = options.speed || 0;
     }
 
     if (this.hitbox) {
@@ -113,7 +113,7 @@ MovableComponent.prototype.reconstruct = function reconstruct(serialized, initia
             this.hitbox.entity(this.entity);
         }
         this.body.labels = this.entity.labels;
-        this.body.movespeed(0.0025);
+        this.body.movespeed(Number(serialized.speed));
         Object.defineProperty(this, 'speed', {
             get: function () { return this.body.movespeed(); },
             set: function (val) {

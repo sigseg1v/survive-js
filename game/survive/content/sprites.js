@@ -4,9 +4,9 @@ var TilingMovieClip = require('pixi-tiling-movie-clip');
 var MultiMovieClip = require('game/engine/presentation/MultiMovieClip');
 
 function register(container) {
-    var GFX_SCALE = 20; // https://github.com/GoodBoyDigital/pixi.js/issues/1306
     var pixi = container.resolve('lib/pixi.js');
     var modelComponent = container.resolve('component/Model');
+    var renderer = container.resolve('system/Renderer');
     modelComponent.registerSpriteLoader('player', function () {
         var sprite = new MultiMovieClip({
             "stance_left": getTextureRange('player_stand', 'png', 0, 4),
@@ -74,17 +74,6 @@ function register(container) {
 
         return [sprite, spriteTop];
     });
-    modelComponent.registerSpriteLoader('genericEnemy', function () {
-        var sprite = new pixi.Sprite(pixi.Texture.fromImage("images/enemy1.png"));
-        sprite.anchor.x = 0.5;
-        sprite.anchor.y = 0.5;
-        sprite.position.x = 0;
-        sprite.position.y = 0;
-        sprite.scale.x = 1.7320507999999961 * GFX_SCALE / 60 /*px*/;
-        sprite.scale.y = 2 * GFX_SCALE / 60 /*px*/;
-        sprite.layer = 2;
-        return [sprite];
-    });
     modelComponent.registerSpriteLoader('attack_swing', function () {
         var frames = [];
         for (var i = 1, len = 12; i <= len; i++) {
@@ -95,8 +84,8 @@ function register(container) {
         sprite.anchor.y = 0.5;
         sprite.position.x = 0;
         sprite.position.y = 0;
-        sprite.scale.x = 1.7320507999999961 * GFX_SCALE / 60 /*px*/;
-        sprite.scale.y = 2 * GFX_SCALE / 60 /*px*/;
+        sprite.scale.x = 2/3;
+        sprite.scale.y = 2/3;
         sprite.layer = 2;
         sprite.animationSpeed = 0.5;
         return [sprite];
@@ -111,8 +100,8 @@ function register(container) {
         sprite.anchor.y = 0.5;
         sprite.position.x = 0;
         sprite.position.y = 0;
-        sprite.scale.x = 1.7320507999999961 * GFX_SCALE / 60 /*px*/;
-        sprite.scale.y = 2 * GFX_SCALE / 60 /*px*/;
+        sprite.scale.x = 2/3;
+        sprite.scale.y = 2/3;
         sprite.layer = 2;
         sprite.animationSpeed = 0.5;
         return [sprite];
@@ -181,8 +170,6 @@ function register(container) {
         sprite.anchor.y = 0.65;
         sprite.position.x = 0;
         sprite.position.y = 0;
-        sprite.scale.x = 1;
-        sprite.scale.y = 1;
         sprite.layer = 2;
         sprite.animationSpeed = 0.1;
         sprite.renderLogic = zombieRenderLogic.bind(null, sprite);

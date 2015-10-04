@@ -254,18 +254,18 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
                 if (action === null)
                     return;
                 var now = Number(new Date());
-                var completion;
-                if (now >= (casting.started + action.castTime)) {
-                    completion = 1;
-                } else {
-                    completion = (now - casting.started) / action.castTime;
-                }
-                game.events.emit('cast:update', completion);
+                game.events.emit('cast:update', {
+                    entity: player,
+                    val: now - casting.started,
+                    total: action.castTime
+                });
             });
         }
     }
     function stopCast() {
-        game.events.emit('cast:end');
+        game.events.emit('cast:end', {
+            entity: player
+        });
         casting = null;
     }
 }

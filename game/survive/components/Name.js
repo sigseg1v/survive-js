@@ -54,7 +54,7 @@ function initNameplate(data, container) {
     var graphics = container.resolve('Graphics');
     graphics.setText(data.name, { font: '12px Michroma', fill: 'green' });
     graphics.offset.x = (graphics.getTextWidth() / 2) * -1;
-    graphics.offset.y = -1.5;
+    graphics.offset.y = -2;
     data.game.events.emit('addOverlayGraphics', graphics.textData);
     data.graphics = graphics;
 }

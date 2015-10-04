@@ -4,6 +4,7 @@
 function Renderer(Placement, Model, Lightsource, pixi, domLoaded, game) {
     var self = this;
 
+    // TODO: remove the scaling from everywhere -- should be able to accomplish this by just scaling containers once and not having to do transforms everywhere
     var GFX_SCALE = 20; // https://github.com/GoodBoyDigital/pixi.js/issues/1306
 
     self.GFX_SCALE = GFX_SCALE;

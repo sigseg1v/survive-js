@@ -12,23 +12,21 @@ function Graphics(pixi, renderer) {
     self.__pixi = pixi;
 }
 Graphics.$inject = ['lib/pixi.js', 'system/Renderer'];
-Graphics.prototype.setShapePosition = function setShapePosition(index, x, y) {
-    // if (arguments.length === 2) {
-    //     y = x.y;
-    //     x = x.x;
-    // }
-    var gfxData = this.data.graphicsData[index];
-    gfxData.shape.x = (this.offset.x + x) * this.renderer.GFX_SCALE;
-    gfxData.shape.y = (this.offset.y * -1 + y) * this.renderer.GFX_SCALE * -1;
+Graphics.prototype.setPosition = function setPosition(x, y) {
+    var gfxData = this.data;
+    gfxData.position.x = (this.offset.x + x) * this.renderer.GFX_SCALE;
+    gfxData.position.y = (this.offset.y * -1 + y) * this.renderer.GFX_SCALE * -1;
 };
 Graphics.prototype.invalidate = function invalidate() {
     this.data.dirty = true;
     this.data.clearDirty = true;
 };
 Graphics.prototype.drawRect = function drawRect(x, y, w, h) {
+    var pos = { x: x, y: y };
+    this.renderer.applyCoordinateTransform(pos);
     this.data.drawRect(
-        (this.offset.x + x) * this.renderer.GFX_SCALE,
-        (this.offset.y + y) * this.renderer.GFX_SCALE * -1,
+        pos.x + this.offset.x * this.renderer.GFX_SCALE,
+        pos.y + (this.offset.y * this.renderer.GFX_SCALE * -1),
         w * this.renderer.GFX_SCALE,
         h * this.renderer.GFX_SCALE
     );

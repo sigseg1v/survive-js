@@ -34,19 +34,6 @@ var bodies = {
             }
         });
     },
-    "GenericEnemy": function (physics) {
-        return physics.body('collision-circle', {
-            x: 0,
-            y: 0,
-            radius: 0.3,
-            restitution: 0,
-            cof: 0,
-            treatment: 'dynamic',
-            options: {
-                integrationMode: isServer ? 'normal' : 'future' // server controls enemy physics, client loads
-            }
-        });
-    },
     "Zombie": function (physics) {
         return physics.body('collision-circle', {
             x: 0,

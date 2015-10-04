@@ -10,10 +10,18 @@ function getSpriteDataFor(entity, type) {
     }
     return entityControlledSpritesMap.get(entity)[type];
 }
+function setSpriteDataFor(entity, type, value) {
+    if (!entityControlledSpritesMap.has(entity)) {
+        entityControlledSpritesMap.set(entity, new EntitySpriteData());
+    }
+    entityControlledSpritesMap.get(entity)[type] = value;
+}
 function removeSpriteUnderEntity(entity, type) {
     if (entityControlledSpritesMap.has(entity)) {
         var data = entityControlledSpritesMap.get(entity);
+        var sprite = data[type];
         data[type] = null;
+        return sprite;
     }
 }
 
@@ -21,11 +29,19 @@ function EntitySpriteData() {
     this.castbar = null;
 }
 
-function Effects(pixi, physics, game, renderer, Model) {
+function Effects(container, pixi, physics, game, renderer, Model) {
     var self = this;
-    var GFX_SCALE = 20; // https://github.com/GoodBoyDigital/pixi.js/issues/1306
 
     var spritesUnderEffect = [];
+
+    game.events.on('cast:start', function () {
+    });
+    game.events.on('cast:update', function (data) {
+        self.drawCastBar(data.entity, data.val, data.total, 0x2DBDED);
+    });
+    game.events.on('cast:end', function (data) {
+        self.destroyCastBar(data.entity);
+    });
 
     // data:
     //      sourceEntity
@@ -44,8 +60,6 @@ function Effects(pixi, physics, game, renderer, Model) {
                 x: data.sourcePoint.x,
                 y: data.sourcePoint.y
             };
-            sprite.scale.x = GFX_SCALE / 30;
-            sprite.scale.y = GFX_SCALE / 30;
             sprite.rotation = angle;
             sprite.layer = 9;
             sprite.loop = false;
@@ -81,8 +95,6 @@ function Effects(pixi, physics, game, renderer, Model) {
                 x: data.sourcePoint.x,
                 y: data.sourcePoint.y
             };
-            sprite.scale.x = GFX_SCALE / 30;
-            sprite.scale.y = GFX_SCALE / 30;
             sprite.rotation = angle;
             sprite.layer = 9;
             sprite.loop = false;
@@ -145,8 +157,8 @@ function Effects(pixi, physics, game, renderer, Model) {
             x: position.x,
             y: position.y
         };
-        sprite.scale.x = GFX_SCALE / 30;
-        sprite.scale.y = GFX_SCALE / 30;
+        sprite.scale.x = 1;
+        sprite.scale.y = 1;
         sprite.layer = 9;
         spritesUnderEffect.push({
             sprite: sprite,
@@ -182,8 +194,8 @@ function Effects(pixi, physics, game, renderer, Model) {
     self.drawCombatText = function drawCombatText(entity, text, format) {
         var sprite = new pixi.MultiStyleText(text, format);
         sprite.anchor.set(0.5, 0.5);
-        sprite.scale.x = GFX_SCALE / 40;
-        sprite.scale.y = GFX_SCALE / 40;
+        sprite.scale.x = 1 / 2;
+        sprite.scale.y = 1 / 2;
         var difference = { x: 0, y: -1 };
         renderer.applyInverseCoordinateTransformUnscaled(difference);
         var pos = { x: entity.components.placement.position.x + difference.x, y: entity.components.placement.position.y + difference.y };
@@ -204,18 +216,32 @@ function Effects(pixi, physics, game, renderer, Model) {
         game.events.emit('addOverlayGraphics', sprite);
     };
 
-    self.drawCastBar = function drawCastBar(entity, value, total) {
-        var sprite = getSpriteDataFor(entity, 'castbar');
-        if (!sprite) {
-            //sprite = new;
+    self.drawCastBar = function drawCastBar(entity, value, total, color) {
+        var graphics = getSpriteDataFor(entity, 'castbar');
+        if (!graphics) {
+            graphics = container.resolve('Graphics');
+            game.events.emit('addGraphics', graphics.data);
+            graphics.offset.y = 1;
+            graphics.offset.x = -0.5;
+            setSpriteDataFor(entity, 'castbar', graphics);
         }
-        // do stuff
+        graphics.data.clear();
+        graphics.data.beginFill(0x000000);
+        graphics.drawRect(entity.components.placement.position.x, entity.components.placement.position.y, 1, 0.2);
+        graphics.data.endFill();
+
+        graphics.data.beginFill(color);
+        graphics.drawRect(entity.components.placement.position.x, entity.components.placement.position.y, Math.min(value / total, 1), 0.2);
+        graphics.data.endFill();
     };
 
     self.destroyCastBar = function destroyCastBar(entity) {
-        removeSpriteUnderEntity(entity, 'castbar');
+        var graphics = removeSpriteUnderEntity(entity, 'castbar');
+        if (graphics) {
+            game.events.emit('removeGraphics', graphics.data);
+        }
     };
 }
 
 module.exports = Effects;
-module.exports.$inject = ['lib/pixi.js', 'lib/physicsjs', 'Game', 'system/Renderer', 'component/Model'];
+module.exports.$inject = ['$container', 'lib/pixi.js', 'lib/physicsjs', 'Game', 'system/Renderer', 'component/Model'];
