@@ -220,7 +220,7 @@ function Effects(container, pixi, physics, game, renderer, Model) {
         var graphics = getSpriteDataFor(entity, 'castbar');
         if (!graphics) {
             graphics = container.resolve('Graphics');
-            game.events.emit('addGraphics', graphics.data);
+            game.events.emit('addOverlayGraphics', graphics.data);
             graphics.offset.y = 1;
             graphics.offset.x = -0.5;
             setSpriteDataFor(entity, 'castbar', graphics);
@@ -238,7 +238,7 @@ function Effects(container, pixi, physics, game, renderer, Model) {
     self.destroyCastBar = function destroyCastBar(entity) {
         var graphics = removeSpriteUnderEntity(entity, 'castbar');
         if (graphics) {
-            game.events.emit('removeGraphics', graphics.data);
+            game.events.emit('removeOverlayGraphics', graphics.data);
         }
     };
 }
