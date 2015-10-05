@@ -189,6 +189,7 @@ function Input(container, physics, ClientActions, path, pixi, world, game, playe
         if (player && playerState) {
             var attackAction = ClientActions.attack(
                 { x: clickData.x, y: clickData.y },
+                playerState.state.weapon,
                 function onStart() {
                     startCast();
                 },

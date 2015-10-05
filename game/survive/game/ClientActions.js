@@ -1,6 +1,7 @@
 "use strict";
 
 var Promise = require('bluebird');
+var constants = require('game/survive/game/SharedConstants');
 
 var rpc = null;
 
@@ -37,30 +38,44 @@ function ClientActions(container, physics, game, world, socket, rpcClientPromise
         if (!rpc) {
             return;
         }
+        // immediately update client
+        playerState.state.weapon = id;
         rpc.selectWeapon(id);
     };
 
-    self.attack = function attack(targetPoint, onStart, onComplete, onCancel) {
+    self.attack = function attack(targetPoint, weaponId, onStart, onComplete, onCancel) {
         if (!rpc || !player) {
             return null;
         }
         var startTime = Number(new Date());
 
-        var promise = rpc.attack(targetPoint);
-        promise.then(function (action) {
-            if (action === null) {
-                player.components.movable.canMove = true;
-                onCancel();
-            }
-        });
-        promise.error(function () {
-            player.components.movable.canMove = true;
-            onCancel();
-        });
+        var promise = rpc.attack(targetPoint, weaponId);
+        switch (weaponId) {
+            case constants.weapons.MELEE.id:
+                promise.then(function (action) {
+                    if (action === null) return;
+                    self.completeAction(action.actionId);
+                });
+                onStart();
+                onComplete();
+                break;
+            case constants.weapons.RIFLE.id:
+                promise.then(function (action) {
+                    if (action === null) {
+                        player.components.movable.canMove = true;
+                        onCancel();
+                    }
+                });
+                promise.error(function () {
+                    player.components.movable.canMove = true;
+                    onCancel();
+                });
 
-        player.components.movable.canMove = false;
-        player.components.movable.velocity = physics.vector.zero;
-        onStart();
+                player.components.movable.canMove = false;
+                player.components.movable.velocity = physics.vector.zero;
+                onStart();
+                break;
+        }
 
         return {
             response: promise,

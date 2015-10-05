@@ -201,18 +201,16 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             var player = Server.getPlayerBySocketId(this.commonId);
             if (!player) return;
 
-            playerStateManager.cancelPendingActions(player);
-
             if (Object.keys(constants.weapons).some(function (k) {
                 return constants.weapons[k].id === id;
             })) {
                 var playerData = playerStateManager.dataFor(player);
                 playerData.weapon = id;
-                playerStateManager.sendDataTo(player);
+                playerStateManager.sendDataTo(player); // should send to other players?
             }
         },
 
-        attack: function attack(targetPoint) {
+        attack: function attack(targetPoint, weaponId) {
             var player = Server.getPlayerBySocketId(this.commonId);
             if (!player) return;
             var client = clientStateManager.getClientStateBySocketId(this.commonId);
@@ -221,7 +219,9 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             // cancel anything in progress
             playerStateManager.cancelPendingActions(player);
 
-            var weaponId = playerData.weapon;
+            if (playerData.weapon !== weaponId) {
+                self.exposedActions.selectWeapon(weaponId);
+            }
             var check = null;
             var returnValue = null;
 
