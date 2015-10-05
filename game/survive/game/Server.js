@@ -29,9 +29,7 @@ function loadGame() {
     game.registerSystem(lighttrails);
 
     var levelData = loader.parse(loader.data);
-    var floorTiles = levelData.floors.map(function (floor) {
-        return Block.fromPoint(floor.x, floor.y);
-    });
+    var floorTiles = levelData.floors.slice();
     var wallEntities = levelData.walls.map(function (wall) {
         var entity = container.resolve('entity/WallEntity/wall');
         var position = wall.getCenter();

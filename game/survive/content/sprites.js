@@ -61,15 +61,49 @@ function register(container) {
     }
     modelComponent.registerSpriteLoader('floor', function () {
         var sprite = spriteFromGenericHex("images/iso_dirt_z1.png");
+        sprite.scale.x = 0.54;
+        sprite.scale.y = 0.54;
         sprite.layer = 0;
 
         return [sprite];
     });
+    modelComponent.registerSpriteLoader('grass0', function () {
+        var sprite = spriteFromGenericHex("images/grass_and_water_0.png");
+        sprite.scale.x = 0.6;
+        sprite.scale.y = 0.6;
+        sprite.layer = 0;
+        return [sprite];
+    });
+    modelComponent.registerSpriteLoader('grass1', function () {
+        var sprite = spriteFromGenericHex("images/grass_and_water_1.png");
+        sprite.scale.x = 0.6;
+        sprite.scale.y = 0.6;
+        sprite.layer = 0;
+        return [sprite];
+    });
+    modelComponent.registerSpriteLoader('grass2', function () {
+        var sprite = spriteFromGenericHex("images/grass_and_water_2.png");
+        sprite.scale.x = 0.6;
+        sprite.scale.y = 0.6;
+        sprite.layer = 0;
+        return [sprite];
+    });
+    modelComponent.registerSpriteLoader('grass3', function () {
+        var sprite = spriteFromGenericHex("images/grass_and_water_3.png");
+        sprite.scale.x = 0.6;
+        sprite.scale.y = 0.6;
+        sprite.layer = 0;
+        return [sprite];
+    });
     modelComponent.registerSpriteLoader('wall', function () {
         var sprite = spriteFromGenericHex("images/iso_wall_z0_5.png");
+        sprite.scale.x = 0.54;
+        sprite.scale.y = 0.54;
         sprite.layer = 1;
 
         var spriteTop = spriteFromGenericHex("images/iso_wall_z1_5.png");
+        spriteTop.scale.x = 0.54;
+        spriteTop.scale.y = 0.54;
         spriteTop.layer = 3;
 
         return [sprite, spriteTop];
@@ -230,8 +264,6 @@ function register(container) {
         sprite.anchor.y = 0.5;
         sprite.position.x = 0;
         sprite.position.y = 0;
-        sprite.scale.x = 0.54;
-        sprite.scale.y = 0.54;
         return sprite;
     }
 }

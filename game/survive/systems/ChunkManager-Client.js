@@ -35,8 +35,8 @@ function ChunkManagerClient(socket, world, game, Model) {
             game.events.emit('removeGraphics', tile.sprite);
         });
         floorTiles = data.map(function (item) {
-            var block = new Block(item.x, item.y);
-            var sprite = Model.createSprites('floor')[0];
+            var block = new Block(item.block.x, item.block.y);
+            var sprite = Model.createSprites(item.texture)[0];
             var pos = block.getCenter();
             sprite.staticPosition = pos;
             return {
