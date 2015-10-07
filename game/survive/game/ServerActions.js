@@ -220,7 +220,7 @@ function ServerActions(container, game, world, Server, socket, physics, pathfind
             playerStateManager.cancelPendingActions(player);
 
             if (playerData.weapon !== weaponId) {
-                self.exposedActions.selectWeapon(weaponId);
+                self.exposedActions.selectWeapon.call(this, weaponId);
             }
             var check = null;
             var returnValue = null;

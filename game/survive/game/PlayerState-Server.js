@@ -47,6 +47,12 @@ function DeferredAction(playerData, startFunction, completionFunction, cancellat
     this.minimumCastTime = minimumCastTime || 0;
     this.started = null;
 }
+DeferredAction.prototype.toJSON = function () {
+    return {
+        uniqueId: this.uniqueId,
+        minimumCastTime: this.minimumCastTime
+    };
+};
 DeferredAction.prototype.idCounter = 0;
 DeferredAction.prototype.start = function start() {
     this.playerData.pendingActions.push(this);
